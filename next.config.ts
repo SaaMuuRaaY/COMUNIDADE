@@ -52,7 +52,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   reactStrictMode: true,
   turbopack: {
     root: __dirname,
@@ -96,5 +95,10 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: true,
   },
 };
+
+// "standalone" só no build Docker (Hetzner). No Vercel usamos o build padrão.
+if (process.env.DOCKER_BUILD === "1") {
+  nextConfig.output = "standalone";
+}
 
 export default nextConfig;
