@@ -1,0 +1,28 @@
+name: Deploy (Hetzner)
+
+# Pré-requisitos no servidor Hetzner:
+#  - repo clonado em /opt/codex-community com o arquivo .env preenchido
+#  - Docker + Docker Compose instalados
+# Secrets do repositório: HETZNER_HOST, HETZNER_USER, HETZNER_SSH_KEY
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/codex-community
+            git pull --ff-only
+            docker compose build
+            docker compose up -d
+            docker image prune -f

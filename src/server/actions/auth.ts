@@ -1,0 +1,115 @@
+"use server";
+
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { loginSchema, registerSchema, forgotPasswordSchema } from "@/lib/validations/schemas";
+import { env } from "@/lib/env";
+import { rateLimit, clientIp } from "@/lib/security/rate-limit";
+
+export type ActionState = { ok: boolean; error?: string; pending?: boolean };
+
+const TOO_MANY = "Muitas tentativas. Aguarde um minuto e tente novamente.";
+const callbackUrl = `${env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+
+export async function loginAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const ip = await clientIp();
+  if (!rateLimit(`login:${ip}`, { limit: 10, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}
+
+export async function registerAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const ip = await clientIp();
+  if (!rateLimit(`register:${ip}`, { limit: 5, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+
+  const parsed = registerSchema.safeParse({
+    full_name: formData.get("full_name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: { full_name: parsed.data.full_name },
+      emailRedirectTo: callbackUrl,
+    },
+  });
+  if (error) return { ok: false, error: error.message };
+
+  // Confirmação de e-mail ligada: signUp não cria sessão até confirmar.
+  if (!data.session) {
+    return { ok: true, pending: true };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}
+
+export async function resendConfirmationAction(
+  _prev: ActionState | null,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = z.string().email().safeParse(formData.get("email"));
+  if (!parsed.success) return { ok: false, error: "E-mail inválido" };
+
+  const ip = await clientIp();
+  if (!rateLimit(`resend:${ip}`, { limit: 3, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data,
+    options: { emailRedirectTo: callbackUrl },
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+export async function forgotPasswordAction(
+  _prev: ActionState | null,
+  formData: FormData,
+): Promise<ActionState> {
+  const ip = await clientIp();
+  if (!rateLimit(`forgot:${ip}`, { limit: 4, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+
+  const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "E-mail inválido" };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: callbackUrl,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  return { ok: true };
+}
+
+export async function logoutAction(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/login");
+}
