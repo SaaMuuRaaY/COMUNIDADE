@@ -25,12 +25,14 @@ export function MemberRow({
   const [currentRole, setRole] = React.useState<Role>(role);
   const [banned, setBanned] = React.useState(isBanned);
 
+  // Owner nunca expõe controles de role/ban — nem para o próprio owner logado.
+  // (A proteção real está nas RPCs/RLS; aqui é só a UI.)
+  if (isOwner) {
+    return <span className="text-xs font-medium text-muted-foreground">Owner protegido</span>;
+  }
+
   if (!canManage) {
-    return (
-      <span className="text-xs text-muted-foreground">
-        {isOwner ? "Owner (protegido)" : "Sem permissão"}
-      </span>
-    );
+    return <span className="text-xs text-muted-foreground">Sem permissão</span>;
   }
 
   function changeRole(v: string) {
