@@ -34,9 +34,20 @@ export async function requireProfile(): Promise<Profile> {
   return profile;
 }
 
+/**
+ * Igual a requireProfile, mas bloqueia banidos: usuário com is_banned=true é
+ * redirecionado para /banned. Use em todas as áreas autenticadas (layouts).
+ * requireProfile continua existindo para usos internos que não devem redirecionar.
+ */
+export async function requireActiveProfile(): Promise<Profile> {
+  const profile = await requireProfile();
+  if (profile.is_banned) redirect("/banned");
+  return profile;
+}
+
 export async function requireRole(roles: Array<"admin" | "moderator" | "member">): Promise<Profile> {
   const profile = await requireProfile();
-  if (profile.is_banned) redirect("/login?banned=1");
+  if (profile.is_banned) redirect("/banned");
   if (!roles.includes(profile.role)) redirect("/dashboard");
   return profile;
 }
@@ -47,7 +58,8 @@ export async function requireAdmin(): Promise<Profile> {
 
 export async function requireOwner(): Promise<Profile> {
   const profile = await requireProfile();
-  if (profile.is_banned || !profile.is_owner) redirect("/dashboard");
+  if (profile.is_banned) redirect("/banned");
+  if (!profile.is_owner) redirect("/dashboard");
   return profile;
 }
 

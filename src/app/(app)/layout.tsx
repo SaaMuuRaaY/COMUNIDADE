@@ -1,11 +1,11 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { requireProfile } from "@/lib/auth/current-user";
+import { requireActiveProfile } from "@/lib/auth/current-user";
 import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const profile = await requireProfile();
+  const profile = await requireActiveProfile();
   const admin = isAdminCheck(profile);
 
   return (

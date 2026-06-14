@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = [
   "/auth/callback",
   "/termos",
   "/privacidade",
+  "/banned",
 ];
 const ADMIN_PREFIX = "/admin";
 
@@ -69,7 +70,13 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!profile || profile.is_banned || profile.role !== "admin") {
+    if (profile?.is_banned) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/banned";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    if (!profile || profile.role !== "admin") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       url.search = "";
