@@ -10,11 +10,16 @@ export function CookieConsent() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(KEY)) setShow(true);
-    } catch {
-      /* localStorage indisponível — não bloqueia a UI */
-    }
+    // Lê fora do corpo síncrono do efeito para evitar setState em cascata
+    // (react-hooks/set-state-in-effect).
+    const id = requestAnimationFrame(() => {
+      try {
+        if (!localStorage.getItem(KEY)) setShow(true);
+      } catch {
+        /* localStorage indisponível — não bloqueia a UI */
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   if (!show) return null;

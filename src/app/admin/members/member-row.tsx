@@ -8,10 +8,30 @@ import { toast } from "sonner";
 
 type Role = "admin" | "moderator" | "member";
 
-export function MemberRow({ id, role, isBanned }: { id: string; role: Role; isBanned: boolean }) {
+export function MemberRow({
+  id,
+  role,
+  isBanned,
+  isOwner = false,
+  canManage = true,
+}: {
+  id: string;
+  role: Role;
+  isBanned: boolean;
+  isOwner?: boolean;
+  canManage?: boolean;
+}) {
   const [pending, startTransition] = React.useTransition();
   const [currentRole, setRole] = React.useState<Role>(role);
   const [banned, setBanned] = React.useState(isBanned);
+
+  if (!canManage) {
+    return (
+      <span className="text-xs text-muted-foreground">
+        {isOwner ? "Owner (protegido)" : "Sem permissão"}
+      </span>
+    );
+  }
 
   function changeRole(v: string) {
     const newRole = v as Role;

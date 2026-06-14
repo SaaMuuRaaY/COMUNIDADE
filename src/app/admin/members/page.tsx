@@ -1,16 +1,20 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/current-user";
+import { canManageMember } from "@/lib/permissions/policies";
 import { MemberRow } from "./member-row";
 
 export const metadata = { title: "Membros · Admin" };
 
 export default async function AdminMembersPage() {
   const supabase = await createClient();
+  const me = await getCurrentProfile();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, username, avatar_url, role, points, level, is_banned, created_at")
+    .select("id, full_name, username, avatar_url, role, points, level, is_banned, is_owner, created_at")
     .order("created_at", { ascending: false });
   const items = data ?? [];
 
@@ -31,11 +35,16 @@ export default async function AdminMembersPage() {
                     className="h-9 w-9"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">
+                    <p className="flex items-center gap-2 truncate font-medium">
                       {(m.full_name as string) ?? "Membro"}{" "}
                       <span className="text-xs text-muted-foreground">
                         @{(m.username as string) ?? "—"}
                       </span>
+                      {m.is_owner ? (
+                        <Badge variant="default" className="text-[10px]">
+                          Owner
+                        </Badge>
+                      ) : null}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {m.points as number} pts · Nv {m.level as number}
@@ -46,6 +55,11 @@ export default async function AdminMembersPage() {
                     id={m.id as string}
                     role={m.role as "admin" | "moderator" | "member"}
                     isBanned={m.is_banned as boolean}
+                    isOwner={m.is_owner as boolean}
+                    canManage={canManageMember(me, {
+                      role: m.role as "admin" | "moderator" | "member",
+                      is_owner: m.is_owner as boolean,
+                    })}
                   />
                 </li>
               ))}

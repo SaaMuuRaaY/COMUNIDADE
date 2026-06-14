@@ -85,6 +85,16 @@ export async function getLessonForViewer(lessonId: string, userId: string) {
     .maybeSingle();
   if (!lesson) return null;
 
+  // SEC-03 (defesa em profundidade): só serve a aula se o curso pai for visível
+  // ao usuário. A RLS de `courses` (courses_select_published_or_mod) já retorna
+  // null quando o curso é draft e o usuário não é moderador/admin.
+  const { data: parentCourse } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("id", lesson.course_id)
+    .maybeSingle();
+  if (!parentCourse) return null;
+
   const [{ data: progress }, { data: siblings }] = await Promise.all([
     supabase
       .from("lesson_progress")

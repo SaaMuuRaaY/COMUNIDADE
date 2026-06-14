@@ -45,6 +45,12 @@ export async function requireAdmin(): Promise<Profile> {
   return requireRole(["admin"]);
 }
 
+export async function requireOwner(): Promise<Profile> {
+  const profile = await requireProfile();
+  if (profile.is_banned || !profile.is_owner) redirect("/dashboard");
+  return profile;
+}
+
 export async function requireModerator(): Promise<Profile> {
   return requireRole(["admin", "moderator"]);
 }

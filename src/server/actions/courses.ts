@@ -112,6 +112,25 @@ export async function markLessonCompleteAction(lessonId: string, courseId: strin
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
 
   const supabase = await createClient();
+
+  // SEC-03/SEC-08: a aula precisa existir, pertencer ao curso informado e o curso
+  // precisa ser acessível (a RLS de lessons/courses já barra cursos draft para
+  // membros comuns). Evita marcar progresso/pontuar aula de curso não publicado.
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("course_id")
+    .eq("id", lessonId)
+    .maybeSingle();
+  if (!lesson || lesson.course_id !== courseId) {
+    return { ok: false, error: "Aula indisponível." };
+  }
+  const { data: course } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("id", courseId)
+    .maybeSingle();
+  if (!course) return { ok: false, error: "Curso indisponível." };
+
   const { error } = await supabase
     .from("lesson_progress")
     .upsert(

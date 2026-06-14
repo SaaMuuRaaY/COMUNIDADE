@@ -53,6 +53,7 @@ export interface Profile {
   points: number;
   level: number;
   is_banned: boolean;
+  is_owner: boolean;
   created_at: string;
   updated_at: string;
 }

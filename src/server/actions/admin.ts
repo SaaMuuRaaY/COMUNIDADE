@@ -15,67 +15,43 @@ const SETTING_KEYS = [
 ] as const;
 const settingKeySchema = z.enum(SETTING_KEYS);
 
+// Traduz a mensagem crua das exceções das RPCs (sem acento) para PT-BR amigável.
+function friendlyAdminError(raw: string): string {
+  const m = raw.toLowerCase();
+  if (m.includes("ultimo admin")) return "Não é possível remover o último administrador.";
+  if (m.includes("proprio acesso")) return "Você não pode remover seu próprio acesso de administrador.";
+  if (m.includes("banir a si")) return "Você não pode banir a si mesmo.";
+  if (m.includes("owner nao pode ser banido")) return "O dono (owner) não pode ser banido.";
+  if (m.includes("somente o owner pode banir")) return "Apenas o dono (owner) pode banir um administrador.";
+  if (m.includes("somente o owner pode alterar")) return "Apenas o dono (owner) pode alterar este usuário.";
+  if (m.includes("forbidden")) return "Sem permissão para esta ação.";
+  return "Não foi possível concluir a ação. Tente novamente.";
+}
+
 export async function setMemberRoleAction(
   userId: string,
   role: "admin" | "moderator" | "member",
 ): Promise<Result> {
-  const me = await requireAdmin();
+  await requireAdmin();
 
-  // Impede o admin de remover o próprio acesso (lockout).
-  if (userId === me.id && role !== "admin") {
-    return { ok: false, error: "Você não pode remover seu próprio acesso de administrador." };
-  }
-
+  // Toda a regra crítica (anti-lockout, último admin, proteção de owner) vive na
+  // RPC transacional admin_set_role (SECURITY DEFINER + FOR UPDATE) — corrige SEC-05.
   const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_role", { p_user: userId, p_role: role });
+  if (error) return { ok: false, error: friendlyAdminError(error.message) };
 
-  // Impede remover o último administrador da comunidade.
-  if (role !== "admin") {
-    const { data: target } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .maybeSingle();
-    if (target?.role === "admin") {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) <= 1) {
-        return { ok: false, error: "Não é possível remover o último administrador." };
-      }
-    }
-  }
-
-  const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
-  if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/members");
   return { ok: true };
 }
 
 export async function setMemberBannedAction(userId: string, banned: boolean): Promise<Result> {
-  const me = await requireAdmin();
+  await requireAdmin();
 
-  // Impede auto-ban (lockout).
-  if (userId === me.id) {
-    return { ok: false, error: "Você não pode banir a si mesmo." };
-  }
-
+  // Regras (anti auto-ban, proteção de owner, admin só banível pelo owner) na RPC.
   const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_banned", { p_user: userId, p_banned: banned });
+  if (error) return { ok: false, error: friendlyAdminError(error.message) };
 
-  // Impede banir outro administrador.
-  if (banned) {
-    const { data: target } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .maybeSingle();
-    if (target?.role === "admin") {
-      return { ok: false, error: "Não é possível banir outro administrador." };
-    }
-  }
-
-  const { error } = await supabase.from("profiles").update({ is_banned: banned }).eq("id", userId);
-  if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/members");
   return { ok: true };
 }
