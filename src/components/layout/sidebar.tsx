@@ -16,7 +16,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const secondary = NAV_ITEMS.filter((i) => i.group === "secondary");
 
   return (
-    <aside className="hidden h-screen w-64 shrink-0 flex-col gap-2 border-r bg-sidebar px-3 py-4 text-sidebar-foreground md:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-2 self-start overflow-y-auto border-r bg-sidebar px-3 py-4 text-sidebar-foreground md:flex">
       <Link href="/dashboard" className="flex items-center px-3 py-2">
         <Logo className="h-7 w-auto" priority />
       </Link>

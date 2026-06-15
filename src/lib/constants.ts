@@ -87,6 +87,9 @@ export const POINTS = {
 export const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "😮"] as const;
 export type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
 
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024; // 5MB (bucket avatars)
+export const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10MB (bucket post-media)
+
 export const BLOCKED_EXTENSIONS = ["exe", "bat", "cmd", "sh", "dmg", "msi", "scr", "vbs"];
 export const ALLOWED_DOC_EXTENSIONS = [
   "pdf", "zip", "doc", "docx", "xls", "xlsx", "ppt", "pptx",

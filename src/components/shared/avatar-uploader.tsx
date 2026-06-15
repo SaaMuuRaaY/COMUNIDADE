@@ -2,21 +2,19 @@
 
 import * as React from "react";
 import { Upload, Loader2, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { safeStoragePath } from "@/lib/storage/upload";
+import { useImageUpload } from "@/lib/storage/use-image-upload";
+import { AVATAR_MAX_BYTES } from "@/lib/constants";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB (limite do bucket avatars)
 
 /**
  * Upload de avatar para o bucket `avatars` (Supabase Storage) via browser client.
  * Componente CONTROLADO: ao concluir o upload, devolve a URL pública por `onChange`.
  * A persistência em `profiles.avatar_url` continua sendo feita pelo "Salvar" do
  * formulário de perfil (mesma action existente) — não duplica lógica de save.
- * Não altera policies de storage (a RLS owner-por-userId já existe).
+ * A lógica de upload vem do hook compartilhado `useImageUpload` (mesma do post).
  */
 export function AvatarUploader({
   userId,
@@ -30,44 +28,17 @@ export function AvatarUploader({
   onChange: (url: string | null) => void;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const { uploading, error, upload } = useImageUpload("avatars", { maxBytes: AVATAR_MAX_BYTES });
   const [localPreview, setLocalPreview] = React.useState<string | null>(null);
   const [showUrl, setShowUrl] = React.useState(false);
 
   async function handleFile(file: File) {
-    setError(null);
-    if (!file.type.startsWith("image/")) {
-      setError("Selecione uma imagem (PNG, JPG, WEBP ou GIF).");
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      setError("Imagem muito grande (máximo 5MB).");
-      return;
-    }
-
     const objUrl = URL.createObjectURL(file);
     setLocalPreview(objUrl);
-    setUploading(true);
-    try {
-      const supabase = createClient();
-      const path = safeStoragePath(userId, file.name);
-      const { error: upErr } = await supabase.storage
-        .from("avatars")
-        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
-      if (upErr) {
-        setError(`Falha no upload: ${upErr.message}`);
-        return;
-      }
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      onChange(data.publicUrl);
-    } catch {
-      setError("Erro inesperado no upload. Tente novamente.");
-    } finally {
-      setUploading(false);
-      URL.revokeObjectURL(objUrl);
-      setLocalPreview(null);
-    }
+    const res = await upload(userId, file);
+    URL.revokeObjectURL(objUrl);
+    setLocalPreview(null);
+    if (res) onChange(res.url);
   }
 
   const preview = localPreview ?? value;

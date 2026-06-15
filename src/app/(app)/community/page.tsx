@@ -29,7 +29,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Se
 
       <FeedFilter />
 
-      {canPost(profile) ? <PostComposer /> : null}
+      {canPost(profile) ? <PostComposer currentUserId={profile.id} /> : null}
 
       <Suspense fallback={<FeedSkeleton />}>
         <Feed userId={profile.id} category={category} search={search} canMod={canModerate(profile)} />

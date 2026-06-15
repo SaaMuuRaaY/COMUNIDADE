@@ -10,12 +10,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/shared/markdown";
 import { POST_CATEGORIES } from "@/lib/constants";
 import { createPostAction } from "@/server/actions/posts";
+import { PostImageField } from "@/components/community/post-image-field";
 import { toast } from "sonner";
 
-export function PostComposer() {
+export function PostComposer({ currentUserId }: { currentUserId: string }) {
   const [category, setCategory] = React.useState<string>("geral");
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
+  const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
+  const [mediaType, setMediaType] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
 
@@ -28,6 +31,10 @@ export function PostComposer() {
     fd.append("category", category);
     fd.append("title", title);
     fd.append("body", body);
+    if (mediaUrl) {
+      fd.append("media_url", mediaUrl);
+      if (mediaType) fd.append("media_type", mediaType);
+    }
     startTransition(async () => {
       const res = await createPostAction(fd);
       if (!res.ok) {
@@ -37,6 +44,8 @@ export function PostComposer() {
       toast.success("Publicação criada.");
       setTitle("");
       setBody("");
+      setMediaUrl(null);
+      setMediaType(null);
       setOpen(false);
     });
   }
@@ -99,6 +108,15 @@ export function PostComposer() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <PostImageField
+          userId={currentUserId}
+          value={mediaUrl}
+          onChange={(url, type) => {
+            setMediaUrl(url);
+            setMediaType(type);
+          }}
+        />
 
         <div className="flex items-center justify-end gap-2">
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={pending}>
