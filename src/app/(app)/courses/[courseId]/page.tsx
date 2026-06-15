@@ -74,7 +74,7 @@ export default async function CourseDetailPage({ params }: { params: Params }) {
                           className="flex items-center gap-3 py-3 hover:bg-accent"
                         >
                           {l.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                            <CheckCircle2 className="h-5 w-5 text-success" />
                           ) : (
                             <Circle className="h-5 w-5 text-muted-foreground" />
                           )}

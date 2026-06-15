@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           <Link key={s.href} href={s.href}>
             <Card className="transition-colors hover:bg-accent">
               <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-[var(--accent)] ring-1 ring-inset ring-[var(--accent-line)]">
                   <s.icon className="h-4 w-4" />
                 </div>
                 <div className="text-sm font-medium">{s.label}</div>

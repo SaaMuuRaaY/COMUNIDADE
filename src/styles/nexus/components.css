@@ -1,0 +1,264 @@
+/* ============================================================
+   NEXUS UI — Componentes portáveis (classes utilitárias)
+   Copiado de NEXUS/nexus-ui/css/components.css (Fase 3 / UI-1a).
+   Depende de tokens.css. Convenção BEM-ish: .bloco__elemento--modificador
+   ============================================================ */
+
+/* ---- Superfícies ---- */
+.nx-surface, .nx-card {
+  background: var(--bg-pane);
+  border-radius: var(--radius);
+  border: 1px solid var(--bd-soft);
+}
+.nx-card--elev { background: var(--bg-card); box-shadow: var(--shadow-1); }
+
+.nx-pane-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bd-soft);
+  min-height: 44px;
+}
+.nx-pane-h__title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  color: var(--fg-2);
+}
+.nx-pane-h__sub { font-size: var(--fs-sm); color: var(--fg-3); margin-left: 4px; }
+.nx-pane-h__spacer { flex: 1; }
+
+/* ---- Badges ---- */
+.nx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  height: 18px;
+  background: var(--bg-elev);
+  color: var(--fg-2);
+  border: 1px solid var(--bd-soft);
+}
+.nx-badge--ok      { color: var(--ok);     background: var(--ok-soft);     border-color: transparent; }
+.nx-badge--warn    { color: var(--warn);   background: var(--warn-soft);   border-color: transparent; }
+.nx-badge--err     { color: var(--err);    background: var(--err-soft);    border-color: transparent; }
+.nx-badge--accent  { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.nx-badge--running { color: var(--info);   background: oklch(0.70 0.12 240 / .14); border-color: transparent; }
+
+/* ---- Botões ---- */
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--bd-soft);
+  color: var(--fg-1);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  transition: background .12s var(--ease), border-color .12s var(--ease);
+  white-space: nowrap;
+}
+.nx-btn:hover { background: var(--bg-hover); border-color: var(--bd-line); }
+.nx-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.nx-btn--ghost { background: transparent; border-color: transparent; color: var(--fg-2); }
+.nx-btn--ghost:hover { background: var(--bg-card); color: var(--fg-1); }
+
+.nx-btn--primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: var(--glow);
+}
+.nx-btn--primary:hover { filter: brightness(1.06); }
+
+.nx-btn--danger { background: transparent; border-color: var(--err-soft); color: var(--err); }
+.nx-btn--danger:hover { background: var(--err-soft); }
+
+.nx-btn--deny { background: var(--err); color: var(--accent-fg); border-color: transparent; font-weight: 600; }
+.nx-btn--deny:hover { filter: brightness(1.1); }
+
+.nx-btn--success { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+.nx-btn--success:hover { background: color-mix(in oklch, var(--ok-soft), var(--ok) 12%); }
+
+.nx-btn--lg { height: 34px; padding: 0 14px; font-size: var(--fs-sm); }
+.nx-btn--sm { height: 22px; padding: 0 8px; font-size: 11px; }
+
+/* ---- Texto utilitário ---- */
+.nx-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-elev);
+  border: 1px solid var(--bd-soft);
+  color: var(--fg-3);
+  line-height: 1;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+.nx-mono  { font-family: var(--font-mono); font-size: var(--fs-sm); }
+.nx-muted { color: var(--fg-3); }
+.nx-dim   { color: var(--fg-4); }
+
+/* ---- Inputs / Select ---- */
+.nx-input, .nx-select {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--bd-soft);
+  color: var(--fg-1);
+  font-size: var(--fs-sm);
+  transition: border-color .12s var(--ease);
+}
+.nx-input:focus, .nx-select:focus { outline: none; border-color: var(--accent-line); background: var(--bg-app); }
+
+/* ---- Toggle (switch) ---- */
+.nx-toggle {
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--bg-elev);
+  border: 1px solid var(--bd-soft);
+  position: relative;
+  cursor: pointer;
+  transition: background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease);
+  flex-shrink: 0;
+}
+.nx-toggle::after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--fg-3);
+  top: 50%; left: 3px;
+  transform: translateY(-50%);
+  transition: left .2s var(--ease), background .2s var(--ease);
+}
+.nx-toggle--on {
+  background: var(--accent);
+  border-color: transparent;
+  box-shadow: 0 0 12px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .30);
+}
+.nx-toggle--on::after { left: 17px; background: oklch(0.99 0.005 var(--accent-h)); }
+
+/* ---- Drawer (painel lateral deslizante) ---- */
+.nx-drawer__overlay {
+  position: fixed;
+  inset: 0;
+  background: oklch(0 0 0 / .40);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s var(--ease);
+}
+.nx-drawer__overlay--open { opacity: 1; pointer-events: auto; }
+.nx-drawer {
+  position: fixed;
+  top: 0; bottom: 0;
+  right: 0;
+  width: 380px;
+  max-width: 92vw;
+  background: var(--bg-pane);
+  border-left: 1px solid var(--bd-line);
+  z-index: 101;
+  transform: translateX(100%);
+  transition: transform .25s var(--ease);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -16px 0 40px oklch(0 0 0 / .35);
+}
+.nx-drawer--open { transform: translateX(0); }
+.nx-drawer__hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--bd-soft);
+}
+.nx-drawer__title { font-size: 13px; font-weight: 600; color: var(--fg-1); }
+.nx-drawer__sub { margin-left: auto; font-size: 11px; font-family: var(--font-mono); color: var(--fg-3); }
+.nx-drawer__close {
+  width: 26px; height: 26px;
+  border-radius: 5px;
+  display: grid; place-items: center;
+  color: var(--fg-3);
+}
+.nx-drawer__close:hover { background: var(--bg-card); color: var(--fg-1); }
+.nx-drawer__body { flex: 1; overflow-y: auto; }
+.nx-drawer__sect { padding: 14px 18px; border-bottom: 1px solid var(--bd-soft); }
+.nx-drawer__sect-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.nx-drawer__sect-h h4 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  color: var(--fg-3);
+}
+.nx-drawer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: var(--fs-sm);
+}
+.nx-drawer__row + .nx-drawer__row { border-top: 1px dashed var(--bd-soft); }
+.nx-drawer__row__lbl { color: var(--fg-2); }
+.nx-drawer__row__hint { font-size: 10.5px; color: var(--fg-4); margin-top: 1px; }
+
+/* ---- Estados ---- */
+.nx-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--fg-3);
+  font-size: 13px;
+  text-align: center;
+}
+.nx-empty__title { font-size: 16px; color: var(--fg-1); font-weight: 500; margin-bottom: 4px; }
+
+.nx-spin {
+  width: 12px; height: 12px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: nx-spin .9s linear infinite;
+  display: inline-block;
+}
+@keyframes nx-spin { to { transform: rotate(360deg); } }
+
+.nx-skeleton-line {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-card), var(--bg-elev), var(--bg-card));
+  background-size: 200% 100%;
+  animation: nx-shimmer 1.6s linear infinite;
+}
+@keyframes nx-shimmer { to { background-position: -200% 0; } }
+
+/* ---- Dot indicador (status vivo) ---- */
+.nx-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--fg-4); display: inline-block; flex-shrink: 0; }
+.nx-dot--ok { background: var(--ok); }
+.nx-dot--err { background: var(--err); }
+.nx-dot--warn { background: var(--warn); }
+.nx-dot--accent { background: var(--accent); }
+.nx-dot--pulse { animation: nx-dot-pulse 1.6s var(--ease) infinite; }
+@keyframes nx-dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }

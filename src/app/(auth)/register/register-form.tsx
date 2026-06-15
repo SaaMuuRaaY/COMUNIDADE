@@ -13,8 +13,8 @@ export function RegisterForm() {
 
   if (state?.pending) {
     return (
-      <div className="space-y-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
-        <p className="font-medium text-emerald-600">Conta criada! 🎉</p>
+      <div className="space-y-2 rounded-md border border-success/30 bg-success/10 p-4 text-sm">
+        <p className="font-medium text-success">Conta criada! 🎉</p>
         <p className="text-muted-foreground">
           Enviamos um e-mail de confirmação. Confira sua caixa de entrada (e o spam) e clique no
           link para ativar seu acesso.

@@ -24,8 +24,8 @@ export default function GlobalError({
           alignItems: "center",
           justifyContent: "center",
           margin: 0,
-          background: "#0a0a0a",
-          color: "#fafafa",
+          background: "#101319",
+          color: "#eef1f5",
         }}
       >
         <div style={{ textAlign: "center", padding: 24 }}>
@@ -39,9 +39,10 @@ export default function GlobalError({
               marginTop: 16,
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #333",
-              background: "#fafafa",
-              color: "#0a0a0a",
+              border: "1px solid transparent",
+              background: "#37e0e8",
+              color: "#06222b",
+              fontWeight: 600,
               cursor: "pointer",
             }}
           >

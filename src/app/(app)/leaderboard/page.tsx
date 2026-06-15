@@ -40,7 +40,7 @@ export default async function LeaderboardPage() {
               return (
                 <li
                   key={p.id as string}
-                  className={`flex items-center gap-3 p-3 ${isMe ? "bg-accent/40" : ""}`}
+                  className={`flex items-center gap-3 p-3 ${isMe ? "bg-[var(--accent-soft)] ring-1 ring-inset ring-[var(--accent-line)]" : ""}`}
                 >
                   <div className="w-8 text-center text-sm font-semibold tabular-nums text-muted-foreground">
                     #{i + 1}

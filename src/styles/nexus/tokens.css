@@ -1,0 +1,254 @@
+/* ============================================================
+   NEXUS UI — Design Tokens (portável)
+   Copiado de NEXUS/nexus-ui/css/tokens.css (Fase 3 / UI-1a).
+   3 eixos de tema via atributos no <html>:
+     [data-theme]   = dark | light
+     [data-style]   = refined | cyberpunk | terminal
+     [data-density] = comfortable | compact
+   Accent por HUE: --accent-h (0..360). Cores em OKLCH.
+   ============================================================ */
+
+:root {
+  /* Accent (só o hue muda entre presets) */
+  --accent-h: 200;          /* Azul Ciano default */
+  --accent-c: 0.20;
+  --accent-l: 0.72;
+
+  /* Density */
+  --d-row: 14px;
+  --d-pad: 18px;
+  --d-gap: 14px;
+  --fs-base: 14px;
+  --fs-sm: 12px;
+  --fs-xs: 11px;
+
+  /* Type */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Layout (ajuste por projeto se quiser) */
+  --sb-w: 232px;
+  --header-h: 52px;
+  --status-h: 28px;
+
+  /* Easing */
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+[data-density="compact"] {
+  --d-row: 10px;
+  --d-pad: 12px;
+  --d-gap: 10px;
+  --fs-base: 13px;
+  --fs-sm: 11px;
+  --fs-xs: 10.5px;
+}
+
+/* ============================================================
+   LIGHT THEME — sobrepõe qualquer [data-style]
+   (html[data-theme="light"] vence os seletores [data-style])
+   ============================================================ */
+html[data-theme="light"] {
+  --bg-app:    oklch(0.985 0.004 260);
+  --bg-pane:   oklch(1.000 0     0);
+  --bg-card:   oklch(0.970 0.005 260);
+  --bg-elev:   oklch(0.945 0.006 260);
+  --bg-hover:  oklch(0.920 0.007 260);
+  --bg-inset:  oklch(0.965 0.005 260);
+
+  --bd-soft:   oklch(0.91 0.006 260 / .9);
+  --bd-line:   oklch(0.85 0.008 260);
+  --bd-strong: oklch(0.72 0.010 260);
+
+  --fg-1:      oklch(0.17 0.010 260);
+  --fg-2:      oklch(0.32 0.010 260);
+  --fg-3:      oklch(0.50 0.010 260);
+  --fg-4:      oklch(0.62 0.010 260);
+  --fg-dim:    oklch(0.76 0.010 260);
+
+  --accent-l: 0.55;
+  --accent-c: 0.22;
+  --accent: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-fg: oklch(0.99 0.005 var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .10);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .30);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .22);
+
+  --ok:        oklch(0.55 0.16 145);
+  --ok-soft:   oklch(0.55 0.16 145 / .12);
+  --warn:      oklch(0.60 0.16 70);
+  --warn-soft: oklch(0.60 0.16 70 / .12);
+  --err:       oklch(0.55 0.20 27);
+  --err-soft:  oklch(0.55 0.20 27 / .12);
+  --info:      oklch(0.50 0.16 240);
+
+  --diff-add-bg: oklch(0.92 0.10 145 / .55);
+  --diff-add-fg: oklch(0.32 0.14 145);
+  --diff-del-bg: oklch(0.93 0.12 25 / .55);
+  --diff-del-fg: oklch(0.40 0.18 25);
+
+  --shadow-1: 0 1px 0 oklch(1 0 0 / .9) inset, 0 1px 2px oklch(0 0 0 / .06);
+  --shadow-2: 0 1px 0 oklch(1 0 0 / .9) inset, 0 16px 36px oklch(0 0 0 / .10);
+  --glow: none;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+}
+
+html[data-theme="light"][data-style="cyberpunk"] {
+  --bg-app:    oklch(0.97 0.012 var(--accent-h));
+  --bg-pane:   oklch(0.99 0.008 var(--accent-h));
+  --bg-card:   oklch(0.95 0.014 var(--accent-h));
+  --bg-elev:   oklch(0.93 0.018 var(--accent-h));
+  --glow: 0 0 18px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .35);
+}
+
+/* ------------------------------------------------------------
+   STYLE: refined (default) — dark Linear/Raycast
+   ------------------------------------------------------------ */
+[data-style="refined"] {
+  --bg-app:    oklch(0.17 0.008 260);
+  --bg-pane:   oklch(0.205 0.008 260);
+  --bg-card:   oklch(0.235 0.008 260);
+  --bg-elev:   oklch(0.27 0.008 260);
+  --bg-hover:  oklch(0.30 0.01  260);
+  --bg-inset:  oklch(0.14 0.008 260);
+
+  --bd-soft:   oklch(0.30 0.008 260 / .6);
+  --bd-line:   oklch(0.36 0.012 260 / .9);
+  --bd-strong: oklch(0.45 0.015 260);
+
+  --fg-1:      oklch(0.96 0.005 260);
+  --fg-2:      oklch(0.82 0.008 260);
+  --fg-3:      oklch(0.66 0.010 260);
+  --fg-4:      oklch(0.50 0.012 260);
+  --fg-dim:    oklch(0.40 0.012 260);
+
+  --accent:    oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-fg: oklch(0.12 0.01 var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .14);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .35);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .25);
+
+  --ok:        oklch(0.74 0.14 150);
+  --ok-soft:   oklch(0.74 0.14 150 / .14);
+  --warn:      oklch(0.80 0.14 75);
+  --warn-soft: oklch(0.80 0.14 75 / .14);
+  --err:       oklch(0.66 0.20 27);
+  --err-soft:  oklch(0.66 0.20 27 / .14);
+  --info:      oklch(0.70 0.12 240);
+
+  --diff-add-bg: oklch(0.30 0.07 150 / .35);
+  --diff-add-fg: oklch(0.92 0.10 150);
+  --diff-del-bg: oklch(0.32 0.10 25 / .35);
+  --diff-del-fg: oklch(0.90 0.10 25);
+
+  --shadow-1: 0 1px 0 oklch(1 0 0 / .03), 0 1px 2px oklch(0 0 0 / .25);
+  --shadow-2: 0 1px 0 oklch(1 0 0 / .04), 0 12px 32px oklch(0 0 0 / .40);
+  --glow: none;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+}
+
+/* ------------------------------------------------------------
+   STYLE: cyberpunk — neon, glow, accent-driven
+   ------------------------------------------------------------ */
+[data-style="cyberpunk"] {
+  --bg-app:    oklch(0.13 0.02 240);
+  --bg-pane:   oklch(0.16 0.025 240);
+  --bg-card:   oklch(0.19 0.03 240);
+  --bg-elev:   oklch(0.22 0.035 240);
+  --bg-hover:  oklch(0.26 0.04 240);
+  --bg-inset:  oklch(0.10 0.02 240);
+
+  --bd-soft:   oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .18);
+  --bd-line:   oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .35);
+  --bd-strong: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .55);
+
+  --fg-1:      oklch(0.97 0.01 var(--accent-h));
+  --fg-2:      oklch(0.84 0.015 var(--accent-h));
+  --fg-3:      oklch(0.68 0.02 var(--accent-h));
+  --fg-4:      oklch(0.52 0.025 var(--accent-h));
+  --fg-dim:    oklch(0.40 0.025 var(--accent-h));
+
+  --accent:    oklch(var(--accent-l) calc(var(--accent-c) + 0.06) var(--accent-h));
+  --accent-fg: oklch(0.10 0.02 var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .18);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .55);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .55);
+
+  --ok:        oklch(0.78 0.18 150);
+  --ok-soft:   oklch(0.78 0.18 150 / .18);
+  --warn:      oklch(0.82 0.16 75);
+  --warn-soft: oklch(0.82 0.16 75 / .18);
+  --err:       oklch(0.70 0.22 17);
+  --err-soft:  oklch(0.70 0.22 17 / .18);
+  --info:      oklch(0.72 0.14 240);
+
+  --diff-add-bg: oklch(0.32 0.10 150 / .40);
+  --diff-add-fg: oklch(0.93 0.13 150);
+  --diff-del-bg: oklch(0.34 0.14 25 / .40);
+  --diff-del-fg: oklch(0.92 0.13 25);
+
+  --shadow-1: 0 0 0 1px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .10);
+  --shadow-2: 0 0 0 1px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .18),
+              0 8px 32px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .18);
+  --glow: 0 0 24px oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .35);
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --radius-lg: 14px;
+}
+
+/* ------------------------------------------------------------
+   STYLE: terminal — quase-preto, mono-heavy, raio mínimo
+   ------------------------------------------------------------ */
+[data-style="terminal"] {
+  --bg-app:    oklch(0.10 0.002 260);
+  --bg-pane:   oklch(0.13 0.003 260);
+  --bg-card:   oklch(0.15 0.003 260);
+  --bg-elev:   oklch(0.18 0.004 260);
+  --bg-hover:  oklch(0.21 0.005 260);
+  --bg-inset:  oklch(0.07 0.002 260);
+
+  --bd-soft:   oklch(0.22 0.005 260);
+  --bd-line:   oklch(0.28 0.006 260);
+  --bd-strong: oklch(0.38 0.008 260);
+
+  --fg-1:      oklch(0.93 0.003 260);
+  --fg-2:      oklch(0.78 0.004 260);
+  --fg-3:      oklch(0.60 0.005 260);
+  --fg-4:      oklch(0.44 0.005 260);
+  --fg-dim:    oklch(0.34 0.005 260);
+
+  --accent:    oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-fg: oklch(0.08 0.005 var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .12);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .30);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / .25);
+
+  --ok:        oklch(0.78 0.18 145);
+  --ok-soft:   oklch(0.78 0.18 145 / .14);
+  --warn:      oklch(0.82 0.16 75);
+  --warn-soft: oklch(0.82 0.16 75 / .14);
+  --err:       oklch(0.70 0.22 25);
+  --err-soft:  oklch(0.70 0.22 25 / .14);
+  --info:      oklch(0.70 0.12 240);
+
+  --diff-add-bg: oklch(0.30 0.08 145 / .30);
+  --diff-add-fg: oklch(0.92 0.12 145);
+  --diff-del-bg: oklch(0.30 0.10 25 / .30);
+  --diff-del-fg: oklch(0.90 0.10 25);
+
+  --shadow-1: none;
+  --shadow-2: 0 8px 24px oklch(0 0 0 / .55);
+  --glow: none;
+
+  --radius: 3px;
+  --radius-sm: 2px;
+  --radius-lg: 4px;
+
+  --font-sans: "Geist Mono", ui-monospace, monospace;
+}

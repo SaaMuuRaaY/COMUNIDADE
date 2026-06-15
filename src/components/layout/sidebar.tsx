@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Hexagon, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -16,9 +17,8 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col gap-2 border-r bg-sidebar px-3 py-4 text-sidebar-foreground md:flex">
-      <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-lg font-semibold">
-        <Hexagon className="h-6 w-6" />
-        CODEX
+      <Link href="/dashboard" className="flex items-center px-3 py-2">
+        <Logo className="h-7 w-auto" priority />
       </Link>
       <Separator className="my-2 bg-sidebar-border" />
       <nav className="flex flex-1 flex-col gap-1">
@@ -31,7 +31,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
             >
@@ -50,7 +50,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
             >
@@ -67,7 +67,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 pathname.startsWith("/admin")
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
             >

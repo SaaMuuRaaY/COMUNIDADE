@@ -48,7 +48,7 @@ export function FeedFilter() {
           onClick={() => setParam("category", null)}
           className={`rounded-full border px-3 py-1 text-xs ${
             currentCategory === "all"
-              ? "bg-foreground text-background"
+              ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
               : "bg-background hover:bg-accent"
           }`}
         >
@@ -60,7 +60,7 @@ export function FeedFilter() {
             onClick={() => setParam("category", c.value)}
             className={`rounded-full border px-3 py-1 text-xs ${
               currentCategory === c.value
-                ? "bg-foreground text-background"
+                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
                 : "bg-background hover:bg-accent"
             }`}
           >

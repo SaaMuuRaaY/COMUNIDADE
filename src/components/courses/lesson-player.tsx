@@ -41,7 +41,7 @@ export function LessonPlayer({ lessonId, courseId, videoUrl, alreadyCompleted }:
         <video
           src={videoUrl}
           controls
-          className="aspect-video w-full rounded-lg bg-black"
+          className="aspect-video w-full rounded-lg bg-[var(--video-bg)]"
           preload="metadata"
         />
       ) : (

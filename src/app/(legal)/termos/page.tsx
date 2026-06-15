@@ -8,7 +8,7 @@ export default function TermosPage() {
 
       <h2>1. Aceitação</h2>
       <p>
-        Ao criar uma conta e usar a plataforma CODEX Community (&quot;Plataforma&quot;), operada por
+        Ao criar uma conta e usar a plataforma Portal Nexus (&quot;Plataforma&quot;), operada por
         [RAZÃO SOCIAL], CNPJ [CNPJ] (&quot;nós&quot;), você concorda com estes Termos. Se não
         concordar, não utilize a Plataforma.
       </p>

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentProfile } from "@/lib/auth/current-user";
 import { logoutAction } from "@/server/actions/auth";
 
-export const metadata = { title: "Conta bloqueada · CODEX Community" };
+export const metadata = { title: "Conta bloqueada · Portal Nexus" };
 
 export default async function BannedPage() {
   // Quem não está banido não deve ver esta tela (evita confusão e loop).
@@ -13,7 +13,7 @@ export default async function BannedPage() {
   if (profile && !profile.is_banned) redirect("/dashboard");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-white via-zinc-50 to-zinc-100 p-6 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
       <Card className="w-full max-w-md">
         <CardContent className="space-y-5 p-8 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">

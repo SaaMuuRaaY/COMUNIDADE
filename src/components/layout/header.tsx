@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Hexagon, LogOut, Menu, User } from "lucide-react";
+import { Bell, LogOut, Menu, User } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { LevelBadge } from "@/components/shared/level-badge";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { logoutAction } from "@/server/actions/auth";
+import { ThemeSettings } from "@/components/nexus/theme-settings";
 import { NAV_ITEMS, ADMIN_ITEM } from "./nav-items";
 import type { Profile } from "@/types/db";
 
@@ -32,9 +34,8 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
         </SheetTrigger>
         <SheetContent side="left" className="p-0">
           <div className="flex h-full flex-col p-4">
-            <Link href="/dashboard" className="flex items-center gap-2 px-2 py-3 text-lg font-semibold">
-              <Hexagon className="h-6 w-6" />
-              CODEX
+            <Link href="/dashboard" className="flex items-center px-2 py-3">
+              <Logo className="h-7 w-auto" />
             </Link>
             <Separator className="my-2" />
             <nav className="flex flex-1 flex-col gap-1">
@@ -65,14 +66,15 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
         </SheetContent>
       </Sheet>
 
-      <Link href="/dashboard" className="flex items-center gap-2 md:hidden">
-        <Hexagon className="h-5 w-5" />
-        <span className="font-semibold">CODEX</span>
+      <Link href="/dashboard" className="flex items-center md:hidden">
+        <Logo className="h-6 w-auto" />
       </Link>
 
       <div className="ml-auto flex items-center gap-3">
         <LevelBadge level={profile.level} />
         <RoleBadge role={profile.role} />
+
+        <ThemeSettings />
 
         <Link href="/notifications" aria-label="Notificações">
           <Button variant="ghost" size="icon">
