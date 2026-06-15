@@ -22,6 +22,9 @@ export type FeedPost = {
   likes_count: number;
   comments_count: number;
   liked_by_me: boolean;
+  is_pinned: boolean;
+  reactions: Record<string, number>;
+  myReactions: string[];
 };
 
 export async function getFeedPosts(opts: {
@@ -34,10 +37,11 @@ export async function getFeedPosts(opts: {
   let query = supabase
     .from("posts")
     .select(
-      `id, title, body, category, media_url, media_type, attachment_url, created_at,
+      `id, title, body, category, media_url, media_type, attachment_url, is_pinned, created_at,
        author:profiles!posts_author_id_fkey(id, full_name, username, avatar_url, level, role)`,
     )
     .eq("is_deleted", false)
+    .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 30);
 
@@ -78,6 +82,25 @@ export async function getFeedPosts(opts: {
   );
   const myLikes = new Set<string>((myLikesRes.data ?? []).map((l) => l.post_id as string));
 
+  // Reações (tolerante: se a tabela post_reactions ainda não existir, ignora — feed não quebra).
+  const { data: reactionData, error: reactionErr } = await supabase
+    .from("post_reactions")
+    .select("post_id, emoji, user_id")
+    .in("post_id", ids);
+  const reactionRows = (reactionErr ? [] : reactionData ?? []) as Array<Record<string, unknown>>;
+  const reactionsByPost = new Map<string, Record<string, number>>();
+  const myReactionsByPost = new Map<string, string[]>();
+  reactionRows.forEach((r) => {
+    const pid = r.post_id as string;
+    const emoji = r.emoji as string;
+    const map = reactionsByPost.get(pid) ?? {};
+    map[emoji] = (map[emoji] ?? 0) + 1;
+    reactionsByPost.set(pid, map);
+    if ((r.user_id as string) === opts.userId) {
+      myReactionsByPost.set(pid, [...(myReactionsByPost.get(pid) ?? []), emoji]);
+    }
+  });
+
   return posts.map((p) => {
     const authorRaw = p.author as Record<string, unknown> | Record<string, unknown>[] | null;
     const authorRow = Array.isArray(authorRaw) ? authorRaw[0] ?? null : authorRaw;
@@ -103,6 +126,9 @@ export async function getFeedPosts(opts: {
       likes_count: likes.get(p.id as string) ?? 0,
       comments_count: comments.get(p.id as string) ?? 0,
       liked_by_me: myLikes.has(p.id as string),
+      is_pinned: (p.is_pinned as boolean) ?? false,
+      reactions: reactionsByPost.get(p.id as string) ?? {},
+      myReactions: myReactionsByPost.get(p.id as string) ?? [],
     };
   });
 }
@@ -112,7 +138,7 @@ export async function getPostById(id: string, userId: string): Promise<FeedPost 
   const { data: row } = await supabase
     .from("posts")
     .select(
-      `id, title, body, category, media_url, media_type, attachment_url, created_at,
+      `id, title, body, category, media_url, media_type, attachment_url, is_pinned, created_at,
        author:profiles!posts_author_id_fkey(id, full_name, username, avatar_url, level, role)`,
     )
     .eq("id", id)
@@ -131,6 +157,20 @@ export async function getPostById(id: string, userId: string): Promise<FeedPost 
       .eq("is_deleted", false),
     supabase.from("post_likes").select("id").eq("post_id", id).eq("user_id", userId).maybeSingle(),
   ]);
+
+  // Reações (tolerante: ignora se a tabela ainda não existir).
+  const { data: reactionData, error: reactionErr } = await supabase
+    .from("post_reactions")
+    .select("emoji, user_id")
+    .eq("post_id", id);
+  const reactions: Record<string, number> = {};
+  const myReactions: string[] = [];
+  (reactionErr ? [] : reactionData ?? []).forEach((r) => {
+    const row = r as Record<string, unknown>;
+    const e = row.emoji as string;
+    reactions[e] = (reactions[e] ?? 0) + 1;
+    if ((row.user_id as string) === userId) myReactions.push(e);
+  });
 
   const authorRaw = p.author as Record<string, unknown> | Record<string, unknown>[] | null;
   const authorRow = Array.isArray(authorRaw) ? authorRaw[0] ?? null : authorRaw;
@@ -157,6 +197,9 @@ export async function getPostById(id: string, userId: string): Promise<FeedPost 
     likes_count: likes ?? 0,
     comments_count: comments ?? 0,
     liked_by_me: !!myLike,
+    is_pinned: (p.is_pinned as boolean) ?? false,
+    reactions,
+    myReactions,
   };
 }
 

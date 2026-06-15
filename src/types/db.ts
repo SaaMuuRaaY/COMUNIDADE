@@ -106,6 +106,14 @@ export interface PostLike {
   created_at: string;
 }
 
+export interface PostReaction {
+  id: string;
+  post_id: string;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+}
+
 export interface Course {
   id: string;
   community_id: string;
@@ -252,6 +260,7 @@ export interface Database {
       posts: GenericTable<Post>;
       post_comments: GenericTable<PostComment>;
       post_likes: GenericTable<PostLike>;
+      post_reactions: GenericTable<PostReaction>;
       courses: GenericTable<Course>;
       course_modules: GenericTable<CourseModule>;
       lessons: GenericTable<Lesson>;

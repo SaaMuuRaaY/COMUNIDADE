@@ -6,7 +6,7 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { isModerator } from "@/lib/permissions/policies";
 import { awardPoints } from "@/lib/points/award";
 import { postSchema, commentSchema } from "@/lib/validations/schemas";
-import { COMMUNITY_ID, POINTS } from "@/lib/constants";
+import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
 import { rateLimit } from "@/lib/security/rate-limit";
 
 const RATE_MSG = "Muitas ações em pouco tempo. Aguarde um momento.";
@@ -96,6 +96,18 @@ export async function deletePostAction(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Fixar post (Fase 4) — somente moderador/admin. is_pinned já existe no schema (0002).
+export async function pinPostAction(postId: string, pinned: boolean): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (!isModerator(profile)) return { ok: false, error: "Sem permissão." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("posts").update({ is_pinned: pinned }).eq("id", postId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/community");
+  revalidatePath(`/community/${postId}`);
+  return { ok: true };
+}
+
 export async function togglePostLikeAction(postId: string): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
@@ -116,6 +128,41 @@ export async function togglePostLikeAction(postId: string): Promise<ActionResult
     const { error } = await supabase.from("post_likes").insert({ post_id: postId, user_id: profile.id });
     if (error) return { ok: false, error: error.message };
     // pontos para o autor são lançados pelo trigger handle_like_award
+  }
+
+  revalidatePath("/community");
+  revalidatePath(`/community/${postId}`);
+  return { ok: true };
+}
+
+// Reações por emoji (Fase 4 / 4B-2) — aditivo, NÃO dá pontos (like é o driver).
+export async function togglePostReactionAction(postId: string, emoji: string): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (profile.is_banned) return { ok: false, error: "Usuário banido." };
+  if (!(REACTION_EMOJIS as readonly string[]).includes(emoji)) {
+    return { ok: false, error: "Reação inválida." };
+  }
+  if (!rateLimit(`react:${profile.id}`, { limit: 60, windowMs: 60_000 }).ok) {
+    return { ok: false, error: RATE_MSG };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("post_reactions")
+    .select("id")
+    .eq("post_id", postId)
+    .eq("user_id", profile.id)
+    .eq("emoji", emoji)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase.from("post_reactions").delete().eq("id", existing.id);
+    if (error) return { ok: false, error: error.message };
+  } else {
+    const { error } = await supabase
+      .from("post_reactions")
+      .insert({ post_id: postId, user_id: profile.id, emoji });
+    if (error) return { ok: false, error: error.message };
   }
 
   revalidatePath("/community");

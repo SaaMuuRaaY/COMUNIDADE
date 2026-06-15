@@ -84,6 +84,9 @@ export const POINTS = {
   EVENT_ATTENDED: 20,
 } as const;
 
+export const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "😮"] as const;
+export type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
+
 export const BLOCKED_EXTENSIONS = ["exe", "bat", "cmd", "sh", "dmg", "msi", "scr", "vbs"];
 export const ALLOWED_DOC_EXTENSIONS = [
   "pdf", "zip", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
