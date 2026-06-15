@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -35,17 +36,22 @@ export default async function AdminMembersPage() {
                     className="h-9 w-9"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 truncate font-medium">
-                      {(m.full_name as string) ?? "Membro"}{" "}
-                      <span className="text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Link
+                        href={`/members/${m.id as string}`}
+                        className="truncate hover:text-[var(--accent)] hover:underline"
+                      >
+                        {(m.full_name as string) ?? "Membro"}
+                      </Link>
+                      <span className="shrink-0 text-xs text-muted-foreground">
                         @{(m.username as string) ?? "—"}
                       </span>
                       {m.is_owner ? (
-                        <Badge variant="default" className="text-[10px]">
+                        <Badge variant="default" className="shrink-0 text-[10px]">
                           Owner
                         </Badge>
                       ) : null}
-                    </p>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {m.points as number} pts · Nv {m.level as number}
                       {m.is_banned ? " · BANIDO" : ""}

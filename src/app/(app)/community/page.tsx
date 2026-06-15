@@ -10,6 +10,9 @@ import { canModerate, canPost } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
 import type { PostCategory } from "@/types/db";
 
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
+
 export const metadata = { title: "Comunidade" };
 
 type SearchParams = Promise<{ category?: string; q?: string }>;
@@ -22,12 +25,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Comunidade</h1>
-        <p className="text-sm text-muted-foreground">
-          Publique, comente e troque ideias com outros membros.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.community} />
 
       <FeedFilter />
 

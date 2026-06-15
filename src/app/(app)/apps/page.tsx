@@ -8,6 +8,9 @@ import { createClient } from "@/lib/supabase/server";
 import { APP_CATEGORIES } from "@/lib/constants";
 import { isSafeEmbedUrl } from "@/lib/storage/upload";
 
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
+
 export const metadata = { title: "Aplicativos" };
 
 export default async function AppsPage() {
@@ -21,12 +24,7 @@ export default async function AppsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Biblioteca de Aplicativos</h1>
-        <p className="text-sm text-muted-foreground">
-          Ferramentas, integrações e apps internos da comunidade.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.apps} />
 
       {items.length === 0 ? (
         <EmptyState icon={LayoutGrid} title="Nenhum aplicativo cadastrado" />

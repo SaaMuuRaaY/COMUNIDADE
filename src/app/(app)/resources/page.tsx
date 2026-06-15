@@ -7,6 +7,9 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { RESOURCE_CATEGORIES } from "@/lib/constants";
 
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
+
 export const metadata = { title: "Recursos" };
 
 export default async function ResourcesPage() {
@@ -20,12 +23,7 @@ export default async function ResourcesPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Biblioteca de Recursos</h1>
-        <p className="text-sm text-muted-foreground">
-          PDFs, templates, planilhas, código e ferramentas curadas para a comunidade.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.resources} />
 
       {items.length === 0 ? (
         <EmptyState icon={Library} title="Sem recursos por enquanto" />

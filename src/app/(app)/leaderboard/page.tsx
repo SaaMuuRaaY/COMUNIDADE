@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -23,14 +24,11 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-          <Trophy className="h-5 w-5" /> Ranking
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Top 50 da comunidade. Você {myRank >= 0 ? `está em #${myRank + 1}` : "ainda não está no top 50"}.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.leaderboard}>
+        {myRank >= 0
+          ? `Você está em #${myRank + 1} de ${rows.length}.`
+          : "Você ainda não está no top 50 — participe para aparecer aqui."}
+      </SectionBanner>
 
       <Card>
         <CardContent className="p-0">

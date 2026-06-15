@@ -7,6 +7,9 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { EVENT_TYPES } from "@/lib/constants";
 
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
+
 export const metadata = { title: "Calendário" };
 
 export default async function CalendarPage() {
@@ -28,12 +31,7 @@ export default async function CalendarPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Calendário</h1>
-        <p className="text-sm text-muted-foreground">
-          Lives, mentorias, aulas e desafios. Fuso: America/Asuncion.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.calendar} />
 
       {items.length === 0 ? (
         <EmptyState icon={Calendar} title="Sem eventos agendados" />

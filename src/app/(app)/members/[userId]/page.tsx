@@ -6,9 +6,11 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { LevelBadge } from "@/components/shared/level-badge";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { SocialLinks } from "@/components/shared/social-links";
 import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelative } from "@/lib/utils";
+import type { SocialLinks as SocialLinksMap } from "@/types/db";
 
 type Params = Promise<{ userId: string }>;
 
@@ -45,6 +47,7 @@ export default async function MemberProfile({ params }: { params: Params }) {
                 <Badge variant="secondary">{p.points as number} pontos</Badge>
               </div>
               {p.bio ? <p className="text-sm text-muted-foreground">{p.bio as string}</p> : null}
+              <SocialLinks links={p.social_links as SocialLinksMap | undefined} className="pt-1" />
             </div>
           </div>
         </CardHeader>

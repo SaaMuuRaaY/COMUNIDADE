@@ -54,6 +54,46 @@ export const profileUpdateSchema = z.object({
 });
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 
+// Redes sociais (Fase 4B-1): cada link deve ser uma URL https do host da própria
+// plataforma — evita open-redirect/abuso. Campo vazio = ausente.
+const SOCIAL_HOSTS = {
+  instagram: ["instagram.com"],
+  tiktok: ["tiktok.com"],
+  linkedin: ["linkedin.com"],
+  github: ["github.com"],
+  youtube: ["youtube.com", "youtu.be"],
+} as const;
+
+function platformUrl(hosts: readonly string[]) {
+  return z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z
+      .string()
+      .max(200)
+      .url()
+      .refine((u) => {
+        try {
+          const url = new URL(u);
+          if (url.protocol !== "https:") return false;
+          const host = url.hostname.toLowerCase().replace(/^www\./, "");
+          return hosts.some((d) => host === d || host.endsWith(`.${d}`));
+        } catch {
+          return false;
+        }
+      }, "Use o link https do seu perfil nessa rede.")
+      .optional(),
+  );
+}
+
+export const socialLinksSchema = z.object({
+  instagram: platformUrl(SOCIAL_HOSTS.instagram),
+  tiktok: platformUrl(SOCIAL_HOSTS.tiktok),
+  linkedin: platformUrl(SOCIAL_HOSTS.linkedin),
+  github: platformUrl(SOCIAL_HOSTS.github),
+  youtube: platformUrl(SOCIAL_HOSTS.youtube),
+});
+export type SocialLinksInput = z.infer<typeof socialLinksSchema>;
+
 export const postCategoryEnum = z.enum([
   "geral",
   "duvidas",

@@ -5,6 +5,9 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { isModerator } from "@/lib/permissions/policies";
 import { getPublishedCoursesWithProgress } from "@/server/queries/courses";
 
+import { SectionBanner } from "@/components/shared/section-banner";
+import { SECTION_BANNERS } from "@/lib/section-banners";
+
 export const metadata = { title: "Cursos" };
 
 export default async function CoursesPage() {
@@ -14,12 +17,7 @@ export default async function CoursesPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Cursos</h1>
-        <p className="text-sm text-muted-foreground">
-          Trilhas e classes da comunidade. Marque aulas como concluídas para ganhar pontos.
-        </p>
-      </div>
+      <SectionBanner {...SECTION_BANNERS.courses} />
 
       {visible.length === 0 ? (
         <EmptyState icon={GraduationCap} title="Sem cursos publicados ainda" />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AvatarUploader } from "@/components/shared/avatar-uploader";
 import { updateProfileAction } from "@/server/actions/profile";
 import { toast } from "sonner";
 import type { Profile } from "@/types/db";
@@ -16,11 +17,24 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     username: profile.username ?? "",
     bio: profile.bio ?? "",
     avatar_url: profile.avatar_url ?? "",
+    social_instagram: profile.social_links?.instagram ?? "",
+    social_tiktok: profile.social_links?.tiktok ?? "",
+    social_linkedin: profile.social_links?.linkedin ?? "",
+    social_github: profile.social_links?.github ?? "",
+    social_youtube: profile.social_links?.youtube ?? "",
   });
 
   function onChange<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
+
+  const SOCIALS: { key: keyof typeof form; label: string; placeholder: string }[] = [
+    { key: "social_instagram", label: "Instagram", placeholder: "https://instagram.com/seu_usuario" },
+    { key: "social_tiktok", label: "TikTok", placeholder: "https://tiktok.com/@seu_usuario" },
+    { key: "social_linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/voce" },
+    { key: "social_github", label: "GitHub", placeholder: "https://github.com/voce" },
+    { key: "social_youtube", label: "YouTube", placeholder: "https://youtube.com/@seu_canal" },
+  ];
 
   function submit() {
     const fd = new FormData();
@@ -52,15 +66,30 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           maxLength={280}
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="avatar_url">URL do avatar</Label>
-        <Input
-          id="avatar_url"
-          value={form.avatar_url}
-          onChange={(e) => onChange("avatar_url", e.target.value)}
-          placeholder="https://…"
-        />
+      <AvatarUploader
+        userId={profile.id}
+        name={form.full_name || profile.full_name}
+        value={form.avatar_url || null}
+        onChange={(url) => onChange("avatar_url", url ?? "")}
+      />
+      <div className="space-y-3">
+        <div>
+          <Label>Redes sociais</Label>
+          <p className="text-xs text-muted-foreground">Cole o link https do seu perfil em cada rede (opcional).</p>
+        </div>
+        {SOCIALS.map(({ key, label, placeholder }) => (
+          <div key={key} className="flex items-center gap-2">
+            <span className="w-20 shrink-0 text-xs text-muted-foreground">{label}</span>
+            <Input
+              aria-label={label}
+              value={form[key]}
+              onChange={(e) => onChange(key, e.target.value)}
+              placeholder={placeholder}
+            />
+          </div>
+        ))}
       </div>
+
       <Button onClick={submit} disabled={pending}>
         {pending ? "Salvando…" : "Salvar alterações"}
       </Button>

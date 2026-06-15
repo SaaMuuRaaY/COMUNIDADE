@@ -43,6 +43,9 @@ export type PointsAction =
   | "lesson_completed"
   | "event_attended";
 
+export type SocialPlatform = "instagram" | "tiktok" | "linkedin" | "github" | "youtube";
+export type SocialLinks = Partial<Record<SocialPlatform, string>>;
+
 export interface Profile {
   id: string;
   full_name: string | null;
@@ -54,6 +57,7 @@ export interface Profile {
   level: number;
   is_banned: boolean;
   is_owner: boolean;
+  social_links: SocialLinks;
   created_at: string;
   updated_at: string;
 }
