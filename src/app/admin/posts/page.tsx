@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelative } from "@/lib/utils";
 import { DeletePostInline } from "./delete-post-inline";
+import { PurgePostInline } from "./purge-post-inline";
 
 export const metadata = { title: "Posts · Admin" };
 
@@ -39,7 +40,11 @@ export default async function AdminPostsPage() {
                       </div>
                       <p className="line-clamp-2 text-sm">{(p.title as string) ?? (p.body as string)}</p>
                     </div>
-                    {!p.is_deleted ? <DeletePostInline postId={p.id as string} /> : null}
+                    {p.is_deleted ? (
+                      <PurgePostInline postId={p.id as string} />
+                    ) : (
+                      <DeletePostInline postId={p.id as string} />
+                    )}
                   </li>
                 );
               })}

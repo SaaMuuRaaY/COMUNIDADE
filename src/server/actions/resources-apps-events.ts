@@ -34,6 +34,34 @@ export async function createResourceAction(formData: FormData): Promise<Result> 
   return { ok: true, id: data.id };
 }
 
+export async function updateResourceAction(id: string, formData: FormData): Promise<Result> {
+  await requireModerator();
+  const parsed = resourceSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description") || null,
+    category: formData.get("category"),
+    file_url: formData.get("file_url") || null,
+    file_storage_path: formData.get("file_storage_path") || null,
+    file_type: formData.get("file_type") || null,
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("resources")
+    .update({
+      title: parsed.data.title,
+      description: parsed.data.description,
+      category: parsed.data.category,
+      file_url: parsed.data.file_url,
+      file_type: parsed.data.file_type,
+    })
+    .eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/resources");
+  revalidatePath("/admin/resources");
+  return { ok: true, id };
+}
+
 export async function deleteResourceAction(id: string): Promise<Result> {
   await requireModerator();
   const supabase = await createClient();

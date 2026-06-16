@@ -96,6 +96,33 @@ export async function deletePostAction(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Excluir permanentemente (hard delete) — somente moderador/admin, e apenas posts já excluídos (soft-delete).
+export async function purgePostAction(postId: string): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (!isModerator(profile)) return { ok: false, error: "Sem permissão." };
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("is_deleted")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (!existing) return { ok: false, error: "Publicação não encontrada." };
+  if (!existing.is_deleted) {
+    return { ok: false, error: "Só é possível remover permanentemente posts já excluídos." };
+  }
+
+  const { error, count } = await supabase
+    .from("posts")
+    .delete({ count: "exact" })
+    .eq("id", postId);
+  if (error) return { ok: false, error: error.message };
+  if (!count) return { ok: false, error: "Nada foi removido (sem permissão?)." };
+  revalidatePath("/admin/posts");
+  revalidatePath("/community");
+  return { ok: true };
+}
+
 // Fixar post (Fase 4) — somente moderador/admin. is_pinned já existe no schema (0002).
 export async function pinPostAction(postId: string, pinned: boolean): Promise<ActionResult> {
   const profile = await requireProfile();

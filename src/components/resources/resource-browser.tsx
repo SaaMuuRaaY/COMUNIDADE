@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Library, Eye, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { CategoryBadge } from "@/components/resources/category-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,10 +24,6 @@ export type ResourceItem = {
   category: string;
   file_url: string | null;
 };
-
-function catLabel(value: string): string {
-  return RESOURCE_CATEGORIES.find((c) => c.value === value)?.label ?? value;
-}
 
 function FilterPill({
   active,
@@ -86,7 +82,7 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
               <CardContent className="flex flex-1 flex-col space-y-3 p-5">
                 <div className="flex items-center gap-2">
                   <Library className="h-4 w-4 text-muted-foreground" />
-                  <Badge variant="secondary">{catLabel(r.category)}</Badge>
+                  <CategoryBadge category={r.category} />
                 </div>
                 <h3 className="font-semibold leading-tight">{r.title}</h3>
                 {r.description ? (
@@ -119,11 +115,7 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
       <Dialog open={!!view} onOpenChange={(o) => !o && setView(null)}>
         <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            {view ? (
-              <Badge variant="secondary" className="w-fit text-[10px]">
-                {catLabel(view.category)}
-              </Badge>
-            ) : null}
+            {view ? <CategoryBadge category={view.category} className="w-fit" /> : null}
             <DialogTitle>{view?.title}</DialogTitle>
             <DialogDescription className="sr-only">Conteúdo do recurso</DialogDescription>
           </DialogHeader>
