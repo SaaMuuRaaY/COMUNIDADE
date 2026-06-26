@@ -1,0 +1,14 @@
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> codex-community@0.1.0 dev
+> next dev -p 3004
+
+[1m[38;2;173;127;168m▲ Next.js 16.2.6[39m[22m (Turbopack)
+- Local:         http://localhost:3004
+- Network:       http://54.232.189.113:3004
+- Environments: .env.local
+[32m[1m✓[22m[39m Ready in 682ms
+
+ GET / [32m200[39m in 8.5s[2m (next.js: 4.9s, application-code: 3.6s)[22m
+[?25h
