@@ -11,7 +11,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Admin" };
 
-async function countTable(table: string): Promise<number> {
+type CountableTable = "profiles" | "posts" | "courses" | "lessons" | "resources" | "apps" | "events";
+
+async function countTable(table: CountableTable): Promise<number> {
   const supabase = await createClient();
   const { count } = await supabase.from(table).select("id", { count: "exact", head: true });
   return count ?? 0;

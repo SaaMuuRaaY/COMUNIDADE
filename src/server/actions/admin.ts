@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/current-user";
+import type { Json } from "@/types/db";
 
 type Result = { ok: boolean; error?: string };
 
@@ -68,7 +69,7 @@ export async function updateSettingAction(key: string, value: unknown): Promise<
   const supabase = await createClient();
   const { error } = await supabase
     .from("settings")
-    .upsert({ key: parsedKey.data, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    .upsert({ key: parsedKey.data, value: value as Json, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/settings");
   return { ok: true };

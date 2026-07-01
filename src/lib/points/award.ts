@@ -19,8 +19,10 @@ export async function awardPoints(
     p_user: userId,
     p_action: action,
     p_points: points,
-    p_ref_type: referenceType,
-    p_ref_id: referenceId,
+    // RPC aceita string|undefined; `null` (ref ausente) vira omissão → o default
+    // `null` da função SQL produz o mesmo resultado no banco.
+    p_ref_type: referenceType ?? undefined,
+    p_ref_id: referenceId ?? undefined,
   });
   if (error) {
     // Não vaza o objeto de erro completo; o caller decide como reagir.
