@@ -13,7 +13,7 @@ type Params = Promise<{ courseId: string; lessonId: string }>;
 export default async function LessonPage({ params }: { params: Params }) {
   const { courseId, lessonId } = await params;
   const profile = await requireProfile();
-  const data = await getLessonForViewer(lessonId, profile.id);
+  const data = await getLessonForViewer(lessonId, profile.id, courseId);
   if (!data) notFound();
   const { lesson, completed, siblings } = data;
 

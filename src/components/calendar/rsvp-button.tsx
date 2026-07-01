@@ -11,13 +11,15 @@ export function RsvpButton({ eventId, initiallyGoing }: { eventId: string; initi
   const [pending, startTransition] = React.useTransition();
 
   function toggle() {
+    // Captura o alvo uma única vez para evitar estado stale em clique duplo
+    // (o botão já é disabled durante `pending`, mas isto torna o toggle robusto).
+    const next = !going;
     startTransition(async () => {
-      const newStatus: "going" | "declined" = going ? "declined" : "going";
-      const res = await rsvpEventAction(eventId, newStatus);
+      const res = await rsvpEventAction(eventId, next ? "going" : "declined");
       if (!res.ok) toast.error(res.error ?? "Erro ao confirmar.");
       else {
-        setGoing(!going);
-        toast.success(going ? "Presença cancelada." : "Presença confirmada · +20 pontos");
+        setGoing(next);
+        toast.success(next ? "Presença confirmada · +20 pontos" : "Presença cancelada.");
       }
     });
   }

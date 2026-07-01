@@ -1,13 +1,17 @@
-name: Deploy (Hetzner)
+name: Deploy (Hetzner) [LEGADO - DESATIVADO]
 
-# Pré-requisitos no servidor Hetzner:
-#  - repo clonado em /opt/codex-community com o arquivo .env preenchido
-#  - Docker + Docker Compose instalados
-# Secrets do repositório: HETZNER_HOST, HETZNER_USER, HETZNER_SSH_KEY
+# ============================================================================
+# LEGADO / DESATIVADO (hardening pré-features, 2026-06-30)
+# A produção oficial do Portal Nexus é a VERCEL (build zero-config do Next.js).
+# Este workflow representa a stack self-hosted Hetzner (Docker + Caddy) ANTIGA.
+# O gatilho automático em `push` foi REMOVIDO para evitar deploy-fantasma e
+# falhas em vermelho a cada push. Mantido apenas como `workflow_dispatch`
+# (execução manual deliberada) e NÃO removido — os arquivos Dockerfile/
+# docker-compose.yml/Caddyfile seguem no repo, pendentes de decisão dedicada.
+# Para reativar o auto-deploy Hetzner: readicionar o bloco `push:` abaixo.
+# ============================================================================
 on:
   workflow_dispatch:
-  push:
-    branches: [main, master]
 
 jobs:
   deploy:

@@ -19,11 +19,18 @@ export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
+
+  // Distinguir "perfil inexistente" (data === null, legítimo — tratado pelos
+  // callers) de "erro real de banco" (não mascarar como deslogado/sem perfil).
+  if (error) {
+    console.error("[auth] falha ao carregar perfil:", error.message);
+    throw new Error("Falha ao carregar o perfil. Tente novamente.");
+  }
 
   return data as Profile | null;
 });

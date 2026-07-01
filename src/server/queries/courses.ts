@@ -76,7 +76,7 @@ export async function getCourseDetail(courseId: string, userId: string) {
   return { course, modules, totalLessons, completedLessons };
 }
 
-export async function getLessonForViewer(lessonId: string, userId: string) {
+export async function getLessonForViewer(lessonId: string, userId: string, courseId: string) {
   const supabase = await createClient();
   const { data: lesson } = await supabase
     .from("lessons")
@@ -84,6 +84,10 @@ export async function getLessonForViewer(lessonId: string, userId: string) {
     .eq("id", lessonId)
     .maybeSingle();
   if (!lesson) return null;
+
+  // A aula precisa pertencer ao curso da rota — evita abrir /courses/A/lessons/<aula-de-B>
+  // (links "Voltar ao curso"/anterior/próxima ficariam incoerentes).
+  if (lesson.course_id !== courseId) return null;
 
   // SEC-03 (defesa em profundidade): só serve a aula se o curso pai for visível
   // ao usuário. A RLS de `courses` (courses_select_published_or_mod) já retorna

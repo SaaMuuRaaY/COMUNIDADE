@@ -5,8 +5,14 @@ type Bucket = { count: number; resetAt: number };
 const store = new Map<string, Bucket>();
 
 /**
- * Rate-limit in-process (sliding fixed-window). Suficiente para deploy
- * single-container (Hetzner). Para escala horizontal, trocar por Redis.
+ * Rate-limit in-process (janela fixa). BEST-EFFORT / defesa-em-profundidade.
+ *
+ * Produção é Vercel (serverless): este `Map` vive POR INSTÂNCIA e some em cold
+ * start, então NÃO é um limite global confiável. A proteção primária de auth é
+ * o rate-limit nativo do Supabase Auth (GoTrue). Este limiter agrega uma camada
+ * leve anti-flood por usuário/IP. Só migrar para store compartilhado (ex.:
+ * Upstash/Redis) ou WAF de borda SE houver evidência de abuso. Ver
+ * docs/HARDENING_PRE_FEATURES.md (seção Rate limit).
  */
 export function rateLimit(
   key: string,

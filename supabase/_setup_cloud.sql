@@ -1,4 +1,19 @@
 -- =============================================================================
+-- ⚠️ LEGADO / SNAPSHOT HISTÓRICO — NÃO USAR PARA PROVISIONAR (marcado 2026-06-30)
+-- -----------------------------------------------------------------------------
+-- Este arquivo é um snapshot CONCATENADO e DEFASADO: cobre apenas 0001–0007.
+-- NÃO contém: 0008 (triggers de notificação), 0009 (is_owner + RPCs admin +
+-- blindagem de colunas sensíveis / SEC-01), 0010 (RLS de cursos draft / SEC-03),
+-- 0011 (social_links) nem 0012 (post_reactions). Provisionar a cloud por ele
+-- deixaria o banco INSEGURO e o app quebraria em runtime.
+--
+-- FONTE ÚNICA DE VERDADE DO SCHEMA = supabase/migrations/ (0001..0012).
+-- Provisionar/atualizar com:  npx supabase db push
+--   (ou aplicar as migrations 0001..0012 EM ORDEM no SQL Editor).
+-- NÃO sincronizar este arquivo à mão. Mantido só como referência histórica.
+-- =============================================================================
+
+-- =============================================================================
 -- 0001 — Profiles + Communities + Members
 -- =============================================================================
 

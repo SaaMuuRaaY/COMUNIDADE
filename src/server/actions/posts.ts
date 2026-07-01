@@ -150,10 +150,16 @@ export async function togglePostLikeAction(postId: string): Promise<ActionResult
 
   if (existing) {
     const { error } = await supabase.from("post_likes").delete().eq("id", existing.id);
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      console.error("[posts] descurtir:", error.message);
+      return { ok: false, error: "Não foi possível atualizar a curtida. Tente novamente." };
+    }
   } else {
     const { error } = await supabase.from("post_likes").insert({ post_id: postId, user_id: profile.id });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      console.error("[posts] curtir:", error.message);
+      return { ok: false, error: "Não foi possível atualizar a curtida. Tente novamente." };
+    }
     // pontos para o autor são lançados pelo trigger handle_like_award
   }
 
@@ -184,12 +190,18 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
 
   if (existing) {
     const { error } = await supabase.from("post_reactions").delete().eq("id", existing.id);
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      console.error("[posts] remover reação:", error.message);
+      return { ok: false, error: "Não foi possível atualizar a reação. Tente novamente." };
+    }
   } else {
     const { error } = await supabase
       .from("post_reactions")
       .insert({ post_id: postId, user_id: profile.id, emoji });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      console.error("[posts] reagir:", error.message);
+      return { ok: false, error: "Não foi possível atualizar a reação. Tente novamente." };
+    }
   }
 
   revalidatePath("/community");

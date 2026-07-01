@@ -234,8 +234,8 @@ COMUNIDADE/
 │     │  ├─ 0006_rls_policies.sql               TODAS as policies RLS
 │     │  └─ 0007_storage_buckets.sql            buckets + storage policies
 │     ├─ seed.sql                                dados demo
-│     ├─ _setup_cloud.sql                        (gerado) concatenado pro Cloud SQL Editor
-│     └─ _seed_cloud.sql                         (gerado) seed pro Cloud
+│     ├─ _setup_cloud.sql                        ⚠️ LEGADO/snapshot (só 0001–0007; NÃO usar — fonte = migrations/)
+│     └─ _seed_cloud.sql                         ⚠️ LEGADO/snapshot demo (senha fixa; NÃO usar em prod)
 │
 ├─ Core lib (LER QUARTO)
 │  └─ src/lib/
@@ -930,7 +930,10 @@ Apaga TUDO no banco e re-aplica setup + seed:
 drop schema if exists public cascade;
 create schema public;
 grant all on schema public to postgres, authenticated, anon, service_role;
--- ... depois colar _setup_cloud.sql e _seed_cloud.sql novamente
+-- ... depois APLICAR AS MIGRATIONS em ordem — FONTE ÚNICA = supabase/migrations/ (0001..0012):
+--     npx supabase db push        (recomendado)
+--   ou colar 0001..0012 no SQL Editor, na ordem.
+-- NÃO usar _setup_cloud.sql / _seed_cloud.sql (legado, defasado em 0007, senha demo fixa).
 ```
 
 Local (Docker): `pnpm db:reset` já faz isso.

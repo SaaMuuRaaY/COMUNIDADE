@@ -64,14 +64,18 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
   const isOwner = post.author?.id === currentUserId;
 
   async function onLike() {
-    setLiked((v) => !v);
-    setLikesCount((c) => c + (liked ? -1 : 1));
+    // Deriva o alvo uma vez e mantém `liked` e `likesCount` acoplados (evita
+    // contador stale no clique duplo — o `setLikesCount` antes usava o `liked`
+    // capturado, desincronizando do botão).
+    const next = !liked;
+    setLiked(next);
+    setLikesCount((c) => c + (next ? 1 : -1));
     startTransition(async () => {
       const res = await togglePostLikeAction(post.id);
       if (!res.ok) {
-        // rollback
-        setLiked((v) => !v);
-        setLikesCount((c) => c + (liked ? 1 : -1));
+        // rollback consistente com `next`
+        setLiked(!next);
+        setLikesCount((c) => c + (next ? -1 : 1));
         toast.error(res.error ?? "Erro ao curtir.");
       }
     });

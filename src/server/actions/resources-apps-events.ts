@@ -158,7 +158,10 @@ export async function rsvpEventAction(eventId: string, status: "going" | "maybe"
       { event_id: eventId, user_id: profile.id, status },
       { onConflict: "event_id,user_id" },
     );
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error("[events] rsvp:", error.message);
+    return { ok: false, error: "Não foi possível confirmar a presença. Tente novamente." };
+  }
 
   if (status === "going") {
     await awardPoints(profile.id, "event_attended", POINTS.EVENT_ATTENDED, "event", eventId);
