@@ -99,19 +99,19 @@ begin
 
   -- posts ---------------------------------------------------------------------
   insert into public.posts (community_id, author_id, category, title, body) values
-    (v_community_id, v_admin_id, 'avisos',
+    (v_community_id, v_admin_id, 'comunicados',
      'Bem-vindo ao CODEX Community',
      'Estamos no ar! Use este espaço para compartilhar projetos, dúvidas e resultados. Boas-vindas a todos. 🚀'),
-    (v_community_id, v_ana_id, 'apresentacoes',
+    (v_community_id, v_ana_id, 'apresente-se',
      'Olá, sou a Ana',
      'Trabalho com **front-end** há 3 anos e quero aprender mais sobre IA generativa este ano. Quem está nessa jornada também?'),
-    (v_community_id, v_bruno_id, 'duvidas',
+    (v_community_id, v_bruno_id, 'duvidas-gerais',
      'Qual stack pra MVP rápido?',
      'Estou montando um MVP e penso em `Next.js + Supabase`. Alguém tem experiência? Quais armadilhas evitar?'),
-    (v_community_id, v_clara_id, 'projetos',
+    (v_community_id, v_clara_id, 'projetos-negocios',
      'Lançando minha automação no n8n',
      'Construí um fluxo que processa leads do Instagram e envia para um Sheets. Posso compartilhar o workflow se interessar.'),
-    (v_community_id, v_mod_id, 'resultados',
+    (v_community_id, v_mod_id, 'compartilhe-seu-projeto',
      '+R$ 12k em 30 dias com a Calculadora MotorBoost',
      'Compartilhando resultados aplicando o que aprendi no curso de IA aplicada. Quem quiser detalhes, comenta aqui.');
 
