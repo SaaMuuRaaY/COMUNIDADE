@@ -25,12 +25,12 @@ O warning `[env] NEXT_PUBLIC_APP_URL aponta para localhost` aparece **antes e de
 
 | Arquivo | Bloco | Mudança |
 |---|:---:|---|
-| `.github/workflows/deploy.yml` | A | Removido gatilho `push`; mantido `workflow_dispatch`; banner LEGADO/DESATIVADO |
+| `.github/deploy-hetzner.legacy.yml` (movido de `workflows/`) | A + §2 | **Arquivado fora de `.github/workflows/`** (via `git mv`) — GitHub não registra nem executa; `on:` comentado; banner ARQUIVADO. `ci.yml` segue como único workflow ativo |
 | `vercel.txt` | B | `git rm --cached` (fora do índice; preservado em disco; já no `.gitignore`) |
 | `supabase/_setup_cloud.sql` | C | Banner de topo: LEGADO/snapshot (só 0001–0007); `migrations/` = fonte única |
 | `docs/PROJETO.md` | C | Marcada estrutura `_setup_cloud/_seed_cloud` como legado; §10.6 aponta para `migrations/`/`db push` |
-| `src/components/community/post-card.tsx` | E | `onLike`: acopla `liked`+`likesCount` via `next` (corrige contador stale) |
-| `src/components/calendar/rsvp-button.tsx` | E | `toggle`: captura `next` uma vez (corrige estado stale) |
+| `src/components/community/post-card.tsx` | E + §1 | `onLike`/`onReact`: acopla estado via `next`/`had` **+ guard de reentrância (`useRef`)** — bloqueia 2ª request no clique duplo do mesmo tick; rollback em `finally` |
+| `src/components/calendar/rsvp-button.tsx` | E + §1 | `toggle`: captura `next` **+ guard de reentrância (`useRef`)** |
 | `src/server/queries/courses.ts` | E | `getLessonForViewer(lessonId, userId, courseId)`: valida `lesson.course_id === courseId` |
 | `src/app/(app)/courses/[courseId]/lessons/[lessonId]/page.tsx` | E | Passa `courseId` ao `getLessonForViewer` |
 | `src/lib/auth/current-user.ts` | E | `getCurrentProfile`: distingue perfil inexistente (`null`) de erro real de banco (`throw`+log) |
@@ -44,7 +44,7 @@ O warning `[env] NEXT_PUBLIC_APP_URL aponta para localhost` aparece **antes e de
 
 ## 3. Decisões
 
-- **Bloco A — deploy.yml:** confirmado como stack Hetzner antiga (SSH → `/opt/codex-community` + `docker compose`). Desativado o **auto-deploy** (removido `push`), preservado `workflow_dispatch` (reativável) e o arquivo. Vercel permanece a **única fonte oficial de deploy**. Docker/compose/Caddyfile **não removidos** (decisão dedicada futura).
+- **Bloco A — deploy.yml (revisado na §2 da revisão final):** confirmado como stack Hetzner antiga (SSH → `/opt/codex-community` + `docker compose`). **Totalmente desativado** — o arquivo foi **movido para fora de `.github/workflows/`** (`git mv` → `.github/deploy-hetzner.legacy.yml`), então o GitHub Actions **não o registra nem executa** (opção A, recomendada). Conteúdo histórico **preservado**; `on:` comentado. Vercel permanece a **única fonte oficial de deploy** e `ci.yml` o único workflow ativo. Docker/compose/Caddyfile **não removidos** (decisão dedicada futura).
 - **Bloco B — vercel.txt:** estava versionado. Removido do índice (`git rm --cached`), mantido em disco e no `.gitignore`. **Conteúdo inspecionado, não exposto** — ver §7 (rotação).
 - **Bloco C — _setup_cloud.sql:** confirmado **defasado** (só 0001–0007; falta 0008–0012). Classificado como **LEGADO / snapshot histórico**; **não** sincronizado à mão. Definido oficialmente: **`supabase/migrations/` = única fonte de verdade do schema**; provisionamento via `npx supabase db push`. Referências operacionais em `PROJETO.md` corrigidas.
 - **Bloco D — tipos Supabase:** **INTERROMPIDO** (ambiente não preparado). Ver §8.
@@ -55,8 +55,8 @@ O warning `[env] NEXT_PUBLIC_APP_URL aponta para localhost` aparece **antes e de
 
 ## 4. Itens corrigidos
 
-1. **Contador otimista de like stale** (`post-card.tsx` `onLike`): `setLikesCount` usava o `liked` capturado enquanto `setLiked` era funcional → desincronizava no clique duplo. Agora ambos derivam de `const next = !liked` (acoplados); rollback idem.
-2. **RSVP stale** (`rsvp-button.tsx` `toggle`): `setGoing(!going)`/toast usavam `going` capturado. Agora `const next = !going` é capturado uma vez e usado no arg da action, no `setGoing` e no toast.
+1. **Contador otimista de like stale + concorrência** (`post-card.tsx` `onLike`/`onReact`): (a) `setLikesCount`/`setReactions` agora derivam do alvo capturado uma vez (`next`/`had`), acoplados ao estado do botão; (b) **guard de reentrância `useRef`** (`toggleInFlight`) bloqueia um 2º clique no mesmo tick antes do re-render que aplica `disabled={pending}` — impede **duas requests concorrentes** chegarem à Server Action (que, sem isso, colidiriam no `unique` de `post_likes`/`post_reactions` e mostrariam erro num like válido). Ref liberado no `finally` (rollback preservado).
+2. **RSVP stale + concorrência** (`rsvp-button.tsx` `toggle`): `const next = !going` capturado uma vez **+ guard de reentrância `useRef`** (`inFlight`), mesmo padrão. Uma request por vez; rollback/`disabled` preservados.
 3. **lessonId↔courseId** (`getLessonForViewer` + página): agora valida que a aula pertence ao curso da rota; divergência → `null` → `notFound()`. Evita `/courses/A/lessons/<aula-de-B>` com links incoerentes.
 4. **`getCurrentProfile` distingue erros**: `error` do SELECT agora é tratado — perfil inexistente (`data === null`) segue retornando `null` (comportamento legítimo, tratado pelos callers); **erro real de banco** loga e lança (não é mais mascarado como "deslogado"→`/login`).
 5. **Erros crus → amigáveis (fluxos tocados)**: `togglePostLike`, `togglePostReaction` e `rsvpEventAction` deixaram de devolver `error.message` cru; agora retornam mensagem amigável e logam o detalhe via `console.error` (sem vazar schema ao usuário).
@@ -87,8 +87,9 @@ Conforme as decisões explícitas do escopo (evitar overcoding / preservar compo
 | `getCurrentProfile` agora pode `throw` em erro de banco | Baixo | Só dispara em erro REAL de DB (raro). Antes, mascarava como logout→`/login`. Propaga ao error boundary — comportamento mais correto. Tipo de retorno inalterado (`Profile\|null`). |
 | Validação lesson↔course | Baixo | Navegação legítima passa o `courseId` correto (mesma origem do Link). Só URLs manipuladas passam a dar 404 (desejado). |
 | Mensagens de erro amigáveis | Muito baixo | Só troca o texto de `error` (tipo `string` inalterado). E2E não asserta msg crua do Postgres. |
-| `deploy.yml` sem `push` | Baixo | Auto-deploy Hetzner cessa. Se o Hetzner ainda estivesse servindo, isso **para** de sincronizá-lo (desejado; Vercel é oficial). Reativável. |
-| `git rm --cached vercel.txt` | Baixo | Só desstageia do índice; arquivo intacto em disco. Efetiva só ao commitar (não feito). |
+| **Guard de reentrância (`useRef`) em like/react/rsvp** | Muito baixo | Só adiciona um curto-circuito síncrono no início do handler + `finally` que libera o ref. Não muda o caminho feliz, o otimismo nem o rollback. Fecha a janela de clique-duplo do mesmo tick que o `disabled={pending}` não cobria. |
+| `deploy.yml` arquivado fora de `workflows/` | Baixo | Auto-deploy Hetzner **totalmente** cessa (GitHub não registra o arquivo). Se o Hetzner ainda servisse, isso para de sincronizá-lo (desejado; Vercel é oficial). Reativável movendo de volta. |
+| `git rm --cached vercel.txt` | Baixo | Já efetivado no commit `2bdb51a` (deleção do índice); arquivo intacto em disco, coberto pelo `.gitignore`. |
 | Banner em `_setup_cloud.sql` | Nenhum | Só comentário SQL; arquivo não é executado por nada automatizado. |
 
 ---
@@ -186,3 +187,18 @@ Hardening **concluído com sucesso e zero regressão** (typecheck/lint/build ver
 Pendências deixadas explícitas (fora desta fase, por decisão): **gerar tipos Supabase reais** (§8 — comando pronto) e **integrar `<Database>` nos clients** logo depois; avaliar **rotação de `vercel.txt`** (§7); os P2/P3 da auditoria seguem oportunísticos.
 
 *Read-only quanto à cloud: nenhuma migration, nenhum SQL executado, nenhum commit/push/deploy.*
+
+---
+
+## 14. Revisão final (follow-up, 2026-06-30)
+
+O hardening base foi commitado como **`2bdb51a`**. Revisão read-only posterior endereçou dois pontos:
+
+- **Concorrência like/react/RSVP (§1 da revisão):** a correção anterior (`const next`) só resolvia o **desync de contador**, mas **duas requests ainda podiam alcançar a Server Action** no clique duplo do mesmo tick (o `disabled={pending}` só vira `disabled` no DOM após o re-render, e `pending`/`liked`/`going` no closure são stale). Adicionado **guard de reentrância com `useRef`** (mutação síncrona) em `onLike`, `onReact` (`post-card.tsx`) e `toggle` (`rsvp-button.tsx`): 2º clique no mesmo tick é curto-circuitado; ref liberado em `finally`. Agora é **uma request por interação** — não é mais mitigação parcial. Banco/Server Actions **não** alterados (a defesa `unique` no banco permanece como rede final).
+- **Deploy Hetzner (§2 da revisão):** antes só sem `push` (ainda aparecia como `workflow_dispatch` executável). Agora **arquivado fora de `.github/workflows/`** (`git mv` → `.github/deploy-hetzner.legacy.yml`), fully desativado; conteúdo preservado. `ci.yml` é o único workflow ativo.
+
+**Acessibilidade:** os botões de like/reação/RSVP já expõem `disabled={pending}` (estado anunciado por leitores de tela); reações têm `aria-pressed`/`aria-label`. O guard `useRef` é interno e não altera a semântica ARIA.
+
+**Gates da revisão:** `pnpm typecheck` ✅ · `pnpm lint` ✅ · `pnpm build` ✅ · `git diff --check` ✅ (só avisos LF→CRLF do autocrlf no Windows, sem erros de whitespace).
+
+**Pendentes desta revisão (para commit):** `.github/deploy-hetzner.legacy.yml` (renomeado de `workflows/deploy.yml`), `post-card.tsx`, `rsvp-button.tsx`, este documento.

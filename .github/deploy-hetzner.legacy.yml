@@ -1,0 +1,34 @@
+name: Deploy (Hetzner) [ARQUIVADO - NÃO É UM WORKFLOW ATIVO]
+
+# ============================================================================
+# ARQUIVADO / TOTALMENTE DESATIVADO (hardening pré-features, 2026-06-30)
+# Este arquivo foi MOVIDO PARA FORA de `.github/workflows/` — o GitHub Actions
+# NÃO o registra nem o executa (nem por push, nem por workflow_dispatch). É um
+# registro histórico da stack self-hosted Hetzner (Docker + Caddy) ANTIGA.
+#
+# A produção oficial do Portal Nexus é a VERCEL (build zero-config do Next.js).
+# Conteúdo preservado; NÃO apagado. Dockerfile/docker-compose.yml/Caddyfile
+# seguem no repo, pendentes de decisão dedicada (não removidos nesta etapa).
+#
+# Para reativar (decisão deliberada): mover de volta para
+# `.github/workflows/deploy.yml` e readicionar o gatilho `push:` no bloco `on:`.
+# ============================================================================
+# on: [workflow_dispatch]   # inerte fora de .github/workflows/ — não dispara
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/codex-community
+            git pull --ff-only
+            docker compose build
+            docker compose up -d
+            docker image prune -f

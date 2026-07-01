@@ -59,29 +59,40 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
     body: post.body,
   });
   const [pending, startTransition] = React.useTransition();
+  // Guard de reentrância: bloqueia um 2º clique no MESMO tick (antes do re-render
+  // que aplica `disabled={pending}`). `pending`/`liked` no closure são stale;
+  // um ref mutado de forma síncrona não é. Evita duas requests concorrentes.
+  const toggleInFlight = React.useRef(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const cat = POST_CATEGORIES.find((c) => c.value === post.category);
   const isOwner = post.author?.id === currentUserId;
 
   async function onLike() {
+    if (toggleInFlight.current) return;
+    toggleInFlight.current = true;
     // Deriva o alvo uma vez e mantém `liked` e `likesCount` acoplados (evita
-    // contador stale no clique duplo — o `setLikesCount` antes usava o `liked`
-    // capturado, desincronizando do botão).
+    // contador stale — o `setLikesCount` antes usava o `liked` capturado).
     const next = !liked;
     setLiked(next);
     setLikesCount((c) => c + (next ? 1 : -1));
     startTransition(async () => {
-      const res = await togglePostLikeAction(post.id);
-      if (!res.ok) {
-        // rollback consistente com `next`
-        setLiked(!next);
-        setLikesCount((c) => c + (next ? -1 : 1));
-        toast.error(res.error ?? "Erro ao curtir.");
+      try {
+        const res = await togglePostLikeAction(post.id);
+        if (!res.ok) {
+          // rollback consistente com `next`
+          setLiked(!next);
+          setLikesCount((c) => c + (next ? -1 : 1));
+          toast.error(res.error ?? "Erro ao curtir.");
+        }
+      } finally {
+        toggleInFlight.current = false;
       }
     });
   }
 
   function onReact(emoji: string) {
+    if (toggleInFlight.current) return;
+    toggleInFlight.current = true;
     const had = myReactions.has(emoji);
     setMyReactions((prev) => {
       const next = new Set(prev);
@@ -91,17 +102,21 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
     });
     setReactions((prev) => ({ ...prev, [emoji]: Math.max(0, (prev[emoji] ?? 0) + (had ? -1 : 1)) }));
     startTransition(async () => {
-      const res = await togglePostReactionAction(post.id, emoji);
-      if (!res.ok) {
-        // rollback
-        setMyReactions((prev) => {
-          const next = new Set(prev);
-          if (had) next.add(emoji);
-          else next.delete(emoji);
-          return next;
-        });
-        setReactions((prev) => ({ ...prev, [emoji]: Math.max(0, (prev[emoji] ?? 0) + (had ? 1 : -1)) }));
-        toast.error(res.error ?? "Erro ao reagir.");
+      try {
+        const res = await togglePostReactionAction(post.id, emoji);
+        if (!res.ok) {
+          // rollback
+          setMyReactions((prev) => {
+            const next = new Set(prev);
+            if (had) next.add(emoji);
+            else next.delete(emoji);
+            return next;
+          });
+          setReactions((prev) => ({ ...prev, [emoji]: Math.max(0, (prev[emoji] ?? 0) + (had ? 1 : -1)) }));
+          toast.error(res.error ?? "Erro ao reagir.");
+        }
+      } finally {
+        toggleInFlight.current = false;
       }
     });
   }

@@ -9,17 +9,24 @@ import { toast } from "sonner";
 export function RsvpButton({ eventId, initiallyGoing }: { eventId: string; initiallyGoing: boolean }) {
   const [going, setGoing] = React.useState(initiallyGoing);
   const [pending, startTransition] = React.useTransition();
+  // Guard de reentrância: bloqueia 2º clique no mesmo tick (ref síncrono, não
+  // sujeito ao closure stale de `going`/`pending`). Evita duas requests.
+  const inFlight = React.useRef(false);
 
   function toggle() {
-    // Captura o alvo uma única vez para evitar estado stale em clique duplo
-    // (o botão já é disabled durante `pending`, mas isto torna o toggle robusto).
+    if (inFlight.current) return;
+    inFlight.current = true;
     const next = !going;
     startTransition(async () => {
-      const res = await rsvpEventAction(eventId, next ? "going" : "declined");
-      if (!res.ok) toast.error(res.error ?? "Erro ao confirmar.");
-      else {
-        setGoing(next);
-        toast.success(next ? "Presença confirmada · +20 pontos" : "Presença cancelada.");
+      try {
+        const res = await rsvpEventAction(eventId, next ? "going" : "declined");
+        if (!res.ok) toast.error(res.error ?? "Erro ao confirmar.");
+        else {
+          setGoing(next);
+          toast.success(next ? "Presença confirmada · +20 pontos" : "Presença cancelada.");
+        }
+      } finally {
+        inFlight.current = false;
       }
     });
   }
