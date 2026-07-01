@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +28,8 @@ import { LevelBadge } from "@/components/shared/level-badge";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Markdown } from "@/components/shared/markdown";
 import { cn, formatRelative } from "@/lib/utils";
-import { POST_CATEGORIES, REACTION_EMOJIS } from "@/lib/constants";
+import { REACTION_EMOJIS } from "@/lib/constants";
+import { getCategoryLabel } from "@/lib/community/structure";
 import {
   togglePostLikeAction,
   togglePostReactionAction,
@@ -54,7 +54,6 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
   const [pinned, setPinned] = React.useState(post.is_pinned);
   const [editOpen, setEditOpen] = React.useState(false);
   const [editForm, setEditForm] = React.useState({
-    category: post.category as string,
     title: post.title ?? "",
     body: post.body,
   });
@@ -64,7 +63,6 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
   // um ref mutado de forma síncrona não é. Evita duas requests concorrentes.
   const toggleInFlight = React.useRef(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const cat = POST_CATEGORIES.find((c) => c.value === post.category);
   const isOwner = post.author?.id === currentUserId;
 
   async function onLike() {
@@ -138,7 +136,6 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
   function onEditSubmit(e: React.FormEvent) {
     e.preventDefault();
     const fd = new FormData();
-    fd.set("category", editForm.category);
     fd.set("title", editForm.title);
     fd.set("body", editForm.body);
     startTransition(async () => {
@@ -179,11 +176,9 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
               </Link>
               <RoleBadge role={post.author?.role ?? "member"} />
               {post.author ? <LevelBadge level={post.author.level} /> : null}
-              {cat ? (
-                <Badge variant="secondary" className="text-[10px]">
-                  {cat.label}
-                </Badge>
-              ) : null}
+              <Badge variant="secondary" className="text-[10px]">
+                {getCategoryLabel(post.category)}
+              </Badge>
               {pinned ? (
                 <Badge variant="outline" className="gap-1 border-[var(--accent-line)] text-[10px] text-[var(--accent)]">
                   <Pin className="h-3 w-3" /> Fixado
@@ -333,27 +328,9 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar publicação</DialogTitle>
-            <DialogDescription>Atualize a categoria, o título e o conteúdo.</DialogDescription>
+            <DialogDescription>Atualize o título e o conteúdo.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onEditSubmit} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label>Categoria</Label>
-              <Select
-                value={editForm.category}
-                onValueChange={(v) => setEditForm((f) => ({ ...f, category: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {POST_CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="space-y-1.5">
               <Label>Título (opcional)</Label>
               <Input

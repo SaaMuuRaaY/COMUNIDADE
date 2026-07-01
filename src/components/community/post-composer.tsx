@@ -5,16 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/shared/markdown";
-import { POST_CATEGORIES } from "@/lib/constants";
 import { createPostAction } from "@/server/actions/posts";
 import { PostImageField } from "@/components/community/post-image-field";
 import { toast } from "sonner";
 
-export function PostComposer({ currentUserId }: { currentUserId: string }) {
-  const [category, setCategory] = React.useState<string>("geral");
+export function PostComposer({
+  currentUserId,
+  channelSlug,
+}: {
+  currentUserId: string;
+  channelSlug: string;
+}) {
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
@@ -28,7 +31,7 @@ export function PostComposer({ currentUserId }: { currentUserId: string }) {
       return;
     }
     const fd = new FormData();
-    fd.append("category", category);
+    fd.append("category", channelSlug);
     fd.append("title", title);
     fd.append("body", body);
     if (mediaUrl) {
@@ -68,26 +71,12 @@ export function PostComposer({ currentUserId }: { currentUserId: string }) {
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
-        <div className="grid gap-2 sm:grid-cols-[1fr_220px]">
-          <Input
-            placeholder="Título (opcional)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={160}
-          />
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POST_CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Input
+          placeholder="Título (opcional)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={160}
+        />
 
         <Tabs defaultValue="write">
           <TabsList>

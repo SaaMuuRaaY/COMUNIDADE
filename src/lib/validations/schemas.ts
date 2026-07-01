@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPostCategory } from "@/lib/community/structure";
 
 /**
  * Aceita só URLs https públicas para imagens fornecidas pelo usuário (avatar),
@@ -105,7 +106,9 @@ export const postCategoryEnum = z.enum([
 ]);
 
 export const postSchema = z.object({
-  category: postCategoryEnum,
+  // Transitório (Fases 3–4): aceita canais novos + categorias antigas. Na Fase 5
+  // (após o remap) estreita para só canais novos (isKnownChannelSlug).
+  category: z.string().refine((s) => isValidPostCategory(s), "Canal inválido"),
   title: z.string().max(160).optional().nullable(),
   body: z.string().min(2, "Conteúdo muito curto").max(8000, "Conteúdo muito longo"),
   media_url: z.string().url().optional().nullable(),

@@ -50,9 +50,10 @@ type Props = {
   comments: CommentRow[];
   currentUserId: string;
   canModerate: boolean;
+  canComment: boolean;
 };
 
-export function CommentList({ postId, comments, currentUserId, canModerate }: Props) {
+export function CommentList({ postId, comments, currentUserId, canModerate, canComment }: Props) {
   const [body, setBody] = React.useState("");
   const [pending, startTransition] = React.useTransition();
 
@@ -73,21 +74,27 @@ export function CommentList({ postId, comments, currentUserId, canModerate }: Pr
 
   return (
     <div className="space-y-3">
-      <Card>
-        <CardContent className="space-y-2 p-4">
-          <Textarea
-            rows={3}
-            placeholder="Adicione um comentário…"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-          <div className="flex justify-end">
-            <Button onClick={submit} disabled={pending || !body.trim()}>
-              {pending ? "Enviando…" : "Comentar"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {canComment ? (
+        <Card>
+          <CardContent className="space-y-2 p-4">
+            <Textarea
+              rows={3}
+              placeholder="Adicione um comentário…"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <div className="flex justify-end">
+              <Button onClick={submit} disabled={pending || !body.trim()}>
+                {pending ? "Enviando…" : "Comentar"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          Comentários desativados neste canal.
+        </p>
+      )}
 
       {comments.length === 0 ? (
         <p className="rounded-md border border-dashed bg-muted/30 p-6 text-center text-sm text-muted-foreground">

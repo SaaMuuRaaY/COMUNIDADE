@@ -1,12 +1,11 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { PostCategory } from "@/types/db";
 
 export type FeedPost = {
   id: string;
   title: string | null;
   body: string;
-  category: PostCategory;
+  category: string;
   media_url: string | null;
   media_type: string | null;
   attachment_url: string | null;
@@ -29,7 +28,7 @@ export type FeedPost = {
 
 export async function getFeedPosts(opts: {
   userId: string;
-  category?: PostCategory | "all";
+  channel?: string;
   search?: string;
   limit?: number;
 }): Promise<FeedPost[]> {
@@ -45,8 +44,8 @@ export async function getFeedPosts(opts: {
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 30);
 
-  if (opts.category && opts.category !== "all") {
-    query = query.eq("category", opts.category);
+  if (opts.channel) {
+    query = query.eq("category", opts.channel);
   }
   if (opts.search && opts.search.trim()) {
     // Sanitiza contra PostgREST filter injection: escapa wildcards do LIKE
@@ -108,7 +107,7 @@ export async function getFeedPosts(opts: {
       id: p.id as string,
       title: (p.title as string | null) ?? null,
       body: p.body as string,
-      category: p.category as PostCategory,
+      category: p.category as string,
       media_url: (p.media_url as string | null) ?? null,
       media_type: (p.media_type as string | null) ?? null,
       attachment_url: (p.attachment_url as string | null) ?? null,
@@ -179,7 +178,7 @@ export async function getPostById(id: string, userId: string): Promise<FeedPost 
     id: p.id as string,
     title: (p.title as string | null) ?? null,
     body: p.body as string,
-    category: p.category as PostCategory,
+    category: p.category as string,
     media_url: (p.media_url as string | null) ?? null,
     media_type: (p.media_type as string | null) ?? null,
     attachment_url: (p.attachment_url as string | null) ?? null,

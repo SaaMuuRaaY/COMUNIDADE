@@ -10,7 +10,7 @@ import { SocialLinks } from "@/components/shared/social-links";
 import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelative } from "@/lib/utils";
-import { POST_CATEGORIES } from "@/lib/constants";
+import { getCategoryLabel } from "@/lib/community/structure";
 import type { SocialLinks as SocialLinksMap } from "@/types/db";
 
 type Params = Promise<{ userId: string }>;
@@ -126,12 +126,11 @@ export default async function MemberProfile({ params }: { params: Params }) {
           ) : (
             <ul className="divide-y">
               {posts.map((post) => {
-                const cat = POST_CATEGORIES.find((c) => c.value === post.category);
                 return (
                   <li key={post.id as string}>
                     <Link href={`/community/${post.id}`} className="block py-3 hover:bg-accent">
                       <p className="text-xs text-muted-foreground">
-                        {formatRelative(post.created_at as string)} · {cat?.label ?? (post.category as string)}
+                        {formatRelative(post.created_at as string)} · {getCategoryLabel(post.category as string)}
                       </p>
                       <p className="line-clamp-2 text-sm">
                         {(post.title as string) ?? (post.body as string)}

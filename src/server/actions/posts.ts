@@ -7,6 +7,7 @@ import { isModerator } from "@/lib/permissions/policies";
 import { awardPoints } from "@/lib/points/award";
 import { postSchema, commentSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
+import { canPostInChannel, canCommentInChannel } from "@/lib/community/structure";
 import { rateLimit } from "@/lib/security/rate-limit";
 
 const RATE_MSG = "Muitas ações em pouco tempo. Aguarde um momento.";
@@ -27,6 +28,9 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
     attachment_url: formData.get("attachment_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  if (!canPostInChannel(profile, parsed.data.category)) {
+    return { ok: false, error: "Sem permissão para publicar neste canal." };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -42,7 +46,7 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
   if (error) return { ok: false, error: error.message };
 
   await awardPoints(profile.id, "post_created", POINTS.POST_CREATED, "post", data.id);
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   revalidatePath("/dashboard");
   return { ok: true, id: data.id };
 }
@@ -67,11 +71,14 @@ export async function updatePostAction(postId: string, formData: FormData): Prom
   if (existing.author_id !== profile.id && !isModerator(profile)) {
     return { ok: false, error: "Sem permissão." };
   }
+  if (parsed.data.category && !canPostInChannel(profile, parsed.data.category)) {
+    return { ok: false, error: "Sem permissão para mover para este canal." };
+  }
 
   const { error } = await supabase.from("posts").update(parsed.data).eq("id", postId);
   if (error) return { ok: false, error: error.message };
 
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   revalidatePath(`/community/${postId}`);
   return { ok: true, id: postId };
 }
@@ -92,7 +99,7 @@ export async function deletePostAction(postId: string): Promise<ActionResult> {
 
   const { error } = await supabase.from("posts").update({ is_deleted: true }).eq("id", postId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   return { ok: true };
 }
 
@@ -119,7 +126,7 @@ export async function purgePostAction(postId: string): Promise<ActionResult> {
   if (error) return { ok: false, error: error.message };
   if (!count) return { ok: false, error: "Nada foi removido (sem permissão?)." };
   revalidatePath("/admin/posts");
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   return { ok: true };
 }
 
@@ -130,7 +137,7 @@ export async function pinPostAction(postId: string, pinned: boolean): Promise<Ac
   const supabase = await createClient();
   const { error } = await supabase.from("posts").update({ is_pinned: pinned }).eq("id", postId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   revalidatePath(`/community/${postId}`);
   return { ok: true };
 }
@@ -163,7 +170,7 @@ export async function togglePostLikeAction(postId: string): Promise<ActionResult
     // pontos para o autor são lançados pelo trigger handle_like_award
   }
 
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   revalidatePath(`/community/${postId}`);
   return { ok: true };
 }
@@ -204,7 +211,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
     }
   }
 
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   revalidatePath(`/community/${postId}`);
   return { ok: true };
 }
@@ -224,11 +231,14 @@ export async function createCommentAction(formData: FormData): Promise<ActionRes
   const supabase = await createClient();
   const { data: post } = await supabase
     .from("posts")
-    .select("id")
+    .select("id, category")
     .eq("id", parsed.data.post_id)
     .eq("is_deleted", false)
     .maybeSingle();
   if (!post) return { ok: false, error: "Publicação não encontrada." };
+  if (!isModerator(profile) && !canCommentInChannel(post.category as string)) {
+    return { ok: false, error: "Comentários desativados neste canal." };
+  }
 
   const { data, error } = await supabase
     .from("post_comments")
@@ -244,7 +254,7 @@ export async function createCommentAction(formData: FormData): Promise<ActionRes
   if (error) return { ok: false, error: error.message };
   await awardPoints(profile.id, "comment_created", POINTS.COMMENT_CREATED, "comment", data.id);
   revalidatePath(`/community/${parsed.data.post_id}`);
-  revalidatePath("/community");
+  revalidatePath("/community", "layout");
   return { ok: true, id: data.id };
 }
 

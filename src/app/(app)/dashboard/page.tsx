@@ -18,7 +18,8 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { requireProfile } from "@/lib/auth/current-user";
 import { getDashboardData } from "@/server/queries/dashboard";
-import { POST_CATEGORIES, nextLevelThreshold } from "@/lib/constants";
+import { nextLevelThreshold } from "@/lib/constants";
+import { getCategoryLabel } from "@/lib/community/structure";
 import { formatRelative } from "@/lib/utils";
 
 export const metadata = { title: "Início" };
@@ -172,7 +173,6 @@ export default async function DashboardPage() {
             <div className="divide-y">
               {data.posts.map((p) => {
                 const author = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
-                const cat = POST_CATEGORIES.find((c) => c.value === p.category);
                 return (
                   <Link
                     key={p.id}
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                         <span>{author?.full_name ?? "Membro"}</span>
                         <span>·</span>
                         <span>{formatRelative(p.created_at)}</span>
-                        {cat ? <Badge variant="outline" className="text-[10px]">{cat.label}</Badge> : null}
+                        <Badge variant="outline" className="text-[10px]">{getCategoryLabel(p.category as string)}</Badge>
                       </div>
                       <p className="line-clamp-2 text-sm">{p.title ?? p.body}</p>
                     </div>

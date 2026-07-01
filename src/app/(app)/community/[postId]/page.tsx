@@ -7,6 +7,7 @@ import { CommentList } from "@/components/community/comment-list";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getPostById, getCommentsByPost } from "@/server/queries/posts";
+import { canCommentInChannel, isKnownChannelSlug } from "@/lib/community/structure";
 
 type Params = Promise<{ postId: string }>;
 
@@ -19,19 +20,24 @@ export default async function PostDetailPage({ params }: { params: Params }) {
   ]);
   if (!post) notFound();
 
+  const mod = canModerate(profile);
+  const backHref = isKnownChannelSlug(post.category) ? `/community/c/${post.category}` : "/community";
+  const canComment = mod || canCommentInChannel(post.category);
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
       <Button asChild variant="ghost" size="sm" className="gap-1">
-        <Link href="/community">
-          <ArrowLeft className="h-4 w-4" /> Voltar para o feed
+        <Link href={backHref}>
+          <ArrowLeft className="h-4 w-4" /> Voltar ao canal
         </Link>
       </Button>
-      <PostCard post={post} currentUserId={profile.id} canModerate={canModerate(profile)} />
+      <PostCard post={post} currentUserId={profile.id} canModerate={mod} />
       <CommentList
         postId={post.id}
         comments={comments}
         currentUserId={profile.id}
-        canModerate={canModerate(profile)}
+        canModerate={mod}
+        canComment={canComment}
       />
     </div>
   );
