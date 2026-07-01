@@ -7,13 +7,24 @@ import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, ADMIN_ITEM } from "./nav-items";
+import { NAV_ITEMS, NAV_GROUPS, ADMIN_ITEM } from "./nav-items";
 import { logoutAction } from "@/server/actions/auth";
+
+const groupHeaderClass =
+  "px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50";
+
+function linkClass(active: boolean) {
+  return cn(
+    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+    active
+      ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
+      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+  );
+}
 
 export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
-  const primary = NAV_ITEMS.filter((i) => i.group === "primary");
-  const secondary = NAV_ITEMS.filter((i) => i.group === "secondary");
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-2 self-start overflow-y-auto border-r bg-sidebar px-3 py-4 text-sidebar-foreground md:flex">
@@ -21,60 +32,42 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
         <Logo className="h-7 w-auto" priority />
       </Link>
       <Separator className="my-2 bg-sidebar-border" />
-      <nav className="flex flex-1 flex-col gap-1">
-        {primary.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+      <nav className="flex flex-1 flex-col gap-4">
+        {NAV_GROUPS.map((g) => {
+          const items = NAV_ITEMS.filter((i) => i.group === g.group);
+          if (items.length === 0) return null;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                active
-                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
-        <Separator className="my-2 bg-sidebar-border" />
-        {secondary.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                active
-                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
+            <div key={g.group} className="flex flex-col gap-1">
+              <p className={groupHeaderClass}>{g.label}</p>
+              {items.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={linkClass(active)}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           );
         })}
         {isAdmin ? (
-          <>
-            <Separator className="my-2 bg-sidebar-border" />
+          <div className="flex flex-col gap-1">
+            <p className={groupHeaderClass}>Administração</p>
             <Link
               href={ADMIN_ITEM.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                pathname.startsWith("/admin")
-                  ? "bg-[var(--accent-soft)] text-foreground font-medium ring-1 ring-inset ring-[var(--accent-line)]"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
+              aria-current={pathname.startsWith("/admin") ? "page" : undefined}
+              className={linkClass(pathname.startsWith("/admin"))}
             >
               <ADMIN_ITEM.icon className="h-4 w-4" />
               {ADMIN_ITEM.label}
             </Link>
-          </>
+          </div>
         ) : null}
       </nav>
       <form action={logoutAction} className="px-1">
