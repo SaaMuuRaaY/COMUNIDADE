@@ -13,7 +13,7 @@ import { SectionBanner } from "@/components/shared/section-banner";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
-import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS } from "@/lib/community/structure";
+import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS, getChannelComposer } from "@/lib/community/structure";
 
 /**
  * Componente COMPARTILHADO de feed da Comunidade (Fase 6.6).
@@ -31,6 +31,7 @@ const GENERAL_COMPOSER_CHANNEL = "chat-networking";
 export async function CommunityGeneralFeed({ search }: { search: string }) {
   const profile = await requireProfile();
   const canPostGeneral = canPostInChannel(profile, GENERAL_COMPOSER_CHANNEL);
+  const generalComposer = getChannelComposer(GENERAL_COMPOSER_CHANNEL);
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
@@ -45,11 +46,16 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
       <FeedFilter />
 
       {canPostGeneral ? (
-        <PostComposer channelSlug={GENERAL_COMPOSER_CHANNEL} currentUserId={profile.id} />
+        <PostComposer
+          channelSlug={GENERAL_COMPOSER_CHANNEL}
+          currentUserId={profile.id}
+          actionLabel={generalComposer.actionLabel}
+          placeholder={generalComposer.placeholder}
+        />
       ) : null}
 
       <Suspense fallback={<FeedSkeleton />}>
-        <FeedList userId={profile.id} search={search} canMod={canModerate(profile)} />
+        <FeedList userId={profile.id} search={search} canMod={canModerate(profile)} role={profile.role} />
       </Suspense>
     </div>
   );
@@ -61,6 +67,7 @@ export async function CommunityChannelFeed({ slug, search }: { slug: string; sea
 
   const profile = await requireProfile();
   const showComposer = canPostInChannel(profile, slug);
+  const composer = getChannelComposer(slug);
   const groupLabel =
     CHANNEL_GROUPS.find((g) => g.slug === channel.groupSlug)?.label ?? "Comunidade";
 
@@ -81,15 +88,21 @@ export async function CommunityChannelFeed({ slug, search }: { slug: string; sea
           Canal em ativação — disponível em breve.
         </p>
       ) : showComposer ? (
-        <PostComposer channelSlug={slug} currentUserId={profile.id} />
-      ) : channel.type === "announcement" ? (
+        <PostComposer
+          channelSlug={slug}
+          currentUserId={profile.id}
+          actionLabel={composer.actionLabel}
+          placeholder={composer.placeholder}
+          guidance={composer.guidance}
+        />
+      ) : (
         <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          Canal oficial — apenas a equipe publica aqui.
+          Apenas a equipe publica neste canal.
         </p>
-      ) : null}
+      )}
 
       <Suspense fallback={<FeedSkeleton />}>
-        <FeedList userId={profile.id} channel={slug} search={search} canMod={canModerate(profile)} />
+        <FeedList userId={profile.id} channel={slug} search={search} canMod={canModerate(profile)} role={profile.role} />
       </Suspense>
     </div>
   );
@@ -100,11 +113,13 @@ async function FeedList({
   channel,
   search,
   canMod,
+  role,
 }: {
   userId: string;
   channel?: string;
   search: string;
   canMod: boolean;
+  role: string;
 }) {
   const posts = await getFeedPosts({ userId, channel, search });
   if (posts.length === 0) {
@@ -125,7 +140,7 @@ async function FeedList({
   return (
     <div className="space-y-4">
       {posts.map((p) => (
-        <PostCard key={p.id} post={p} currentUserId={userId} canModerate={canMod} />
+        <PostCard key={p.id} post={p} currentUserId={userId} canModerate={canMod} role={role} />
       ))}
     </div>
   );

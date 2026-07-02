@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile, requireModerator, requireAdmin } from "@/lib/auth/current-user";
+import { requireProfile, requireAdmin } from "@/lib/auth/current-user";
 import { awardPoints } from "@/lib/points/award";
 import { resourceSchema, appSchema, eventSchema } from "@/lib/validations/schemas";
 import { POINTS } from "@/lib/constants";
@@ -12,7 +12,7 @@ type Result = { ok: boolean; error?: string; id?: string };
 
 // Recursos -------------------------------------------------------------------
 export async function createResourceAction(formData: FormData): Promise<Result> {
-  const profile = await requireModerator();
+  const profile = await requireAdmin();
   const parsed = resourceSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description") || null,
@@ -35,7 +35,7 @@ export async function createResourceAction(formData: FormData): Promise<Result> 
 }
 
 export async function updateResourceAction(id: string, formData: FormData): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const parsed = resourceSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description") || null,
@@ -63,7 +63,7 @@ export async function updateResourceAction(id: string, formData: FormData): Prom
 }
 
 export async function deleteResourceAction(id: string): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase.from("resources").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
@@ -112,7 +112,7 @@ export async function deleteAppAction(id: string): Promise<Result> {
 
 // Eventos --------------------------------------------------------------------
 export async function createEventAction(formData: FormData): Promise<Result> {
-  const profile = await requireModerator();
+  const profile = await requireAdmin();
   const parsed = eventSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description") || null,
@@ -136,7 +136,7 @@ export async function createEventAction(formData: FormData): Promise<Result> {
 }
 
 export async function deleteEventAction(id: string): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase.from("events").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };

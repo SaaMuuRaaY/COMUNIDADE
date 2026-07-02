@@ -55,14 +55,14 @@ export const CHANNELS: Channel[] = [
   { slug: "dicas-novidades", label: "Dicas e novidades", groupSlug: "networking", order: 3, icon: "lightbulb", description: "Dicas, links e novidades.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "vagas-oportunidades", label: "Vagas e oportunidades", groupSlug: "networking", order: 4, icon: "briefcase", description: "Vagas e oportunidades.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   // Mercado e Negócios
-  { slug: "marketing-vendas", label: "Marketing e vendas", groupSlug: "mercado-negocios", order: 1, icon: "trending-up", description: "Marketing, vendas e aquisição.", type: "discussion", publish: "member", comments: true, isOfficial: false },
+  { slug: "marketing-vendas", label: "Marketing e vendas", groupSlug: "mercado-negocios", order: 1, icon: "trending-up", description: "Marketing, vendas e aquisição.", type: "discussion", publish: "moderator", comments: true, isOfficial: false },
   { slug: "parcerias-colaboracoes", label: "Parcerias e colaborações", groupSlug: "mercado-negocios", order: 2, icon: "handshake", description: "Busca de parcerias.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "servicos-oportunidades", label: "Serviços e oportunidades", groupSlug: "mercado-negocios", order: 3, icon: "badge-dollar-sign", description: "Ofertas de serviços.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "projetos-negocios", label: "Projetos e negócios", groupSlug: "mercado-negocios", order: 4, icon: "folder-kanban", description: "Projetos e negócios.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   // Suporte e Construção
-  { slug: "duvidas-gerais", label: "Dúvidas gerais", groupSlug: "suporte-construcao", order: 1, icon: "help-circle", description: "Perguntas e suporte da comunidade.", type: "discussion", publish: "member", comments: true, isOfficial: false },
+  { slug: "duvidas-gerais", label: "Dúvidas gerais", groupSlug: "suporte-construcao", order: 1, icon: "help-circle", description: "Perguntas e suporte da comunidade.", type: "discussion", publish: "moderator", comments: true, isOfficial: false },
   // Canal NOVO (Fase 6.5) — aceita posts só após a migration 0016 (CHECK). Navegável/leitura antes disso.
-  { slug: "suporte-tecnico", label: "Suporte técnico", groupSlug: "suporte-construcao", order: 2, icon: "life-buoy", description: "Dúvidas técnicas, erros e configuração — ajuda entre membros e equipe.", type: "discussion", publish: "member", comments: true, isOfficial: false },
+  { slug: "suporte-tecnico", label: "Suporte técnico", groupSlug: "suporte-construcao", order: 2, icon: "life-buoy", description: "Dúvidas técnicas, erros e configuração — ajuda entre membros e equipe.", type: "discussion", publish: "moderator", comments: true, isOfficial: false },
   // Portal Nexus
   { slug: "beneficios", label: "Benefícios", groupSlug: "portal-nexus", order: 1, icon: "gift", description: "Benefícios do Portal Nexus.", type: "announcement", publish: "admin", comments: false, isOfficial: true },
   { slug: "cupons-descontos", label: "Cupons e descontos", groupSlug: "portal-nexus", order: 2, icon: "ticket", description: "Cupons e descontos.", type: "announcement", publish: "admin", comments: false, isOfficial: true },
@@ -132,6 +132,38 @@ export const CHANNEL_HREFS: Record<string, string> = {
 /** Path raiz canônico de um canal (undefined se legado/desconhecido). */
 export function channelHref(slug: string): string | undefined {
   return CHANNEL_HREFS[slug];
+}
+
+/**
+ * CTA/guidance contextual do composer por canal (F2 — gestão contextual).
+ * Estático (não CMS). Canais sem entrada usam o texto padrão do PostComposer.
+ */
+export const CHANNEL_COMPOSER: Record<
+  string,
+  { actionLabel: string; placeholder?: string; guidance?: string }
+> = {
+  "comece-por-aqui": { actionLabel: "Criar orientação", guidance: "Onboarding e primeiros passos." },
+  "apresente-se": { actionLabel: "Criar apresentação", placeholder: "Conte quem você é e o que faz…", guidance: "Novos membros se apresentam aqui." },
+  rotinas: { actionLabel: "Criar rotina", guidance: "Desafios, rituais e check-ins da comunidade." },
+  comunicados: { actionLabel: "Criar comunicado", guidance: "Anúncio oficial da comunidade." },
+  "lives-encontros": { actionLabel: "Criar live ou encontro", guidance: "Avise sobre a live/encontro e deixe o link." },
+  "marketing-vendas": { actionLabel: "Criar publicação", guidance: "Marketing, vendas e aquisição." },
+  "chat-networking": { actionLabel: "Criar publicação", placeholder: "O que está acontecendo?…" },
+  "vagas-oportunidades": { actionLabel: "Publicar vaga ou oportunidade", placeholder: "Descreva a vaga ou oportunidade…", guidance: "Compartilhe vagas e oportunidades." },
+  "parcerias-colaboracoes": { actionLabel: "Propor parceria", placeholder: "O que você busca ou oferece?…", guidance: "Busca por parcerias e colaborações." },
+  "compartilhe-seu-projeto": { actionLabel: "Compartilhar projeto", placeholder: "Mostre o que está construindo…", guidance: "Compartilhe seu projeto e peça feedback." },
+  "duvidas-gerais": { actionLabel: "Criar tópico", guidance: "Perguntas e suporte da comunidade." },
+  "cupons-descontos": { actionLabel: "Adicionar benefício", guidance: "Cupons e descontos do Portal Nexus." },
+  "suporte-tecnico": { actionLabel: "Criar tópico de suporte", placeholder: "Descreva seu problema técnico…", guidance: "Dúvidas técnicas, erros e configuração." },
+};
+
+/** CTA/placeholder/guidance do composer para um canal (objeto vazio se não houver). */
+export function getChannelComposer(slug: string): {
+  actionLabel?: string;
+  placeholder?: string;
+  guidance?: string;
+} {
+  return CHANNEL_COMPOSER[slug] ?? {};
 }
 
 /** Slugs de categoria ANTIGOS (transição — removidos no CHECK final da Fase 5). */

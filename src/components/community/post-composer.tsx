@@ -14,9 +14,15 @@ import { toast } from "sonner";
 export function PostComposer({
   currentUserId,
   channelSlug,
+  actionLabel,
+  placeholder,
+  guidance,
 }: {
   currentUserId: string;
   channelSlug: string;
+  actionLabel?: string;
+  placeholder?: string;
+  guidance?: string;
 }) {
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
@@ -61,7 +67,7 @@ export function PostComposer({
             onClick={() => setOpen(true)}
             className="w-full rounded-md border bg-muted/40 px-4 py-3 text-left text-sm text-muted-foreground hover:bg-muted"
           >
-            O que está acontecendo? Compartilhe com a comunidade…
+            {actionLabel ?? "O que está acontecendo? Compartilhe com a comunidade…"}
           </button>
         </CardContent>
       </Card>
@@ -71,6 +77,7 @@ export function PostComposer({
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
+        {guidance ? <p className="text-xs text-muted-foreground">{guidance}</p> : null}
         <Input
           placeholder="Título (opcional)"
           value={title}
@@ -86,7 +93,7 @@ export function PostComposer({
           <TabsContent value="write">
             <Textarea
               rows={6}
-              placeholder="Escreva em Markdown — **negrito**, _itálico_, listas, [links](#)…"
+              placeholder={placeholder ?? "Escreva em Markdown — **negrito**, _itálico_, listas, [links](#)…"}
               value={body}
               onChange={(e) => setBody(e.target.value)}
             />

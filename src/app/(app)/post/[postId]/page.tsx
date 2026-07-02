@@ -32,7 +32,7 @@ export default async function PostDetailPage({ params }: { params: Params }) {
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
       </Button>
-      <PostCard post={post} currentUserId={profile.id} canModerate={mod} />
+      <PostCard post={post} currentUserId={profile.id} canModerate={mod} role={profile.role} />
       <CommentList
         postId={post.id}
         comments={comments}

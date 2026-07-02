@@ -29,7 +29,13 @@ import { RoleBadge } from "@/components/shared/role-badge";
 import { Markdown } from "@/components/shared/markdown";
 import { cn, formatRelative } from "@/lib/utils";
 import { REACTION_EMOJIS } from "@/lib/constants";
-import { getCategoryLabel } from "@/lib/community/structure";
+import {
+  getCategoryLabel,
+  CHANNELS,
+  canPostInChannel,
+  isChannelDeprecated,
+  getChannel,
+} from "@/lib/community/structure";
 import {
   togglePostLikeAction,
   togglePostReactionAction,
@@ -44,9 +50,10 @@ type Props = {
   post: FeedPost;
   currentUserId: string;
   canModerate: boolean;
+  role: string;
 };
 
-export function PostCard({ post, currentUserId, canModerate }: Props) {
+export function PostCard({ post, currentUserId, canModerate, role }: Props) {
   const [liked, setLiked] = React.useState(post.liked_by_me);
   const [likesCount, setLikesCount] = React.useState(post.likes_count);
   const [reactions, setReactions] = React.useState<Record<string, number>>(post.reactions ?? {});
@@ -57,6 +64,19 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
     title: post.title ?? "",
     body: post.body,
   });
+  // "Mover de canal" (F3) — só mod/admin. Alvos = canais não-legados em que o
+  // papel pode publicar; garante o canal atual na lista.
+  const [moveTo, setMoveTo] = React.useState(post.category);
+  const moveTargets = React.useMemo(() => {
+    const targets = CHANNELS.filter(
+      (c) => !isChannelDeprecated(c.slug) && canPostInChannel({ role, is_banned: false }, c.slug),
+    );
+    if (!targets.some((c) => c.slug === post.category)) {
+      const cur = getChannel(post.category);
+      if (cur) targets.unshift(cur);
+    }
+    return targets;
+  }, [role, post.category]);
   const [pending, startTransition] = React.useTransition();
   // Guard de reentrância: bloqueia um 2º clique no MESMO tick (antes do re-render
   // que aplica `disabled={pending}`). `pending`/`liked` no closure são stale;
@@ -138,6 +158,7 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
     const fd = new FormData();
     fd.set("title", editForm.title);
     fd.set("body", editForm.body);
+    if (canModerate && moveTo && moveTo !== post.category) fd.set("category", moveTo);
     startTransition(async () => {
       const res = await updatePostAction(post.id, fd);
       if (!res.ok) toast.error(res.error ?? "Erro ao editar.");
@@ -348,6 +369,22 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
                 required
               />
             </div>
+            {canModerate ? (
+              <div className="space-y-1.5">
+                <Label>Canal</Label>
+                <select
+                  value={moveTo}
+                  onChange={(e) => setMoveTo(e.target.value)}
+                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                >
+                  {moveTargets.map((c) => (
+                    <option key={c.slug} value={c.slug}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <DialogFooter className="gap-2">
               <Button type="button" variant="ghost" onClick={() => setEditOpen(false)} disabled={pending}>
                 Cancelar

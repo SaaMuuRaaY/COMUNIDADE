@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile, requireModerator } from "@/lib/auth/current-user";
+import { requireProfile, requireAdmin } from "@/lib/auth/current-user";
 import { awardPoints } from "@/lib/points/award";
 import { courseSchema, moduleSchema, lessonSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS } from "@/lib/constants";
@@ -10,7 +10,7 @@ import { COMMUNITY_ID, POINTS } from "@/lib/constants";
 type Result = { ok: boolean; error?: string; id?: string };
 
 export async function createCourseAction(formData: FormData): Promise<Result> {
-  const profile = await requireModerator();
+  const profile = await requireAdmin();
   const parsed = courseSchema.safeParse({
     title: formData.get("title"),
     slug: formData.get("slug"),
@@ -34,7 +34,7 @@ export async function createCourseAction(formData: FormData): Promise<Result> {
 }
 
 export async function updateCourseAction(courseId: string, formData: FormData): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const parsed = courseSchema.partial().safeParse({
     title: formData.get("title"),
     slug: formData.get("slug"),
@@ -54,7 +54,7 @@ export async function updateCourseAction(courseId: string, formData: FormData): 
 }
 
 export async function deleteCourseAction(courseId: string): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase.from("courses").delete().eq("id", courseId);
   if (error) return { ok: false, error: error.message };
@@ -64,7 +64,7 @@ export async function deleteCourseAction(courseId: string): Promise<Result> {
 }
 
 export async function createModuleAction(formData: FormData): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const parsed = moduleSchema.safeParse({
     course_id: formData.get("course_id"),
     title: formData.get("title"),
@@ -82,7 +82,7 @@ export async function createModuleAction(formData: FormData): Promise<Result> {
 }
 
 export async function createLessonAction(formData: FormData): Promise<Result> {
-  await requireModerator();
+  await requireAdmin();
   const parsed = lessonSchema.safeParse({
     module_id: formData.get("module_id"),
     course_id: formData.get("course_id"),
