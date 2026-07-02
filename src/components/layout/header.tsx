@@ -69,7 +69,10 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <button
+              aria-label="Menu do usuário"
+              className="flex items-center gap-2 rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               <UserAvatar name={profile.full_name} src={profile.avatar_url} />
             </button>
           </DropdownMenuTrigger>

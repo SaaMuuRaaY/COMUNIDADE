@@ -100,6 +100,7 @@ export async function deletePostAction(postId: string): Promise<ActionResult> {
   const { error } = await supabase.from("posts").update({ is_deleted: true }).eq("id", postId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/community", "layout");
+  revalidatePath(`/post/${postId}`);
   return { ok: true };
 }
 
