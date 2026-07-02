@@ -2,6 +2,15 @@
 
 import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +21,7 @@ import { APP_CATEGORIES, APP_STATUSES, APP_TYPES } from "@/lib/constants";
 import { createAppAction, deleteAppAction } from "@/server/actions/resources-apps-events";
 import { toast } from "sonner";
 
-export function AppComposer() {
+export function AppComposer({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [pending, startTransition] = React.useTransition();
   const [form, setForm] = React.useState({
     name: "",
@@ -53,6 +62,7 @@ export function AppComposer() {
           file_url: "",
           icon_url: "",
         });
+        onSuccess?.();
       }
     });
   }
@@ -156,6 +166,27 @@ export function AppComposer() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/** CTA contextual (F4.2) — botão "Adicionar aplicativo" em dialog, reusa AppComposer. */
+export function CreateAppButton() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-2">
+          <Plus className="h-4 w-4" /> Adicionar aplicativo
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Adicionar aplicativo</DialogTitle>
+          <DialogDescription className="sr-only">Novo aplicativo</DialogDescription>
+        </DialogHeader>
+        <AppComposer onSuccess={() => setOpen(false)} />
+      </DialogContent>
+    </Dialog>
   );
 }
 

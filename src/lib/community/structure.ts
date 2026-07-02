@@ -51,7 +51,7 @@ export const CHANNELS: Channel[] = [
   { slug: "rotinas", label: "Rotinas", groupSlug: "boas-vindas", order: 5, icon: "repeat", description: "Desafios, rituais e check-ins da comunidade.", type: "announcement", publish: "moderator", comments: true, isOfficial: true },
   // Networking
   { slug: "compartilhe-seu-projeto", label: "Compartilhe seu projeto", groupSlug: "networking", order: 1, icon: "rocket", description: "Mostre o que está construindo.", type: "discussion", publish: "member", comments: true, isOfficial: false },
-  { slug: "chat-networking", label: "Chat e networking", groupSlug: "networking", order: 2, icon: "messages-square", description: "Conversa geral e conexões.", type: "discussion", publish: "member", comments: true, isOfficial: false },
+  { slug: "chat-networking", label: "Chat Network", groupSlug: "networking", order: 2, icon: "messages-square", description: "Conversa geral e conexões.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "dicas-novidades", label: "Dicas e novidades", groupSlug: "networking", order: 3, icon: "lightbulb", description: "Dicas, links e novidades.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "vagas-oportunidades", label: "Vagas e oportunidades", groupSlug: "networking", order: 4, icon: "briefcase", description: "Vagas e oportunidades.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   // Mercado e Negócios

@@ -1,15 +1,18 @@
 import { Library } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { requireProfile } from "@/lib/auth/current-user";
+import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { createClient } from "@/lib/supabase/server";
 import { ResourceBrowser, type ResourceItem } from "@/components/resources/resource-browser";
+import { CreateResourceButton } from "@/app/admin/resources/resource-actions";
 import { SectionBanner } from "@/components/shared/section-banner";
 import { SECTION_BANNERS } from "@/lib/section-banners";
 
 export const metadata = { title: "Recursos" };
 
 export default async function ResourcesPage() {
-  await requireProfile();
+  const profile = await requireProfile();
+  const admin = isAdminCheck(profile);
   const supabase = await createClient();
   const { data } = await supabase
     .from("resources")
@@ -27,6 +30,12 @@ export default async function ResourcesPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.resources} />
+
+      {admin ? (
+        <div className="flex justify-end">
+          <CreateResourceButton />
+        </div>
+      ) : null}
 
       {items.length === 0 ? (
         <EmptyState icon={Library} title="Sem recursos por enquanto" />

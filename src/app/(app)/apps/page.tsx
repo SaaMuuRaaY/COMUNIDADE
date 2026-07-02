@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { requireProfile } from "@/lib/auth/current-user";
+import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { createClient } from "@/lib/supabase/server";
 import { APP_CATEGORIES } from "@/lib/constants";
 import { isSafeEmbedUrl } from "@/lib/storage/upload";
+import { CreateAppButton } from "@/app/admin/apps/app-actions";
 
 import { SectionBanner } from "@/components/shared/section-banner";
 import { SECTION_BANNERS } from "@/lib/section-banners";
@@ -15,7 +17,8 @@ import { SECTION_BANNERS } from "@/lib/section-banners";
 export const metadata = { title: "Aplicativos" };
 
 export default async function AppsPage() {
-  await requireProfile();
+  const profile = await requireProfile();
+  const admin = isAdminCheck(profile);
   const supabase = await createClient();
   const { data } = await supabase
     .from("apps")
@@ -27,12 +30,15 @@ export default async function AppsPage() {
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.apps} />
 
-      <Link
-        href="/duvidas-gerais"
-        className="inline-flex text-sm text-primary hover:underline"
-      >
-        💬 Precisa de ajuda com um app? Pergunte na comunidade →
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/duvidas-gerais"
+          className="inline-flex text-sm text-primary hover:underline"
+        >
+          💬 Precisa de ajuda com um app? Pergunte na comunidade →
+        </Link>
+        {admin ? <CreateAppButton /> : null}
+      </div>
 
       {items.length === 0 ? (
         <EmptyState icon={LayoutGrid} title="Nenhum aplicativo cadastrado" />

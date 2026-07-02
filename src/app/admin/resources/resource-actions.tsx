@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,6 +157,33 @@ export function ResourceComposer() {
         />
       </CardContent>
     </Card>
+  );
+}
+
+/** CTA contextual (F4.1) — botão "Adicionar recurso" em dialog, reusa ResourceForm. */
+export function CreateResourceButton() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-2">
+          <Plus className="h-4 w-4" /> Adicionar recurso
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Adicionar recurso</DialogTitle>
+          <DialogDescription className="sr-only">Novo recurso da biblioteca</DialogDescription>
+        </DialogHeader>
+        <ResourceForm
+          initial={EMPTY}
+          submitLabel="Adicionar recurso"
+          successMessage="Recurso adicionado."
+          onSubmit={(values) => createResourceAction(toFormData(values))}
+          onSuccess={() => setOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
 

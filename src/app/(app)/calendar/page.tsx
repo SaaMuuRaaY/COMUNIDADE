@@ -4,7 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RsvpButton } from "@/components/calendar/rsvp-button";
+import { CreateEventButton } from "@/app/admin/events/event-actions";
 import { requireProfile } from "@/lib/auth/current-user";
+import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { createClient } from "@/lib/supabase/server";
 import { EVENT_TYPES } from "@/lib/constants";
 
@@ -15,6 +17,7 @@ export const metadata = { title: "Calendário" };
 
 export default async function CalendarPage() {
   const profile = await requireProfile();
+  const admin = isAdminCheck(profile);
   const supabase = await createClient();
   const { data: events } = await supabase
     .from("events")
@@ -34,12 +37,15 @@ export default async function CalendarPage() {
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.calendar} />
 
-      <Link
-        href="/lives-e-encontros"
-        className="inline-flex text-sm text-primary hover:underline"
-      >
-        💬 Discutir as lives e encontros na comunidade →
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/lives-e-encontros"
+          className="inline-flex text-sm text-primary hover:underline"
+        >
+          💬 Discutir as lives e encontros na comunidade →
+        </Link>
+        {admin ? <CreateEventButton /> : null}
+      </div>
 
       {items.length === 0 ? (
         <EmptyState icon={Calendar} title="Sem eventos agendados" />

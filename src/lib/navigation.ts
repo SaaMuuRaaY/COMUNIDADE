@@ -77,7 +77,7 @@ export const NAV_TREE: NavGroup[] = [
   {
     label: "Networking",
     items: [
-      { type: "channel", label: "Chat e Networking", slug: "chat-networking", icon: "messages-square" },
+      { type: "channel", label: "Chat Network", slug: "chat-networking", icon: "messages-square" },
       { type: "channel", label: "Vagas e Oportunidades", slug: "vagas-oportunidades", icon: "briefcase" },
       { type: "channel", label: "Parcerias e Colaborações", slug: "parcerias-colaboracoes", icon: "handshake" },
       { type: "channel", label: "Compartilhe seu Projeto", slug: "compartilhe-seu-projeto", icon: "rocket" },

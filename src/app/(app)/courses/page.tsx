@@ -1,8 +1,10 @@
-import { GraduationCap } from "lucide-react";
+import Link from "next/link";
+import { GraduationCap, Plus } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { requireProfile } from "@/lib/auth/current-user";
-import { isModerator } from "@/lib/permissions/policies";
+import { isModerator, isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { getPublishedCoursesWithProgress } from "@/server/queries/courses";
 
 import { SectionBanner } from "@/components/shared/section-banner";
@@ -12,12 +14,23 @@ export const metadata = { title: "Cursos" };
 
 export default async function CoursesPage() {
   const profile = await requireProfile();
+  const admin = isAdminCheck(profile);
   const courses = await getPublishedCoursesWithProgress(profile.id);
   const visible = courses.filter((c) => c.status === "published" || isModerator(profile));
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.courses} />
+
+      {admin ? (
+        <div className="flex justify-end">
+          <Button asChild size="sm" className="gap-2">
+            <Link href="/admin/courses/new">
+              <Plus className="h-4 w-4" /> Criar curso
+            </Link>
+          </Button>
+        </div>
+      ) : null}
 
       {visible.length === 0 ? (
         <EmptyState icon={GraduationCap} title="Sem cursos publicados ainda" />

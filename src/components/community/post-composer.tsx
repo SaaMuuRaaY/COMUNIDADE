@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,16 +62,12 @@ export function PostComposer({
 
   if (!open) {
     return (
-      <Card>
-        <CardContent className="p-4">
-          <button
-            onClick={() => setOpen(true)}
-            className="w-full rounded-md border bg-muted/40 px-4 py-3 text-left text-sm text-muted-foreground hover:bg-muted"
-          >
-            {actionLabel ?? "O que está acontecendo? Compartilhe com a comunidade…"}
-          </button>
-        </CardContent>
-      </Card>
+      <div className="flex justify-end">
+        <Button onClick={() => setOpen(true)} size="sm" className="gap-2">
+          <Plus className="h-4 w-4" />
+          {actionLabel ?? "Criar publicação"}
+        </Button>
+      </div>
     );
   }
 
