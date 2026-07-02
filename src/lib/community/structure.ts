@@ -72,11 +72,12 @@ export const CHANNELS: Channel[] = [
 export const DEFAULT_CHANNEL_SLUG = "comece-por-aqui";
 
 /**
- * Canais NOVOS (Fase 6.5) ainda não aceitos pelo CHECK do banco — dependem da
- * migration 0016. Ficam navegáveis/leitura; publicar fica bloqueado (composer
- * oculto + Server Action nega) até a 0016 ser aplicada. Ao aplicar, esvaziar.
+ * Canais aguardando o CHECK do banco (migration 0016). Enquanto pendentes, ficam
+ * navegáveis/leitura (composer oculto + Server Action nega). A 0016 foi APLICADA
+ * e validada na cloud (2026-07-02) → lista esvaziada: rotinas e suporte-tecnico
+ * estão liberados para publicação conforme suas permissões.
  */
-export const PENDING_CHANNELS = ["rotinas", "suporte-tecnico"] as const;
+export const PENDING_CHANNELS = [] as const;
 
 /** Se o canal existe mas ainda não aceita posts (aguarda migration 0016). */
 export function isChannelPending(slug: string): boolean {

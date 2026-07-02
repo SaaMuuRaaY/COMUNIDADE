@@ -1,16 +1,19 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { MessageSquareText } from "lucide-react";
+import { Clock, MessageSquareText, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PostComposer } from "@/components/community/post-composer";
 import { PostCard } from "@/components/community/post-card";
 import { FeedFilter } from "@/components/community/feed-filter";
 import { ChannelIcon } from "@/components/community/channel-icon";
+import { SectionBanner } from "@/components/shared/section-banner";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
-import { getChannel, canPostInChannel, isChannelPending } from "@/lib/community/structure";
+import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS } from "@/lib/community/structure";
 
 /**
  * Componente COMPARTILHADO de feed da Comunidade (Fase 6.6).
@@ -31,13 +34,13 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Comunidade</h1>
-        <p className="text-sm text-muted-foreground">
-          Acompanhe as publicações, novidades, projetos e conversas de todos os canais do
-          Portal Nexus.
-        </p>
-      </div>
+      <SectionBanner
+        icon={MessageSquareText}
+        eyebrow="Portal Nexus"
+        title="Comunidade"
+        description="Acompanhe as publicações, novidades, projetos e conversas de todos os canais do Portal Nexus."
+        variant="featured"
+      />
 
       <FeedFilter />
 
@@ -58,16 +61,18 @@ export async function CommunityChannelFeed({ slug, search }: { slug: string; sea
 
   const profile = await requireProfile();
   const showComposer = canPostInChannel(profile, slug);
+  const groupLabel =
+    CHANNEL_GROUPS.find((g) => g.slug === channel.groupSlug)?.label ?? "Comunidade";
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <div className="flex items-start gap-3">
-        <ChannelIcon id={channel.icon} className="mt-0.5 h-6 w-6 text-[var(--accent)]" />
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight">{channel.label}</h1>
-          <p className="text-sm text-muted-foreground">{channel.description}</p>
-        </div>
-      </div>
+      <SectionBanner
+        iconNode={<ChannelIcon id={channel.icon} className="h-5 w-5" />}
+        eyebrow={groupLabel}
+        title={channel.label}
+        description={channel.description}
+        variant="featured"
+      />
 
       <FeedFilter />
 
@@ -103,11 +108,17 @@ async function FeedList({
 }) {
   const posts = await getFeedPosts({ userId, channel, search });
   if (posts.length === 0) {
+    if (channel) {
+      const ch = getChannel(channel);
+      return (
+        <ChannelPreparingNotice label={ch?.label ?? "Este canal"} description={ch?.description ?? ""} />
+      );
+    }
     return (
       <EmptyState
         icon={MessageSquareText}
         title="Nada por aqui ainda"
-        description={channel ? "Seja o primeiro a publicar neste canal." : "Ainda não há publicações."}
+        description="Ainda não há publicações."
       />
     );
   }
@@ -117,6 +128,39 @@ async function FeedList({
         <PostCard key={p.id} post={p} currentUserId={userId} canModerate={canMod} />
       ))}
     </div>
+  );
+}
+
+// Aviso "Em preparação" (estilo /agentes) para canais ainda sem publicação.
+function ChannelPreparingNotice({ label, description }: { label: string; description: string }) {
+  return (
+    <Card>
+      <CardContent className="space-y-5 p-6">
+        <Badge variant="secondary" className="gap-1.5">
+          <Clock className="h-3.5 w-3.5" /> Em preparação
+        </Badge>
+
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          O canal <span className="font-medium text-foreground">{label}</span> está começando agora.
+          {description ? ` ${description}` : ""} Em breve, as primeiras publicações e novidades
+          aparecem por aqui.
+        </p>
+
+        <div className="space-y-2">
+          <p className="flex items-center gap-2 text-sm font-medium">
+            <Sparkles className="h-4 w-4 text-[var(--accent)]" /> O que vem por aí
+          </p>
+          <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
+            <li>Publicações e novidades deste canal.</li>
+            <li>Um espaço para trocar ideias com a comunidade.</li>
+          </ul>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Fique de olho — este canal será atualizado em breve.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 

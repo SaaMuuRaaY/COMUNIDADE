@@ -14,10 +14,11 @@ export function SectionBanner({
   title,
   description,
   icon: Icon,
+  iconNode,
   cta,
   variant = "default",
   children,
-}: SectionBannerConfig & { children?: React.ReactNode }) {
+}: SectionBannerConfig & { children?: React.ReactNode; iconNode?: React.ReactNode }) {
   const featured = variant === "featured";
 
   return (
@@ -38,9 +39,9 @@ export function SectionBanner({
       ) : null}
 
       <div className="relative flex items-start gap-4">
-        {Icon ? (
+        {iconNode || Icon ? (
           <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted text-[var(--accent)] ring-1 ring-[var(--accent-line)] sm:flex">
-            <Icon className="h-5 w-5" />
+            {iconNode ? iconNode : Icon ? <Icon className="h-5 w-5" /> : null}
           </div>
         ) : null}
 
