@@ -271,7 +271,7 @@ export function PostCard({ post, currentUserId, canModerate }: Props) {
             {likesCount}
           </Button>
           <Button asChild variant="ghost" size="sm" className="gap-2">
-            <Link href={`/community/${post.id}`}>
+            <Link href={`/post/${post.id}`}>
               <MessageCircle className="h-4 w-4" />
               {post.comments_count}
             </Link>

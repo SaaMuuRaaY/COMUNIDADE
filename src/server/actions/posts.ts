@@ -79,7 +79,7 @@ export async function updatePostAction(postId: string, formData: FormData): Prom
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/community", "layout");
-  revalidatePath(`/community/${postId}`);
+  revalidatePath(`/post/${postId}`);
   return { ok: true, id: postId };
 }
 
@@ -138,7 +138,7 @@ export async function pinPostAction(postId: string, pinned: boolean): Promise<Ac
   const { error } = await supabase.from("posts").update({ is_pinned: pinned }).eq("id", postId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/community", "layout");
-  revalidatePath(`/community/${postId}`);
+  revalidatePath(`/post/${postId}`);
   return { ok: true };
 }
 
@@ -171,7 +171,7 @@ export async function togglePostLikeAction(postId: string): Promise<ActionResult
   }
 
   revalidatePath("/community", "layout");
-  revalidatePath(`/community/${postId}`);
+  revalidatePath(`/post/${postId}`);
   return { ok: true };
 }
 
@@ -212,7 +212,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
   }
 
   revalidatePath("/community", "layout");
-  revalidatePath(`/community/${postId}`);
+  revalidatePath(`/post/${postId}`);
   return { ok: true };
 }
 
@@ -253,7 +253,7 @@ export async function createCommentAction(formData: FormData): Promise<ActionRes
 
   if (error) return { ok: false, error: error.message };
   await awardPoints(profile.id, "comment_created", POINTS.COMMENT_CREATED, "comment", data.id);
-  revalidatePath(`/community/${parsed.data.post_id}`);
+  revalidatePath(`/post/${parsed.data.post_id}`);
   revalidatePath("/community", "layout");
   return { ok: true, id: data.id };
 }
@@ -272,6 +272,6 @@ export async function deleteCommentAction(commentId: string): Promise<ActionResu
   }
   const { error } = await supabase.from("post_comments").update({ is_deleted: true }).eq("id", commentId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath(`/community/${existing.post_id}`);
+  revalidatePath(`/post/${existing.post_id}`);
   return { ok: true };
 }

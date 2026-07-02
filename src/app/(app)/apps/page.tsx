@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LayoutGrid, ExternalLink, Download, Boxes } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,13 @@ export default async function AppsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.apps} />
+
+      <Link
+        href="/duvidas-gerais"
+        className="inline-flex text-sm text-primary hover:underline"
+      >
+        💬 Precisa de ajuda com um app? Pergunte na comunidade →
+      </Link>
 
       {items.length === 0 ? (
         <EmptyState icon={LayoutGrid} title="Nenhum aplicativo cadastrado" />

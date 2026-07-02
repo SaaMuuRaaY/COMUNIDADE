@@ -162,6 +162,32 @@ export type Database = {
           },
         ]
       }
+      community_migration_backup: {
+        Row: {
+          migrated_at: string
+          old_category: string
+          post_id: string
+        }
+        Insert: {
+          migrated_at?: string
+          old_category: string
+          post_id: string
+        }
+        Update: {
+          migrated_at?: string
+          old_category?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_migration_backup_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_modules: {
         Row: {
           course_id: string
@@ -896,6 +922,9 @@ export type Database = {
         }
         Returns: undefined
       }
+      channel_allows_comments: { Args: { slug: string }; Returns: boolean }
+      channel_requires_admin: { Args: { slug: string }; Returns: boolean }
+      channel_requires_mod: { Args: { slug: string }; Returns: boolean }
       current_role: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_moderator: { Args: never; Returns: boolean }

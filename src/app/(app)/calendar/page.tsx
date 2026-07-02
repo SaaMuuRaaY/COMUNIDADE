@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Calendar, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,13 @@ export default async function CalendarPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
       <SectionBanner {...SECTION_BANNERS.calendar} />
+
+      <Link
+        href="/lives-e-encontros"
+        className="inline-flex text-sm text-primary hover:underline"
+      >
+        💬 Discutir as lives e encontros na comunidade →
+      </Link>
 
       {items.length === 0 ? (
         <EmptyState icon={Calendar} title="Sem eventos agendados" />

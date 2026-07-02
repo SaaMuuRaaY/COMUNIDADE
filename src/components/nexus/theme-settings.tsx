@@ -55,16 +55,32 @@ function Choice({
   );
 }
 
-export function ThemeSettings() {
+/**
+ * Drawer de aparência. Sem props → botão-ícone próprio (uso legado).
+ * Com `open`/`onOpenChange` (+ `hideTrigger`) → modo controlado, para ser
+ * acionado de fora, ex.: item "Configurações visuais" no menu do avatar.
+ */
+export function ThemeSettings({
+  open,
+  onOpenChange,
+  hideTrigger = false,
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+} = {}) {
   const { tweaks, setTweak } = useTweaks();
+  const controlled = open !== undefined;
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Aparência">
-          <Settings className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={controlled ? open : undefined} onOpenChange={onOpenChange}>
+      {hideTrigger ? null : (
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" aria-label="Aparência">
+            <Settings className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent side="right" className="w-80 sm:max-w-sm">
         <SheetHeader>
           <SheetTitle>Aparência</SheetTitle>

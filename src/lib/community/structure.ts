@@ -47,6 +47,8 @@ export const CHANNELS: Channel[] = [
   { slug: "apresente-se", label: "Apresente-se", groupSlug: "boas-vindas", order: 2, icon: "hand", description: "Novos membros se apresentam.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "comunicados", label: "Comunicados", groupSlug: "boas-vindas", order: 3, icon: "megaphone", description: "Anúncios oficiais da comunidade.", type: "announcement", publish: "moderator", comments: true, isOfficial: true },
   { slug: "lives-encontros", label: "Lives e encontros", groupSlug: "boas-vindas", order: 4, icon: "radio", description: "Lives e encontros da comunidade.", type: "announcement", publish: "moderator", comments: true, isOfficial: true },
+  // Canal NOVO (Fase 6.5) — aceita posts só após a migration 0016 (CHECK). Navegável/leitura antes disso.
+  { slug: "rotinas", label: "Rotinas", groupSlug: "boas-vindas", order: 5, icon: "repeat", description: "Desafios, rituais e check-ins da comunidade.", type: "announcement", publish: "moderator", comments: true, isOfficial: true },
   // Networking
   { slug: "compartilhe-seu-projeto", label: "Compartilhe seu projeto", groupSlug: "networking", order: 1, icon: "rocket", description: "Mostre o que está construindo.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   { slug: "chat-networking", label: "Chat e networking", groupSlug: "networking", order: 2, icon: "messages-square", description: "Conversa geral e conexões.", type: "discussion", publish: "member", comments: true, isOfficial: false },
@@ -59,6 +61,8 @@ export const CHANNELS: Channel[] = [
   { slug: "projetos-negocios", label: "Projetos e negócios", groupSlug: "mercado-negocios", order: 4, icon: "folder-kanban", description: "Projetos e negócios.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   // Suporte e Construção
   { slug: "duvidas-gerais", label: "Dúvidas gerais", groupSlug: "suporte-construcao", order: 1, icon: "help-circle", description: "Perguntas e suporte da comunidade.", type: "discussion", publish: "member", comments: true, isOfficial: false },
+  // Canal NOVO (Fase 6.5) — aceita posts só após a migration 0016 (CHECK). Navegável/leitura antes disso.
+  { slug: "suporte-tecnico", label: "Suporte técnico", groupSlug: "suporte-construcao", order: 2, icon: "life-buoy", description: "Dúvidas técnicas, erros e configuração — ajuda entre membros e equipe.", type: "discussion", publish: "member", comments: true, isOfficial: false },
   // Portal Nexus
   { slug: "beneficios", label: "Benefícios", groupSlug: "portal-nexus", order: 1, icon: "gift", description: "Benefícios do Portal Nexus.", type: "announcement", publish: "admin", comments: false, isOfficial: true },
   { slug: "cupons-descontos", label: "Cupons e descontos", groupSlug: "portal-nexus", order: 2, icon: "ticket", description: "Cupons e descontos.", type: "announcement", publish: "admin", comments: false, isOfficial: true },
@@ -66,6 +70,68 @@ export const CHANNELS: Channel[] = [
 
 /** Canal padrão para /community e fallbacks. */
 export const DEFAULT_CHANNEL_SLUG = "comece-por-aqui";
+
+/**
+ * Canais NOVOS (Fase 6.5) ainda não aceitos pelo CHECK do banco — dependem da
+ * migration 0016. Ficam navegáveis/leitura; publicar fica bloqueado (composer
+ * oculto + Server Action nega) até a 0016 ser aplicada. Ao aplicar, esvaziar.
+ */
+export const PENDING_CHANNELS = ["rotinas", "suporte-tecnico"] as const;
+
+/** Se o canal existe mas ainda não aceita posts (aguarda migration 0016). */
+export function isChannelPending(slug: string): boolean {
+  return (PENDING_CHANNELS as readonly string[]).includes(slug);
+}
+
+/**
+ * Canais LEGADOS/DEPRECIADOS (Fase 6.5) — fora da arquitetura final da sidebar,
+ * mas PRESERVADOS: continuam na config e no CHECK do banco, sem rota raiz própria
+ * (posts visíveis no Feed Geral). NÃO aparecem em src/lib/navigation.ts.
+ * Aguardam inventário de conteúdo; destinos PROVÁVEIS (ainda NÃO executados):
+ *   - servicos-oportunidades → vagas-oportunidades
+ *   - projetos-negocios      → compartilhe-seu-projeto
+ *   - beneficios             → cupons-descontos ou página institucional
+ *   - dicas-novidades        → decidir entre comunicados e chat-networking
+ * Nenhum remap/migração de conteúdo nesta etapa.
+ */
+export const DEPRECATED_CHANNELS = [
+  "servicos-oportunidades",
+  "projetos-negocios",
+  "beneficios",
+  "dicas-novidades",
+] as const;
+
+/** Se o canal é legado/depreciado (oculto da nav, preservado no banco/URL). */
+export function isChannelDeprecated(slug: string): boolean {
+  return (DEPRECATED_CHANNELS as readonly string[]).includes(slug);
+}
+
+/**
+ * URL canônica RAIZ de cada canal ATIVO (Fase 6.6). Cada unidade tem rota própria
+ * na raiz (ex.: /comece-por-aqui), NÃO mais sob /community/c/. O PATH pode diferir
+ * do slug de categoria (ex.: slug `lives-encontros` → path `/lives-e-encontros`).
+ * Canais LEGADOS (DEPRECATED_CHANNELS) não têm rota raiz (undefined).
+ */
+export const CHANNEL_HREFS: Record<string, string> = {
+  "comece-por-aqui": "/comece-por-aqui",
+  "apresente-se": "/apresente-se",
+  rotinas: "/rotinas",
+  comunicados: "/comunicados",
+  "lives-encontros": "/lives-e-encontros",
+  "marketing-vendas": "/marketing-e-vendas",
+  "chat-networking": "/chat-e-networking",
+  "vagas-oportunidades": "/vagas-e-oportunidades",
+  "parcerias-colaboracoes": "/parcerias-e-colaboracoes",
+  "compartilhe-seu-projeto": "/compartilhe-seu-projeto",
+  "duvidas-gerais": "/duvidas-gerais",
+  "cupons-descontos": "/cupons-e-descontos",
+  "suporte-tecnico": "/suporte-tecnico",
+};
+
+/** Path raiz canônico de um canal (undefined se legado/desconhecido). */
+export function channelHref(slug: string): string | undefined {
+  return CHANNEL_HREFS[slug];
+}
 
 /** Slugs de categoria ANTIGOS (transição — removidos no CHECK final da Fase 5). */
 export const LEGACY_CATEGORIES = [
@@ -127,6 +193,7 @@ type ProfileLike = { role: string; is_banned: boolean } | null;
 export function canPostInChannel(profile: ProfileLike, slug: string): boolean {
   const ch = getChannel(slug);
   if (!ch || !profile || profile.is_banned) return false;
+  if (isChannelPending(slug)) return false; // aguarda migration 0016
   const role = profile.role;
   if (ch.publish === "member") return true;
   if (ch.publish === "moderator") return role === "moderator" || role === "admin";

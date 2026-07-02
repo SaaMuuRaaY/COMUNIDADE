@@ -19,7 +19,8 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { requireProfile } from "@/lib/auth/current-user";
 import { getDashboardData } from "@/server/queries/dashboard";
 import { nextLevelThreshold } from "@/lib/constants";
-import { getCategoryLabel } from "@/lib/community/structure";
+import { getCategoryLabel, getChannel, channelHref } from "@/lib/community/structure";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { formatRelative } from "@/lib/utils";
 
 export const metadata = { title: "Início" };
@@ -31,6 +32,15 @@ const SHORTCUTS = [
   { href: "/apps", label: "Apps", icon: LayoutGrid },
   { href: "/calendar", label: "Calendário", icon: Calendar },
   { href: "/profile", label: "Perfil", icon: User },
+];
+
+const FEATURED_CHANNELS = [
+  "comece-por-aqui",
+  "apresente-se",
+  "chat-networking",
+  "duvidas-gerais",
+  "vagas-oportunidades",
+  "comunicados",
 ];
 
 export default async function DashboardPage() {
@@ -75,6 +85,33 @@ export default async function DashboardPage() {
             </Card>
           </Link>
         ))}
+      </section>
+
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">Canais da comunidade</h2>
+          <Button asChild variant="ghost" size="sm" className="gap-1">
+            <Link href="/community">
+              Ver todos <ArrowRight className="h-3 w-3" />
+            </Link>
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {FEATURED_CHANNELS.map((slug) => {
+            const ch = getChannel(slug);
+            if (!ch) return null;
+            return (
+              <Link
+                key={slug}
+                href={channelHref(slug) ?? "/community"}
+                className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+              >
+                <ChannelIcon id={ch.icon} className="h-4 w-4 text-[var(--accent)]" />
+                {ch.label}
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -176,7 +213,7 @@ export default async function DashboardPage() {
                 return (
                   <Link
                     key={p.id}
-                    href={`/community/${p.id}`}
+                    href={`/post/${p.id}`}
                     className="flex items-start gap-3 py-3 hover:bg-accent"
                   >
                     <UserAvatar

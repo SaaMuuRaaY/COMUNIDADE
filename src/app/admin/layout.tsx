@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar isAdmin />
+      <Sidebar />
       <div className="flex min-h-screen flex-1 flex-col">
         <Header profile={profile} isAdmin />
         <div className="border-b bg-muted/30">

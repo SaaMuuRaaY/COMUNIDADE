@@ -1,10 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Bell, LogOut, Menu, User } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Logo } from "@/components/shared/logo";
+import { Bell, LogOut, Menu, Settings, User, Wrench } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,21 +14,22 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/shared/logo";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { LevelBadge } from "@/components/shared/level-badge";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { logoutAction } from "@/server/actions/auth";
 import { ThemeSettings } from "@/components/nexus/theme-settings";
-import { NAV_ITEMS, NAV_GROUPS, ADMIN_ITEM } from "./nav-items";
+import { NavTree } from "./nav-tree";
 import type { Profile } from "@/types/db";
 
 export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolean }) {
-  const pathname = usePathname();
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur md:px-6">
-      <Sheet>
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
@@ -39,65 +38,17 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
         </SheetTrigger>
         <SheetContent side="left" className="p-0">
           <div className="flex h-full flex-col p-4">
-            <Link href="/dashboard" className="flex items-center px-2 py-3">
+            <Link
+              href="/dashboard"
+              onClick={() => setDrawerOpen(false)}
+              className="flex items-center px-2 py-3"
+            >
               <Logo className="h-7 w-auto" />
             </Link>
             <Separator className="my-2" />
             <nav className="flex flex-1 flex-col gap-4 overflow-y-auto">
-              {NAV_GROUPS.map((g) => {
-                const items = NAV_ITEMS.filter((i) => i.group === g.group);
-                if (items.length === 0) return null;
-                return (
-                  <div key={g.group} className="flex flex-col gap-1">
-                    <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      {g.label}
-                    </p>
-                    {items.map((i) => {
-                      const active = isActive(i.href);
-                      return (
-                        <Link
-                          key={i.href}
-                          href={i.href}
-                          aria-current={active ? "page" : undefined}
-                          className={cn(
-                            "flex items-center gap-3 rounded-md px-2 py-2 text-sm",
-                            active
-                              ? "bg-accent font-medium text-accent-foreground"
-                              : "hover:bg-accent",
-                          )}
-                        >
-                          <i.icon className="h-4 w-4" /> {i.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-              {isAdmin ? (
-                <div className="flex flex-col gap-1">
-                  <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Administração
-                  </p>
-                  <Link
-                    href={ADMIN_ITEM.href}
-                    aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-                    className={cn(
-                      "flex items-center gap-3 rounded-md px-2 py-2 text-sm",
-                      pathname.startsWith("/admin")
-                        ? "bg-accent font-medium text-accent-foreground"
-                        : "hover:bg-accent",
-                    )}
-                  >
-                    <ADMIN_ITEM.icon className="h-4 w-4" /> {ADMIN_ITEM.label}
-                  </Link>
-                </div>
-              ) : null}
+              <NavTree variant="drawer" onNavigate={() => setDrawerOpen(false)} />
             </nav>
-            <form action={logoutAction}>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <LogOut className="h-4 w-4" /> Sair
-              </Button>
-            </form>
           </div>
         </SheetContent>
       </Sheet>
@@ -110,15 +61,13 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
         <LevelBadge level={profile.level} />
         <RoleBadge role={profile.role} />
 
-        <ThemeSettings />
-
         <Link href="/notifications" aria-label="Notificações">
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
         </Link>
 
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <UserAvatar name={profile.full_name} src={profile.avatar_url} />
@@ -128,7 +77,12 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
             <DropdownMenuLabel className="font-normal">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">{profile.full_name ?? "Membro"}</p>
-                <p className="text-xs text-muted-foreground">{profile.points} pontos · Nv {profile.level}</p>
+                {profile.username ? (
+                  <p className="text-xs text-muted-foreground">@{profile.username}</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  {profile.points} pontos · Nv {profile.level}
+                </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -137,10 +91,19 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
                 <User className="h-4 w-4" /> Meu perfil
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onSelect={(e) => {
+                e.preventDefault();
+                setThemeOpen(true);
+              }}
+            >
+              <Settings className="h-4 w-4" /> Configurações visuais
+            </DropdownMenuItem>
             {isAdmin ? (
               <DropdownMenuItem asChild>
                 <Link href="/admin" className="flex items-center gap-2">
-                  <ADMIN_ITEM.icon className="h-4 w-4" /> Painel admin
+                  <Wrench className="h-4 w-4" /> Painel administrativo
                 </Link>
               </DropdownMenuItem>
             ) : null}
@@ -155,6 +118,9 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Drawer de aparência controlado pelo item "Configurações visuais" (sem trigger próprio). */}
+      <ThemeSettings open={themeOpen} onOpenChange={setThemeOpen} hideTrigger />
     </header>
   );
 }

@@ -24,6 +24,7 @@ import {
   HelpCircle,
   Gift,
   Ticket,
+  Repeat,
   MessageSquareText,
 } from "lucide-react";
 
@@ -50,6 +51,7 @@ const ICONS: Record<string, IconComp> = {
   "help-circle": HelpCircle,
   gift: Gift,
   ticket: Ticket,
+  repeat: Repeat,
 };
 
 export function ChannelIcon({ id, className }: { id: string; className?: string }) {

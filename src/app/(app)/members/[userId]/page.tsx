@@ -128,7 +128,7 @@ export default async function MemberProfile({ params }: { params: Params }) {
               {posts.map((post) => {
                 return (
                   <li key={post.id as string}>
-                    <Link href={`/community/${post.id}`} className="block py-3 hover:bg-accent">
+                    <Link href={`/post/${post.id}`} className="block py-3 hover:bg-accent">
                       <p className="text-xs text-muted-foreground">
                         {formatRelative(post.created_at as string)} · {getCategoryLabel(post.category as string)}
                       </p>

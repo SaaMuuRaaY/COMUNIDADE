@@ -1,20 +1,9 @@
 import type { ReactNode } from "react";
-import { ChannelNav, ChannelSelectMobile } from "@/components/community/channel-nav";
 
+// Fase 6.5 — Unificação da navegação: o painel interno de canais (segunda
+// sidebar) foi REMOVIDO. A navegação de canais vive agora na sidebar única
+// (src/lib/navigation.ts). O feed ocupa toda a área útil; o cabeçalho de cada
+// canal é renderizado dentro do próprio conteúdo (c/[channel]/page.tsx).
 export default function CommunityLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex">
-      <aside className="hidden w-60 shrink-0 border-r md:block">
-        <div className="sticky top-14 max-h-[calc(100vh-3.5rem)] overflow-y-auto p-3">
-          <ChannelNav />
-        </div>
-      </aside>
-      <div className="min-w-0 flex-1">
-        <div className="border-b p-2 md:hidden">
-          <ChannelSelectMobile />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+  return <>{children}</>;
 }

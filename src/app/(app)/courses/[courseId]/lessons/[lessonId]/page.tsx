@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, MessageSquareText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LessonPlayer } from "@/components/courses/lesson-player";
@@ -61,6 +61,14 @@ export default async function LessonPage({ params }: { params: Params }) {
           📎 Baixar material de apoio
         </a>
       ) : null}
+
+      <div className="rounded-md border bg-muted/40 p-3">
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link href="/duvidas-gerais">
+            <MessageSquareText className="h-4 w-4" /> Tirar dúvida sobre esta aula na comunidade
+          </Link>
+        </Button>
+      </div>
 
       <div className="flex items-center justify-between border-t pt-4">
         {prev ? (
