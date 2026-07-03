@@ -45,6 +45,7 @@ export const NAV_TREE: NavGroup[] = [
     items: [
       { type: "route", label: "Início", href: "/dashboard", icon: "home" },
       { type: "route", label: "Comunidade", href: "/community", icon: "message-square-text" },
+      { type: "route", label: "Mensagens", href: "/mensagens", icon: "mail" },
     ],
   },
   {

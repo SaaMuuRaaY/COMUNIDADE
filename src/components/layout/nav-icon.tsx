@@ -34,6 +34,7 @@ import {
   Gift,
   Info,
   Flag,
+  Mail,
 } from "lucide-react";
 
 type IconComp = typeof MessageSquareText;
@@ -66,6 +67,7 @@ const ICONS: Record<string, IconComp> = {
   gift: Gift,
   info: Info,
   flag: Flag,
+  mail: Mail,
 };
 
 export function NavIcon({ id, className }: { id: string; className?: string }) {

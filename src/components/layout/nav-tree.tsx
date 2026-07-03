@@ -36,7 +36,15 @@ function linkClass(active: boolean, variant: Variant) {
  * pela sidebar desktop quanto pelo drawer mobile — fonte única, sem duplicar o
  * markup. `onNavigate` fecha o drawer após o clique no mobile.
  */
-export function NavTree({ variant, onNavigate }: { variant: Variant; onNavigate?: () => void }) {
+export function NavTree({
+  variant,
+  onNavigate,
+  unreadDm,
+}: {
+  variant: Variant;
+  onNavigate?: () => void;
+  unreadDm?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -57,6 +65,11 @@ export function NavTree({ variant, onNavigate }: { variant: Variant; onNavigate?
               >
                 <NavIcon id={item.icon} className="h-4 w-4 shrink-0" />
                 <span className="truncate">{item.label}</span>
+                {href === "/mensagens" && unreadDm && unreadDm > 0 ? (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1.5 text-[11px] font-medium text-white">
+                    {unreadDm > 99 ? "99+" : unreadDm}
+                  </span>
+                ) : null}
               </Link>
             );
           })}

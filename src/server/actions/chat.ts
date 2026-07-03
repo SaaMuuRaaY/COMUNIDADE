@@ -6,6 +6,7 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { isModerator } from "@/lib/permissions/policies";
 import { messageSchema } from "@/lib/validations/schemas";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { hasProfanity, PROFANITY_ERROR } from "@/lib/security/profanity";
 
 const RATE_MSG = "Muitas mensagens em pouco tempo. Aguarde um momento.";
 const ROOM = "community";
@@ -25,6 +26,7 @@ export async function sendMessageAction(formData: FormData): Promise<ActionResul
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Mensagem inválida" };
   }
+  if (hasProfanity(parsed.data.body)) return { ok: false, error: PROFANITY_ERROR };
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -81,6 +83,7 @@ export async function editMessageAction(messageId: string, body: string): Promis
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Mensagem inválida" };
   }
+  if (hasProfanity(parsed.data.body)) return { ok: false, error: PROFANITY_ERROR };
 
   const supabase = await createClient();
   const { data: existing } = await supabase

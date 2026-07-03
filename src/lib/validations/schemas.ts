@@ -130,6 +130,12 @@ export const messageSchema = z.object({
 });
 export type MessageInput = z.infer<typeof messageSchema>;
 
+// Direct Messages (FEATURE 03) — denúncia de conversa.
+export const reportSchema = z.object({
+  reason: z.string().trim().min(3, "Descreva o motivo").max(500, "Motivo muito longo"),
+});
+export type ReportInput = z.infer<typeof reportSchema>;
+
 export const courseSchema = z.object({
   title: z.string().min(3).max(120),
   slug: z.string().min(3).max(120).regex(/^[a-z0-9-]+$/),
