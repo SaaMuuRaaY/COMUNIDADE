@@ -90,6 +90,47 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          author_avatar: string | null
+          author_id: string
+          author_name: string | null
+          body: string
+          created_at: string
+          id: string
+          is_deleted: boolean
+          room: string
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_id: string
+          author_name?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          room?: string
+        }
+        Update: {
+          author_avatar?: string | null
+          author_id?: string
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          room?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communities: {
         Row: {
           created_at: string

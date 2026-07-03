@@ -34,6 +34,7 @@ import {
   CHANNELS,
   canPostInChannel,
   isChannelDeprecated,
+  isChatChannel,
   getChannel,
 } from "@/lib/community/structure";
 import {
@@ -69,7 +70,10 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
   const [moveTo, setMoveTo] = React.useState(post.category);
   const moveTargets = React.useMemo(() => {
     const targets = CHANNELS.filter(
-      (c) => !isChannelDeprecated(c.slug) && canPostInChannel({ role, is_banned: false }, c.slug),
+      (c) =>
+        !isChannelDeprecated(c.slug) &&
+        !isChatChannel(c.slug) &&
+        canPostInChannel({ role, is_banned: false }, c.slug),
     );
     if (!targets.some((c) => c.slug === post.category)) {
       const cur = getChannel(post.category);

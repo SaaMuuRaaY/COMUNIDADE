@@ -3,21 +3,10 @@ import type {
   AppStatus,
   AppType,
   EventType,
-  PostCategory,
   ResourceCategory,
 } from "@/types/db";
 
 export const COMMUNITY_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-
-export const POST_CATEGORIES: { value: PostCategory; label: string }[] = [
-  { value: "geral", label: "Geral" },
-  { value: "duvidas", label: "Dúvidas" },
-  { value: "apresentacoes", label: "Apresentações" },
-  { value: "resultados", label: "Resultados" },
-  { value: "projetos", label: "Projetos" },
-  { value: "avisos", label: "Avisos" },
-  { value: "suporte", label: "Suporte" },
-];
 
 export const RESOURCE_CATEGORIES: { value: ResourceCategory; label: string }[] = [
   { value: "apostilas", label: "Apostilas" },

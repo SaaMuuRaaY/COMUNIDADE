@@ -24,14 +24,6 @@ export type Updatable<T extends keyof Database["public"]["Tables"]> =
 
 // --- Refinamentos de domínio (colunas `text`+CHECK / `jsonb`) -----------------
 export type Role = "admin" | "moderator" | "member";
-export type PostCategory =
-  | "geral"
-  | "duvidas"
-  | "apresentacoes"
-  | "resultados"
-  | "projetos"
-  | "avisos"
-  | "suporte";
 export type ResourceCategory =
   | "apostilas"
   | "templates"
@@ -67,7 +59,7 @@ export type Profile = Omit<Tables<"profiles">, "role" | "social_links"> & {
 export type Community = Omit<Tables<"communities">, "visibility"> & {
   visibility: "public" | "private";
 };
-export type Post = Omit<Tables<"posts">, "category"> & { category: PostCategory };
+export type Post = Tables<"posts">;
 export type PostComment = Tables<"post_comments">;
 export type PostLike = Tables<"post_likes">;
 export type PostReaction = Tables<"post_reactions">;

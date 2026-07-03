@@ -124,6 +124,12 @@ export const commentSchema = z.object({
 });
 export type CommentInput = z.infer<typeof commentSchema>;
 
+// Chat em tempo real (FEATURE 02) — mensagem da sala da comunidade.
+export const messageSchema = z.object({
+  body: z.string().trim().min(1, "Mensagem vazia").max(2000, "Mensagem muito longa"),
+});
+export type MessageInput = z.infer<typeof messageSchema>;
+
 export const courseSchema = z.object({
   title: z.string().min(3).max(120),
   slug: z.string().min(3).max(120).regex(/^[a-z0-9-]+$/),

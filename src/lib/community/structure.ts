@@ -108,6 +108,16 @@ export function isChannelDeprecated(slug: string): boolean {
 }
 
 /**
+ * Canais que são CHAT em tempo real (FEATURE 02) — a rota renderiza o chat, não
+ * um feed de posts. Não recebem posts novos (nem via "mover de canal"); posts
+ * históricos seguem visíveis no Feed Geral agregado.
+ */
+export const CHAT_CHANNELS = ["chat-networking"] as const;
+export function isChatChannel(slug: string): boolean {
+  return (CHAT_CHANNELS as readonly string[]).includes(slug);
+}
+
+/**
  * URL canônica RAIZ de cada canal ATIVO (Fase 6.6). Cada unidade tem rota própria
  * na raiz (ex.: /comece-por-aqui), NÃO mais sob /community/c/. O PATH pode diferir
  * do slug de categoria (ex.: slug `lives-encontros` → path `/lives-e-encontros`).
@@ -148,7 +158,6 @@ export const CHANNEL_COMPOSER: Record<
   comunicados: { actionLabel: "Criar comunicado", guidance: "Anúncio oficial da comunidade." },
   "lives-encontros": { actionLabel: "Criar live ou encontro", guidance: "Avise sobre a live/encontro e deixe o link." },
   "marketing-vendas": { actionLabel: "Criar publicação", guidance: "Marketing, vendas e aquisição." },
-  "chat-networking": { actionLabel: "Criar publicação", placeholder: "O que está acontecendo?…" },
   "vagas-oportunidades": { actionLabel: "Publicar vaga ou oportunidade", placeholder: "Descreva a vaga ou oportunidade…", guidance: "Compartilhe vagas e oportunidades." },
   "parcerias-colaboracoes": { actionLabel: "Propor parceria", placeholder: "O que você busca ou oferece?…", guidance: "Busca por parcerias e colaborações." },
   "compartilhe-seu-projeto": { actionLabel: "Compartilhar projeto", placeholder: "Mostre o que está construindo…", guidance: "Compartilhe seu projeto e peça feedback." },

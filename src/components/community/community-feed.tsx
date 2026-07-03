@@ -25,13 +25,10 @@ import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS, getChan
  * e comentários (via getFeedPosts + PostCard, inalterados).
  */
 
-// Canal-alvo do composer no Feed Geral (postável por membro; não é oficial/pendente).
-const GENERAL_COMPOSER_CHANNEL = "chat-networking";
-
+// FEATURE 02 — Feed Geral é VIEW-ONLY: a conversa geral migrou para o Chat Network
+// (realtime). Publicar posts acontece nos canais específicos (cada um tem "+ Criar").
 export async function CommunityGeneralFeed({ search }: { search: string }) {
   const profile = await requireProfile();
-  const canPostGeneral = canPostInChannel(profile, GENERAL_COMPOSER_CHANNEL);
-  const generalComposer = getChannelComposer(GENERAL_COMPOSER_CHANNEL);
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
@@ -44,15 +41,6 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
       />
 
       <FeedFilter />
-
-      {canPostGeneral ? (
-        <PostComposer
-          channelSlug={GENERAL_COMPOSER_CHANNEL}
-          currentUserId={profile.id}
-          actionLabel={generalComposer.actionLabel}
-          placeholder={generalComposer.placeholder}
-        />
-      ) : null}
 
       <Suspense fallback={<FeedSkeleton />}>
         <FeedList userId={profile.id} search={search} canMod={canModerate(profile)} role={profile.role} />
