@@ -67,3 +67,35 @@ export async function deleteMessageAction(messageId: string): Promise<ActionResu
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+// Editar a propria mensagem (corpo). Apenas o AUTOR (moderador so remove).
+// Realtime propaga o UPDATE (corpo + edited_at).
+export async function editMessageAction(messageId: string, body: string): Promise<ActionResult> {
+  if (!z.string().uuid().safeParse(messageId).success) {
+    return { ok: false, error: "ID inválido." };
+  }
+  const profile = await requireProfile();
+  if (profile.is_banned) return { ok: false, error: "Usuário banido." };
+
+  const parsed = messageSchema.safeParse({ body });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Mensagem inválida" };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("chat_messages")
+    .select("author_id, is_deleted")
+    .eq("id", messageId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Mensagem não encontrada." };
+  if (existing.author_id !== profile.id) return { ok: false, error: "Sem permissão." };
+  if (existing.is_deleted) return { ok: false, error: "Mensagem removida." };
+
+  const { error } = await supabase
+    .from("chat_messages")
+    .update({ body: parsed.data.body, edited_at: new Date().toISOString() })
+    .eq("id", messageId);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}

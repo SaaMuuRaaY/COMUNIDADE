@@ -97,6 +97,7 @@ export type Database = {
           author_name: string | null
           body: string
           created_at: string
+          edited_at: string | null
           id: string
           is_deleted: boolean
           room: string
@@ -107,6 +108,7 @@ export type Database = {
           author_name?: string | null
           body: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_deleted?: boolean
           room?: string
@@ -117,6 +119,7 @@ export type Database = {
           author_name?: string | null
           body?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_deleted?: boolean
           room?: string
