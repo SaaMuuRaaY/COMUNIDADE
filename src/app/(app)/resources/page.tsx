@@ -16,15 +16,18 @@ export default async function ResourcesPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("resources")
-    .select("id, title, description, category, file_url")
+    .select("id, slug, title, description, category, file_url, cover_url, click_count")
     .order("created_at", { ascending: false });
 
   const items: ResourceItem[] = (data ?? []).map((r) => ({
     id: r.id as string,
+    slug: (r.slug as string | null) ?? null,
     title: r.title as string,
     description: (r.description as string | null) ?? null,
     category: r.category as string,
     file_url: (r.file_url as string | null) ?? null,
+    cover_url: (r.cover_url as string | null) ?? null,
+    click_count: (r.click_count as number) ?? 0,
   }));
 
   return (

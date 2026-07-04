@@ -147,6 +147,18 @@ export async function updateAppAction(id: string, formData: FormData): Promise<R
   return { ok: true, id };
 }
 
+// Contador de clique intencional (Biblioteca 2.0 F3/F4). Fire-and-forget: a
+// falha NUNCA bloqueia o acesso ao destino. +1 atomico via RPC (0026).
+export async function incrementResourceClick(id: string): Promise<void> {
+  const supabase = await createClient();
+  await supabase.rpc("increment_resource_click", { p_id: id });
+}
+
+export async function incrementAppClick(id: string): Promise<void> {
+  const supabase = await createClient();
+  await supabase.rpc("increment_app_click", { p_id: id });
+}
+
 export async function deleteAppAction(id: string): Promise<Result> {
   await requireAdmin();
   const supabase = await createClient();

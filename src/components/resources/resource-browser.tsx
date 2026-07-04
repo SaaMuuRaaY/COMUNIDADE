@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Library, Eye, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryBadge } from "@/components/resources/category-badge";
@@ -13,16 +14,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Markdown } from "@/components/shared/markdown";
+import { TrackedLink } from "@/components/resources/tracked-link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RESOURCE_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export type ResourceItem = {
   id: string;
+  slug: string | null;
   title: string;
   description: string | null;
   category: string;
   file_url: string | null;
+  cover_url: string | null;
+  click_count: number;
 };
 
 function FilterPill({
@@ -78,34 +83,48 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((r) => (
-            <Card key={r.id} className="flex h-full flex-col">
+            <Card key={r.id} className="flex h-full flex-col overflow-hidden">
+              {r.cover_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={r.cover_url} alt={r.title} className="aspect-video w-full object-cover" />
+              ) : null}
               <CardContent className="flex flex-1 flex-col space-y-3 p-5">
                 <div className="flex items-center gap-2">
                   <Library className="h-4 w-4 text-muted-foreground" />
                   <CategoryBadge category={r.category} />
                 </div>
-                <h3 className="font-semibold leading-tight">{r.title}</h3>
+                <h3 className="font-semibold leading-tight">
+                  <Link
+                    href={`/resources/${r.slug ?? r.id}`}
+                    className="hover:text-[var(--accent)] hover:underline"
+                  >
+                    {r.title}
+                  </Link>
+                </h3>
                 {r.description ? (
                   <p className="line-clamp-3 flex-1 text-sm text-muted-foreground">{r.description}</p>
                 ) : (
                   <div className="flex-1" />
                 )}
-                {r.file_url ? (
-                  <Button asChild size="sm" variant="outline" className="gap-2 self-start">
-                    <a href={r.file_url} target="_blank" rel="noopener noreferrer">
+                <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                  {r.file_url ? (
+                    <TrackedLink
+                      kind="resource"
+                      id={r.id}
+                      href={r.file_url}
+                      className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                    >
                       <Eye className="h-3 w-3" /> Ver <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-2 self-start"
-                    onClick={() => setView(r)}
-                  >
-                    <Eye className="h-3 w-3" /> Ver
-                  </Button>
-                )}
+                    </TrackedLink>
+                  ) : (
+                    <Button size="sm" variant="outline" className="gap-2" onClick={() => setView(r)}>
+                      <Eye className="h-3 w-3" /> Ver
+                    </Button>
+                  )}
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {r.click_count} acesso{r.click_count === 1 ? "" : "s"}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           ))}

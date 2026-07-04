@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LayoutGrid, ExternalLink, Download, Boxes } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { TrackedLink } from "@/components/resources/tracked-link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { requireProfile } from "@/lib/auth/current-user";
 import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
@@ -49,7 +49,15 @@ export default async function AppsPage() {
             const statusVariant =
               a.status === "active" ? "success" : a.status === "beta" ? "warning" : "secondary";
             return (
-              <Card key={a.id as string}>
+              <Card key={a.id as string} className="overflow-hidden">
+                {a.cover_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={a.cover_url as string}
+                    alt={a.name as string}
+                    className="aspect-video w-full object-cover"
+                  />
+                ) : null}
                 <CardContent className="space-y-3 p-5">
                   <div className="flex items-center gap-2">
                     <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
@@ -62,7 +70,14 @@ export default async function AppsPage() {
                       </Badge>
                     </div>
                   </div>
-                  <h3 className="font-semibold leading-tight">{a.name as string}</h3>
+                  <h3 className="font-semibold leading-tight">
+                    <Link
+                      href={`/apps/${(a.slug as string | null) ?? (a.id as string)}`}
+                      className="hover:text-[var(--accent)] hover:underline"
+                    >
+                      {a.name as string}
+                    </Link>
+                  </h3>
                   {a.description ? (
                     <p className="line-clamp-3 text-sm text-muted-foreground">{a.description as string}</p>
                   ) : null}
@@ -76,21 +91,32 @@ export default async function AppsPage() {
                     />
                   ) : null}
 
-                  <div className="flex gap-2">
-                    {a.url ? (
-                      <Button asChild size="sm" variant="outline" className="gap-2">
-                        <a href={a.url as string} target="_blank" rel="noopener noreferrer">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                      {a.url ? (
+                        <TrackedLink
+                          kind="app"
+                          id={a.id as string}
+                          href={a.url as string}
+                          className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                        >
                           Abrir <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    ) : null}
-                    {a.type === "file" && a.file_url ? (
-                      <Button asChild size="sm" variant="outline" className="gap-2">
-                        <a href={a.file_url as string} target="_blank" rel="noopener noreferrer">
+                        </TrackedLink>
+                      ) : null}
+                      {a.type === "file" && a.file_url ? (
+                        <TrackedLink
+                          kind="app"
+                          id={a.id as string}
+                          href={a.file_url as string}
+                          className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                        >
                           Baixar <Download className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    ) : null}
+                        </TrackedLink>
+                      ) : null}
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {(a.click_count as number) ?? 0} acesso{(a.click_count as number) === 1 ? "" : "s"}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
