@@ -913,6 +913,7 @@ export type Database = {
           created_at: string
           id: string
           points: number
+          reason: string | null
           reference_id: string | null
           reference_type: string | null
           user_id: string
@@ -922,6 +923,7 @@ export type Database = {
           created_at?: string
           id?: string
           points: number
+          reason?: string | null
           reference_id?: string | null
           reference_type?: string | null
           user_id: string
@@ -931,6 +933,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          reason?: string | null
           reference_id?: string | null
           reference_type?: string | null
           user_id?: string
@@ -1292,6 +1295,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_points: {
+        Args: { p_delta: number; p_reason: string; p_user: string }
+        Returns: undefined
+      }
       admin_set_banned: {
         Args: { p_banned: boolean; p_user: string }
         Returns: undefined
