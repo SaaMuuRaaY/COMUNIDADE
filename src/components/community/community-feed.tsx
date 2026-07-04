@@ -11,6 +11,7 @@ import { FeedFilter } from "@/components/community/feed-filter";
 import { ChannelIcon } from "@/components/community/channel-icon";
 import { SectionBanner } from "@/components/shared/section-banner";
 import { UpcomingEventsPanel } from "@/components/discovery/upcoming-events-panel";
+import { TrendingPanel } from "@/components/discovery/trending-panel";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
@@ -51,6 +52,9 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          <Suspense fallback={<PanelSkeleton />}>
+            <TrendingPanel />
+          </Suspense>
           <Suspense fallback={<PanelSkeleton />}>
             <UpcomingEventsPanel />
           </Suspense>
