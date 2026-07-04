@@ -50,12 +50,13 @@ export default async function DashboardPage() {
   const data = await getDashboardData(profile.id);
 
   const supabase = await createClient();
-  const { data: onboarding } = await supabase
+  const { data: onboarding, error: onboardingError } = await supabase
     .from("member_onboarding")
     .select("completed_at")
     .eq("user_id", profile.id)
     .maybeSingle();
-  const needsOnboarding = !onboarding?.completed_at;
+  // Na duvida (erro de query) NAO incomoda quem talvez ja tenha completado.
+  const needsOnboarding = !onboardingError && !onboarding?.completed_at;
 
   const nextThreshold = nextLevelThreshold(profile.points);
   const progressToNext = nextThreshold

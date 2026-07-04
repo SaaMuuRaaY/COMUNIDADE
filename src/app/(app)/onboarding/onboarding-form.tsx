@@ -37,14 +37,19 @@ type FormState = {
 export function OnboardingForm({
   initial,
   alreadyCompleted,
+  acceptedVersion,
 }: {
   initial: FormState;
   alreadyCompleted: boolean;
+  acceptedVersion: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
   const [form, setForm] = React.useState<FormState>(initial);
-  const [accepted, setAccepted] = React.useState(alreadyCompleted);
+  // So pre-marca o aceite se ja completou COM a versao vigente dos acordos.
+  // Se a versao mudou, forca reler + reaceitar (nao grava consentimento implicito).
+  const agreementsChanged = alreadyCompleted && acceptedVersion !== AGREEMENTS_VERSION;
+  const [accepted, setAccepted] = React.useState(alreadyCompleted && !agreementsChanged);
 
   function toggle(key: "goals" | "interests", value: string) {
     setForm((f) => {
@@ -157,6 +162,12 @@ export function OnboardingForm({
 
         <div className="space-y-2">
           <Label>Acordos</Label>
+          {agreementsChanged ? (
+            <p className="rounded-md border border-[var(--accent-line)] bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+              Os acordos foram atualizados (versão {AGREEMENTS_VERSION}). Revise e aceite novamente
+              antes de salvar.
+            </p>
+          ) : null}
           {AGREEMENTS.map((a) => (
             <Collapsible key={a.key} title={a.label}>
               Leia o documento completo em{" "}

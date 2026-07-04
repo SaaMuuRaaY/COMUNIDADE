@@ -9,7 +9,9 @@ export default async function OnboardingPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("member_onboarding")
-    .select("ai_level, goals, interests, current_project, participation_goal, completed_at")
+    .select(
+      "ai_level, goals, interests, current_project, participation_goal, completed_at, agreements_version",
+    )
     .eq("user_id", profile.id)
     .maybeSingle();
 
@@ -30,6 +32,7 @@ export default async function OnboardingPage() {
           participation_goal: data?.participation_goal ?? "",
         }}
         alreadyCompleted={!!data?.completed_at}
+        acceptedVersion={data?.agreements_version ?? null}
       />
     </div>
   );
