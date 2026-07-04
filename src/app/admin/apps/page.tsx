@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { createClient } from "@/lib/supabase/server";
-import { AppComposer, DeleteAppInline } from "./app-actions";
+import { AppComposer, DeleteAppInline, EditAppDialog } from "./app-actions";
 
 export const metadata = { title: "Apps · Admin" };
 
@@ -34,7 +34,24 @@ export default async function AdminAppsPage() {
                       <p className="text-xs text-muted-foreground">{a.url as string}</p>
                     ) : null}
                   </div>
-                  <DeleteAppInline id={a.id as string} />
+                  <div className="flex shrink-0 items-center gap-1">
+                    <EditAppDialog
+                      app={{
+                        id: a.id as string,
+                        name: (a.name as string) ?? "",
+                        description: (a.description as string | null) ?? "",
+                        category: (a.category as string) ?? "ia",
+                        type: (a.type as string) ?? "link",
+                        status: (a.status as string) ?? "active",
+                        url: (a.url as string | null) ?? "",
+                        embed_url: (a.embed_url as string | null) ?? "",
+                        file_url: (a.file_url as string | null) ?? "",
+                        icon_url: (a.icon_url as string | null) ?? "",
+                        cover_url: (a.cover_url as string | null) ?? "",
+                      }}
+                    />
+                    <DeleteAppInline id={a.id as string} />
+                  </div>
                 </li>
               ))}
             </ul>
