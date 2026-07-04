@@ -17,7 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { requireProfile } from "@/lib/auth/current-user";
+import { createClient } from "@/lib/supabase/server";
 import { getDashboardData } from "@/server/queries/dashboard";
+import { OnboardingBanner } from "@/components/onboarding/onboarding-banner";
 import { nextLevelThreshold } from "@/lib/constants";
 import { getCategoryLabel, getChannel, channelHref } from "@/lib/community/structure";
 import { ChannelIcon } from "@/components/community/channel-icon";
@@ -47,6 +49,14 @@ export default async function DashboardPage() {
   const profile = await requireProfile();
   const data = await getDashboardData(profile.id);
 
+  const supabase = await createClient();
+  const { data: onboarding } = await supabase
+    .from("member_onboarding")
+    .select("completed_at")
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  const needsOnboarding = !onboarding?.completed_at;
+
   const nextThreshold = nextLevelThreshold(profile.points);
   const progressToNext = nextThreshold
     ? Math.min(100, Math.round(((profile.points / nextThreshold) * 100)))
@@ -54,6 +64,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
+      {needsOnboarding ? <OnboardingBanner /> : null}
       <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <UserAvatar name={profile.full_name} src={profile.avatar_url} className="h-14 w-14" />
