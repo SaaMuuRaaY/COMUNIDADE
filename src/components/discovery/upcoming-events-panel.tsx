@@ -19,11 +19,12 @@ export async function UpcomingEventsPanel({ limit = 4 }: { limit?: number }) {
   let going = new Set<string>();
   if (events.length > 0) {
     const supabase = await createClient();
-    const { data: rsvps } = await supabase
+    const { data: rsvps, error } = await supabase
       .from("event_attendees")
       .select("event_id")
       .eq("user_id", profile.id)
       .eq("status", "going");
+    if (error) console.error("[upcoming-events] rsvps:", error.message);
     going = new Set((rsvps ?? []).map((r) => r.event_id as string));
   }
 

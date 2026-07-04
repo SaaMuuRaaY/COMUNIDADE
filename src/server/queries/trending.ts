@@ -23,7 +23,8 @@ const cachedTrending = unstable_cache(
 
     let base = (data ?? []).map((r) => ({
       id: r.id,
-      title: r.title,
+      // O tipo gerado diz string, mas posts.title e nullable no banco.
+      title: (r.title as string | null) ?? "(sem título)",
       category: r.category,
       author_id: r.author_id,
       interactions: r.likes + r.reactions + r.unique_commenters,
