@@ -1,13 +1,16 @@
+import { COMPANY } from "@/lib/config/company";
+
 export const metadata = { title: "Política de Privacidade" };
 
 export default function PrivacidadePage() {
   return (
     <>
       <h1>Política de Privacidade</h1>
-      <p>Última atualização: 9 de junho de 2026.</p>
+      <p>Última atualização: 4 de julho de 2026.</p>
       <p>
-        Esta Política descreve como [RAZÃO SOCIAL], CNPJ [CNPJ], trata seus dados pessoais, em
-        conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).
+        Esta Política descreve como {COMPANY.legalName}, {COMPANY.taxIdLabel} {COMPANY.taxId}, trata
+        seus dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº
+        13.709/2018 — LGPD).
       </p>
 
       <h2>1. Dados que coletamos</h2>
@@ -45,7 +48,7 @@ export default function PrivacidadePage() {
       <p>
         Você pode solicitar acesso, correção, portabilidade, anonimização ou exclusão dos seus
         dados, além de revogar consentimento. Para exercer seus direitos, contate nosso encarregado
-        (DPO): [E-MAIL DO ENCARREGADO].
+        (DPO): {COMPANY.dpoEmail}.
       </p>
 
       <h2>7. Segurança</h2>
@@ -55,7 +58,7 @@ export default function PrivacidadePage() {
       </p>
 
       <h2>8. Contato</h2>
-      <p>Dúvidas sobre privacidade: [E-MAIL DE CONTATO].</p>
+      <p>Dúvidas sobre privacidade: {COMPANY.contactEmail}.</p>
     </>
   );
 }

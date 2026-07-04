@@ -1,16 +1,19 @@
+import { COMPANY } from "@/lib/config/company";
+
 export const metadata = { title: "Termos de Uso" };
 
 export default function TermosPage() {
   return (
     <>
       <h1>Termos de Uso</h1>
-      <p>Última atualização: 9 de junho de 2026.</p>
+      <p>Última atualização: 4 de julho de 2026.</p>
 
       <h2>1. Aceitação</h2>
       <p>
         Ao criar uma conta e usar a plataforma Portal Nexus (&quot;Plataforma&quot;), operada por
-        [RAZÃO SOCIAL], CNPJ [CNPJ] (&quot;nós&quot;), você concorda com estes Termos. Se não
-        concordar, não utilize a Plataforma.
+        {" "}
+        {COMPANY.legalName}, {COMPANY.taxIdLabel} {COMPANY.taxId} (&quot;nós&quot;), você concorda
+        com estes Termos. Se não concordar, não utilize a Plataforma.
       </p>
 
       <h2>2. Conta e elegibilidade</h2>
@@ -53,7 +56,7 @@ export default function TermosPage() {
 
       <h2>8. Contato</h2>
       <p>
-        Dúvidas sobre estes Termos: [E-MAIL DE CONTATO]. Foro da comarca de [CIDADE/UF], salvo
+        Dúvidas sobre estes Termos: {COMPANY.contactEmail}. Foro de {COMPANY.jurisdiction}, salvo
         disposição legal em contrário.
       </p>
     </>
