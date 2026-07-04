@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Markdown } from "@/components/shared/markdown";
 import { TrackedLink } from "@/components/resources/tracked-link";
+import { incrementResourceClick } from "@/server/actions/resources-apps-events";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RESOURCE_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -117,7 +118,15 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
                       <Eye className="h-3 w-3" /> Ver <ExternalLink className="h-3 w-3" />
                     </TrackedLink>
                   ) : (
-                    <Button size="sm" variant="outline" className="gap-2" onClick={() => setView(r)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => {
+                        setView(r);
+                        void incrementResourceClick(r.id);
+                      }}
+                    >
                       <Eye className="h-3 w-3" /> Ver
                     </Button>
                   )}
@@ -151,6 +160,9 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
                 Abrir arquivo <ExternalLink className="h-3 w-3" />
               </a>
             </Button>
+          ) : null}
+          {view ? (
+            <p className="text-xs text-muted-foreground">{view.click_count} acesso(s)</p>
           ) : null}
         </DialogContent>
       </Dialog>
