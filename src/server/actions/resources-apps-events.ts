@@ -211,6 +211,22 @@ export async function rsvpEventAction(eventId: string, status: "going" | "maybe"
     return { ok: false, error: "Muitas ações em pouco tempo. Aguarde um momento." };
   }
   const supabase = await createClient();
+
+  // Nao deixa confirmar/marcar presenca em evento ja encerrado (a UI ja esconde
+  // o botao; isto bloqueia chamada direta). "declined" (cancelar) segue livre.
+  if (status !== "declined") {
+    const { data: ev } = await supabase
+      .from("events")
+      .select("starts_at, ends_at")
+      .eq("id", eventId)
+      .maybeSingle();
+    if (!ev) return { ok: false, error: "Evento não encontrado." };
+    const ref = (ev.ends_at as string | null) ?? (ev.starts_at as string);
+    if (new Date(ref).getTime() < Date.now()) {
+      return { ok: false, error: "Este evento já foi encerrado." };
+    }
+  }
+
   const { error } = await supabase
     .from("event_attendees")
     .upsert(

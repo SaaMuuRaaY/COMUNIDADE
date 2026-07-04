@@ -10,6 +10,7 @@ import { PostCard } from "@/components/community/post-card";
 import { FeedFilter } from "@/components/community/feed-filter";
 import { ChannelIcon } from "@/components/community/channel-icon";
 import { SectionBanner } from "@/components/shared/section-banner";
+import { UpcomingEventsPanel } from "@/components/discovery/upcoming-events-panel";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
@@ -31,20 +32,40 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
   const profile = await requireProfile();
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
-      <SectionBanner
-        icon={MessageSquareText}
-        eyebrow="Portal Nexus"
-        title="Comunidade"
-        description="Acompanhe as publicações, novidades, projetos e conversas de todos os canais do Portal Nexus."
-        variant="featured"
-      />
+    <div className="mx-auto max-w-6xl p-4 md:p-6">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="min-w-0 space-y-4 lg:col-span-2">
+          <SectionBanner
+            icon={MessageSquareText}
+            eyebrow="Portal Nexus"
+            title="Comunidade"
+            description="Acompanhe as publicações, novidades, projetos e conversas de todos os canais do Portal Nexus."
+            variant="featured"
+          />
 
-      <FeedFilter />
+          <FeedFilter />
 
-      <Suspense fallback={<FeedSkeleton />}>
-        <FeedList userId={profile.id} search={search} canMod={canModerate(profile)} role={profile.role} />
-      </Suspense>
+          <Suspense fallback={<FeedSkeleton />}>
+            <FeedList userId={profile.id} search={search} canMod={canModerate(profile)} role={profile.role} />
+          </Suspense>
+        </div>
+
+        <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          <Suspense fallback={<PanelSkeleton />}>
+            <UpcomingEventsPanel />
+          </Suspense>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function PanelSkeleton() {
+  return (
+    <div className="space-y-3 rounded-xl border p-5">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-16 w-full" />
+      <Skeleton className="h-16 w-full" />
     </div>
   );
 }
