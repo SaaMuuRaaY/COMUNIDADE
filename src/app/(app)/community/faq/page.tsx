@@ -1,3 +1,5 @@
+import { Collapsible } from "@/components/ui/collapsible";
+
 export const metadata = { title: "Perguntas frequentes · Comunidade" };
 
 const FAQ: { q: string; a: string }[] = [
@@ -30,12 +32,11 @@ export default function FaqPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Perguntas frequentes</h1>
         <p className="text-sm text-muted-foreground">Respostas rápidas sobre a comunidade.</p>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {FAQ.map((item) => (
-          <div key={item.q} className="rounded-lg border p-4">
-            <h2 className="text-sm font-semibold">{item.q}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{item.a}</p>
-          </div>
+          <Collapsible key={item.q} title={item.q}>
+            {item.a}
+          </Collapsible>
         ))}
       </div>
     </div>
