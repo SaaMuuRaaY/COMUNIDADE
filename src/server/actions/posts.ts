@@ -217,6 +217,44 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
   return { ok: true };
 }
 
+// Salvar/dessalvar post (bookmark privado) — FEATURE 04 Fase 3. Sem pontos.
+export async function toggleSavePostAction(postId: string): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (profile.is_banned) return { ok: false, error: "Usuário banido." };
+  if (!rateLimit(`save:${profile.id}`, { limit: 60, windowMs: 60_000 }).ok) return { ok: false, error: RATE_MSG };
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("saved_posts")
+    .select("post_id")
+    .eq("post_id", postId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("saved_posts")
+      .delete()
+      .eq("post_id", postId)
+      .eq("user_id", profile.id);
+    if (error) {
+      console.error("[posts] dessalvar:", error.message);
+      return { ok: false, error: "Não foi possível atualizar. Tente novamente." };
+    }
+  } else {
+    const { error } = await supabase.from("saved_posts").insert({ post_id: postId, user_id: profile.id });
+    if (error) {
+      console.error("[posts] salvar:", error.message);
+      return { ok: false, error: "Não foi possível atualizar. Tente novamente." };
+    }
+  }
+
+  revalidatePath("/salvos");
+  revalidatePath("/community", "layout");
+  revalidatePath(`/post/${postId}`);
+  return { ok: true };
+}
+
 export async function createCommentAction(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };

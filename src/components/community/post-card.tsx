@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { Heart, MessageCircle, MoreHorizontal, Pencil, Pin, Trash2 } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, Pencil, Pin, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ import {
 import {
   togglePostLikeAction,
   togglePostReactionAction,
+  toggleSavePostAction,
   deletePostAction,
   pinPostAction,
   updatePostAction,
@@ -57,6 +58,7 @@ type Props = {
 export function PostCard({ post, currentUserId, canModerate, role }: Props) {
   const [liked, setLiked] = React.useState(post.liked_by_me);
   const [likesCount, setLikesCount] = React.useState(post.likes_count);
+  const [saved, setSaved] = React.useState(post.saved_by_me);
   const [reactions, setReactions] = React.useState<Record<string, number>>(post.reactions ?? {});
   const [myReactions, setMyReactions] = React.useState<Set<string>>(() => new Set(post.myReactions ?? []));
   const [pinned, setPinned] = React.useState(post.is_pinned);
@@ -86,6 +88,7 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
   // que aplica `disabled={pending}`). `pending`/`liked` no closure são stale;
   // um ref mutado de forma síncrona não é. Evita duas requests concorrentes.
   const toggleInFlight = React.useRef(false);
+  const saveInFlight = React.useRef(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const isOwner = post.author?.id === currentUserId;
 
@@ -108,6 +111,24 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
         }
       } finally {
         toggleInFlight.current = false;
+      }
+    });
+  }
+
+  function onSave() {
+    if (saveInFlight.current) return;
+    saveInFlight.current = true;
+    const next = !saved;
+    setSaved(next);
+    startTransition(async () => {
+      try {
+        const res = await toggleSavePostAction(post.id);
+        if (!res.ok) {
+          setSaved(!next);
+          toast.error(res.error ?? "Erro ao salvar.");
+        }
+      } finally {
+        saveInFlight.current = false;
       }
     });
   }
@@ -300,6 +321,18 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
               <MessageCircle className="h-4 w-4" />
               {post.comments_count}
             </Link>
+          </Button>
+          <Button
+            variant={saved ? "secondary" : "ghost"}
+            size="sm"
+            onClick={onSave}
+            disabled={pending}
+            className="ml-auto"
+            aria-pressed={saved}
+            aria-label={saved ? "Remover dos salvos" : "Salvar"}
+            title={saved ? "Remover dos salvos" : "Salvar"}
+          >
+            <Bookmark className={cn("h-4 w-4", saved && "fill-current")} />
           </Button>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, LogOut, Menu, MessageCircle, Settings, User, Wrench } from "lucide-react";
+import { Bell, Bookmark, LogOut, Menu, MessageCircle, Settings, User, Wrench } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,6 +93,12 @@ export function Header({
         >
           <NotificationsPanel />
         </HeaderPanel>
+
+        <Link href="/salvos" aria-label="Salvos">
+          <Button variant="ghost" size="icon">
+            <Bookmark className="h-5 w-5" />
+          </Button>
+        </Link>
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
