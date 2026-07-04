@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, LogOut, Menu, Settings, User, Wrench } from "lucide-react";
+import { Bell, LogOut, Menu, MessageCircle, Settings, User, Wrench } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +21,22 @@ import { RoleBadge } from "@/components/shared/role-badge";
 import { logoutAction } from "@/server/actions/auth";
 import { ThemeSettings } from "@/components/nexus/theme-settings";
 import { NavTree } from "./nav-tree";
+import { HeaderPanel } from "./header-panel";
+import { ConversationsPanel } from "@/components/direct/conversations-panel";
+import { NotificationsPanel } from "@/components/notifications/notifications-panel";
 import type { Profile } from "@/types/db";
 
-export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolean }) {
+export function Header({
+  profile,
+  isAdmin,
+  unreadDm,
+  unreadNotifications,
+}: {
+  profile: Profile;
+  isAdmin: boolean;
+  unreadDm?: number;
+  unreadNotifications?: number;
+}) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
 
@@ -61,11 +74,25 @@ export function Header({ profile, isAdmin }: { profile: Profile; isAdmin: boolea
         <LevelBadge level={profile.level} />
         <RoleBadge role={profile.role} />
 
-        <Link href="/notifications" aria-label="Notificações">
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-        </Link>
+        <HeaderPanel
+          icon={MessageCircle}
+          label="Conversas"
+          count={unreadDm}
+          href="/mensagens"
+          footerLabel="Ver todas as mensagens"
+        >
+          <ConversationsPanel />
+        </HeaderPanel>
+
+        <HeaderPanel
+          icon={Bell}
+          label="Notificações"
+          count={unreadNotifications}
+          href="/notifications"
+          footerLabel="Ver todas as notificações"
+        >
+          <NotificationsPanel />
+        </HeaderPanel>
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>

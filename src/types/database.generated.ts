@@ -735,6 +735,8 @@ export type Database = {
           created_at: string
           id: string
           read_at: string | null
+          reference_id: string | null
+          reference_type: string | null
           title: string
           type: string
           user_id: string
@@ -744,6 +746,8 @@ export type Database = {
           created_at?: string
           id?: string
           read_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
           title: string
           type?: string
           user_id: string
@@ -753,6 +757,8 @@ export type Database = {
           created_at?: string
           id?: string
           read_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
           title?: string
           type?: string
           user_id?: string

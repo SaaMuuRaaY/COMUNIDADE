@@ -6,7 +6,12 @@ import { requireActiveProfile } from "@/lib/auth/current-user";
 import { messageSchema, reportSchema } from "@/lib/validations/schemas";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { hasProfanity, PROFANITY_ERROR } from "@/lib/security/profanity";
-import { listMembersForDM, type DMMemberOption } from "@/server/queries/direct-messages";
+import {
+  listMembersForDM,
+  getConversations,
+  type DMMemberOption,
+  type DMConversationSummary,
+} from "@/server/queries/direct-messages";
 
 export type DMResult = { ok: boolean; error?: string; id?: string };
 export type StartResult = { ok: boolean; error?: string; conversationId?: string };
@@ -172,6 +177,17 @@ export async function markConversationRead(conversationId: string): Promise<DMRe
   const patch = conv.user_a === me.id ? { user_a_last_read_at: nowIso() } : { user_b_last_read_at: nowIso() };
   const { error } = await supabase.from("dm_conversations").update(patch).eq("id", conversationId);
   if (error) return { ok: false, error: error.message };
+
+  // Marca lida a notificacao de DM dessa conversa (best-effort).
+  await supabase
+    .from("notifications")
+    .update({ read_at: nowIso() })
+    .eq("user_id", me.id)
+    .eq("type", "dm")
+    .eq("reference_type", "dm_conversation")
+    .eq("reference_id", conversationId)
+    .is("read_at", null);
+
   return { ok: true };
 }
 
@@ -222,4 +238,9 @@ export async function reportConversation(conversationId: string, reason: string)
 // Busca de membros para o seletor "nova conversa" (wrapper client-callable da query).
 export async function searchMembers(query: string): Promise<DMMemberOption[]> {
   return listMembersForDM(query);
+}
+
+// Prévia das conversas para o painel rápido do header (client-callable, top 8).
+export async function getConversationsPreview(): Promise<DMConversationSummary[]> {
+  return (await getConversations()).slice(0, 8);
 }
