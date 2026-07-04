@@ -1,8 +1,11 @@
 -- =============================================================================
 -- seed.sql — Dados demo do CODEX Community
 --
--- IMPORTANTE: este seed cria usuários demo via auth.users + profiles.
--- Em produção, prefira criar usuários via Supabase Auth API.
+-- ⚠️ LOCAL-DEV ONLY — NUNCA aplicar na cloud/produção.
+-- Cria usuários demo com senha PÚBLICA (codex123!) — na cloud isso é um BACKDOOR.
+-- A migration 0025 remove esses demos da cloud (SEC-02). Usuários reais devem
+-- ser criados via Supabase Auth API. (No reset LOCAL, a 0025 faz no-op e este
+-- seed recria os demos para o dev.)
 --
 -- Usuários criados (senha: codex123!):
 --   - admin@codex.community     (admin)
