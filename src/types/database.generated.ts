@@ -813,6 +813,56 @@ export type Database = {
           },
         ]
       }
+      member_onboarding: {
+        Row: {
+          agreements_accepted_at: string | null
+          agreements_version: string | null
+          ai_level: string | null
+          completed_at: string | null
+          created_at: string
+          current_project: string | null
+          goals: string[]
+          interests: string[]
+          participation_goal: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agreements_accepted_at?: string | null
+          agreements_version?: string | null
+          ai_level?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_project?: string | null
+          goals?: string[]
+          interests?: string[]
+          participation_goal?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agreements_accepted_at?: string | null
+          agreements_version?: string | null
+          ai_level?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_project?: string | null
+          goals?: string[]
+          interests?: string[]
+          participation_goal?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_onboarding_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null

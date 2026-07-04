@@ -1,5 +1,11 @@
 import { z } from "zod";
 import { isValidPostCategory } from "@/lib/community/structure";
+import {
+  AI_LEVEL_VALUES,
+  GOAL_VALUES,
+  INTEREST_VALUES,
+  PARTICIPATION_VALUES,
+} from "@/lib/config/onboarding";
 
 /**
  * Aceita só URLs https públicas para imagens fornecidas pelo usuário (avatar),
@@ -37,6 +43,27 @@ export const forgotPasswordSchema = z.object({
   email: z.string().email("E-mail inválido"),
 });
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+// Onboarding (Feature B). goals/interests = multipla escolha; aceite obrigatorio.
+// As colunas no banco sao text/text[]; aqui validamos contra as listas de config.
+const inList = (list: readonly string[]) => (v: string) => list.includes(v);
+
+export const onboardingSchema = z.object({
+  ai_level: z.string().refine(inList(AI_LEVEL_VALUES), "Selecione seu nível"),
+  goals: z
+    .array(z.string().refine(inList(GOAL_VALUES), "Objetivo inválido"))
+    .min(1, "Escolha ao menos 1 objetivo")
+    .max(GOAL_VALUES.length),
+  interests: z
+    .array(z.string().refine(inList(INTEREST_VALUES), "Interesse inválido"))
+    .max(INTEREST_VALUES.length),
+  current_project: z.string().max(280, "Máximo 280 caracteres").optional().nullable(),
+  participation_goal: z.string().refine(inList(PARTICIPATION_VALUES), "Selecione uma opção"),
+  agreements_accepted: z
+    .boolean()
+    .refine((v) => v === true, "É necessário aceitar os acordos para continuar"),
+});
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
 export const profileUpdateSchema = z.object({
   full_name: z.string().min(2).max(80),
