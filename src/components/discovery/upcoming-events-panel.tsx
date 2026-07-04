@@ -51,7 +51,7 @@ export async function UpcomingEventsPanel({ limit = 4 }: { limit?: number }) {
                   minute: "2-digit",
                 })}
               </p>
-              <p className="font-medium leading-tight">{e.title}</p>
+              <p className="line-clamp-2 font-medium leading-tight">{e.title}</p>
               <div className="mt-2">
                 <RsvpButton eventId={e.id} initiallyGoing={going.has(e.id)} />
               </div>
