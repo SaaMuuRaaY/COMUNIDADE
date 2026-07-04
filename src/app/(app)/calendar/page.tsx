@@ -19,9 +19,13 @@ export default async function CalendarPage() {
   const profile = await requireProfile();
   const admin = isAdminCheck(profile);
   const supabase = await createClient();
+  // Oculta eventos ENCERRADOS (já terminaram); mantém futuros e em andamento.
+  // Um evento sem ends_at é encerrado quando starts_at passa.
+  const nowIso = new Date().toISOString();
   const { data: events } = await supabase
     .from("events")
     .select("*")
+    .or(`ends_at.gte.${nowIso},and(ends_at.is.null,starts_at.gte.${nowIso})`)
     .order("starts_at", { ascending: true });
 
   const { data: myRsvps } = await supabase
@@ -54,16 +58,17 @@ export default async function CalendarPage() {
           {items.map((e) => {
             const type = EVENT_TYPES.find((t) => t.value === e.event_type);
             const date = new Date(e.starts_at as string);
+            const endRef = (e.ends_at as string | null) ?? (e.starts_at as string);
             // eslint-disable-next-line react-hooks/purity
-            const past = date.getTime() < Date.now();
+            const ended = new Date(endRef).getTime() < Date.now();
             return (
-              <Card key={e.id as string} className={past ? "opacity-70" : ""}>
+              <Card key={e.id as string} className={ended ? "opacity-70" : ""}>
                 <CardContent className="space-y-3 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary">{type?.label ?? e.event_type}</Badge>
-                        {past ? <Badge variant="outline">Encerrado</Badge> : null}
+                        {ended ? <Badge variant="outline">Encerrado</Badge> : null}
                       </div>
                       <h3 className="font-semibold leading-tight">{e.title as string}</h3>
                       <p className="text-xs text-muted-foreground">
@@ -74,7 +79,7 @@ export default async function CalendarPage() {
                         })}
                       </p>
                     </div>
-                    {!past ? (
+                    {!ended ? (
                       <RsvpButton eventId={e.id as string} initiallyGoing={goingSet.has(e.id as string)} />
                     ) : null}
                   </div>
