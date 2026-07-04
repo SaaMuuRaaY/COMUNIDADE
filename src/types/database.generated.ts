@@ -37,6 +37,8 @@ export type Database = {
       apps: {
         Row: {
           category: string
+          click_count: number
+          cover_url: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -45,6 +47,7 @@ export type Database = {
           icon_url: string | null
           id: string
           name: string
+          slug: string | null
           status: string
           type: string
           updated_at: string
@@ -52,6 +55,8 @@ export type Database = {
         }
         Insert: {
           category?: string
+          click_count?: number
+          cover_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -60,6 +65,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name: string
+          slug?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -67,6 +73,8 @@ export type Database = {
         }
         Update: {
           category?: string
+          click_count?: number
+          cover_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -75,6 +83,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name?: string
+          slug?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -1127,6 +1136,8 @@ export type Database = {
       resources: {
         Row: {
           category: string
+          click_count: number
+          cover_url: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -1134,10 +1145,13 @@ export type Database = {
           file_type: string | null
           file_url: string | null
           id: string
+          slug: string | null
           title: string
         }
         Insert: {
           category?: string
+          click_count?: number
+          cover_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1145,10 +1159,13 @@ export type Database = {
           file_type?: string | null
           file_url?: string | null
           id?: string
+          slug?: string | null
           title: string
         }
         Update: {
           category?: string
+          click_count?: number
+          cover_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1156,6 +1173,7 @@ export type Database = {
           file_type?: string | null
           file_url?: string | null
           id?: string
+          slug?: string | null
           title?: string
         }
         Relationships: [
@@ -1247,12 +1265,15 @@ export type Database = {
       channel_requires_mod: { Args: { slug: string }; Returns: boolean }
       current_role: { Args: never; Returns: string }
       dm_unread_count: { Args: never; Returns: number }
+      increment_app_click: { Args: { p_id: string }; Returns: undefined }
+      increment_resource_click: { Args: { p_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_dm_blocked: { Args: { other: string }; Returns: boolean }
       is_moderator: { Args: never; Returns: boolean }
       is_not_banned: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       recalc_level: { Args: { p_points: number }; Returns: number }
+      slugify: { Args: { v: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

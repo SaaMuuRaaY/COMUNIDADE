@@ -175,6 +175,7 @@ export const resourceSchema = z.object({
   file_url: z.string().url().optional().nullable(),
   file_storage_path: z.string().optional().nullable(),
   file_type: z.string().optional().nullable(),
+  cover_url: z.string().url().optional().nullable(),
 });
 export type ResourceInput = z.infer<typeof resourceSchema>;
 
@@ -196,6 +197,7 @@ export const appSchema = z.object({
   embed_url: z.string().url().optional().nullable(),
   file_url: z.string().url().optional().nullable(),
   icon_url: z.string().url().optional().nullable(),
+  cover_url: z.string().url().optional().nullable(),
 });
 export type AppInput = z.infer<typeof appSchema>;
 

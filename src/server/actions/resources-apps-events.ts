@@ -7,8 +7,25 @@ import { awardPoints } from "@/lib/points/award";
 import { resourceSchema, appSchema, eventSchema } from "@/lib/validations/schemas";
 import { POINTS } from "@/lib/constants";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { slugify } from "@/lib/utils";
 
 type Result = { ok: boolean; error?: string; id?: string };
+
+// Gera um slug único na tabela (slugify + sufixo -N em colisão). O índice unique
+// da 0026 é o backstop final; este check evita a colisão comum.
+async function uniqueSlug(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  table: "resources" | "apps",
+  base: string,
+): Promise<string> {
+  const root = slugify(base) || (table === "apps" ? "aplicativo" : "recurso");
+  for (let i = 1; i <= 50; i++) {
+    const candidate = i === 1 ? root : `${root}-${i}`;
+    const { data } = await supabase.from(table).select("id").eq("slug", candidate).maybeSingle();
+    if (!data) return candidate;
+  }
+  return `${root}-${Date.now().toString(36)}`;
+}
 
 // Recursos -------------------------------------------------------------------
 export async function createResourceAction(formData: FormData): Promise<Result> {
@@ -20,12 +37,14 @@ export async function createResourceAction(formData: FormData): Promise<Result> 
     file_url: formData.get("file_url") || null,
     file_storage_path: formData.get("file_storage_path") || null,
     file_type: formData.get("file_type") || null,
+    cover_url: formData.get("cover_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   const supabase = await createClient();
+  const slug = await uniqueSlug(supabase, "resources", parsed.data.title);
   const { data, error } = await supabase
     .from("resources")
-    .insert({ ...parsed.data, created_by: profile.id })
+    .insert({ ...parsed.data, slug, created_by: profile.id })
     .select("id")
     .single();
   if (error) return { ok: false, error: error.message };
@@ -85,13 +104,15 @@ export async function createAppAction(formData: FormData): Promise<Result> {
     embed_url: formData.get("embed_url") || null,
     file_url: formData.get("file_url") || null,
     icon_url: formData.get("icon_url") || null,
+    cover_url: formData.get("cover_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
+  const slug = await uniqueSlug(supabase, "apps", parsed.data.name);
   const { data, error } = await supabase
     .from("apps")
-    .insert({ ...parsed.data, created_by: profile.id })
+    .insert({ ...parsed.data, slug, created_by: profile.id })
     .select("id")
     .single();
   if (error) return { ok: false, error: error.message };
