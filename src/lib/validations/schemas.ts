@@ -140,7 +140,7 @@ export const courseSchema = z.object({
   title: z.string().min(3).max(120),
   slug: z.string().min(3).max(120).regex(/^[a-z0-9-]+$/),
   description: z.string().max(2000).optional().nullable(),
-  cover_url: z.string().url().optional().nullable(),
+  cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
   status: z.enum(["draft", "published"]).default("draft"),
 });
 export type CourseInput = z.infer<typeof courseSchema>;
@@ -175,7 +175,7 @@ export const resourceSchema = z.object({
   file_url: z.string().url().optional().nullable(),
   file_storage_path: z.string().optional().nullable(),
   file_type: z.string().optional().nullable(),
-  cover_url: z.string().url().optional().nullable(),
+  cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
 });
 export type ResourceInput = z.infer<typeof resourceSchema>;
 
@@ -197,7 +197,7 @@ export const appSchema = z.object({
   embed_url: z.string().url().optional().nullable(),
   file_url: z.string().url().optional().nullable(),
   icon_url: z.string().url().optional().nullable(),
-  cover_url: z.string().url().optional().nullable(),
+  cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
 });
 export type AppInput = z.infer<typeof appSchema>;
 
