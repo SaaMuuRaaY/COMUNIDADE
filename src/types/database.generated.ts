@@ -1315,6 +1315,20 @@ export type Database = {
       channel_requires_mod: { Args: { slug: string }; Returns: boolean }
       current_role: { Args: never; Returns: string }
       dm_unread_count: { Args: never; Returns: number }
+      get_trending_posts: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          author_id: string
+          category: string
+          created_at: string
+          hot_score: number
+          id: string
+          likes: number
+          reactions: number
+          title: string
+          unique_commenters: number
+        }[]
+      }
       increment_app_click: { Args: { p_id: string }; Returns: undefined }
       increment_resource_click: { Args: { p_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
