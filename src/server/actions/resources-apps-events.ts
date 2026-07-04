@@ -62,6 +62,7 @@ export async function updateResourceAction(id: string, formData: FormData): Prom
     file_url: formData.get("file_url") || null,
     file_storage_path: formData.get("file_storage_path") || null,
     file_type: formData.get("file_type") || null,
+    cover_url: formData.get("cover_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   const supabase = await createClient();
@@ -73,6 +74,7 @@ export async function updateResourceAction(id: string, formData: FormData): Prom
       category: parsed.data.category,
       file_url: parsed.data.file_url,
       file_type: parsed.data.file_type,
+      cover_url: parsed.data.cover_url,
     })
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
@@ -119,6 +121,30 @@ export async function createAppAction(formData: FormData): Promise<Result> {
   revalidatePath("/apps");
   revalidatePath("/admin/apps");
   return { ok: true, id: data.id };
+}
+
+export async function updateAppAction(id: string, formData: FormData): Promise<Result> {
+  await requireAdmin();
+  const parsed = appSchema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description") || null,
+    category: formData.get("category"),
+    type: formData.get("type"),
+    status: formData.get("status"),
+    url: formData.get("url") || null,
+    embed_url: formData.get("embed_url") || null,
+    file_url: formData.get("file_url") || null,
+    icon_url: formData.get("icon_url") || null,
+    cover_url: formData.get("cover_url") || null,
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const supabase = await createClient();
+  // slug NÃO é atualizado aqui (estável); demais campos sim.
+  const { error } = await supabase.from("apps").update({ ...parsed.data }).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/apps");
+  revalidatePath("/admin/apps");
+  return { ok: true, id };
 }
 
 export async function deleteAppAction(id: string): Promise<Result> {

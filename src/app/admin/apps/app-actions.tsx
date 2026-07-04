@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConfirmDeleteIconButton } from "@/components/shared/confirm-delete-icon-button";
 import { APP_CATEGORIES, APP_STATUSES, APP_TYPES } from "@/lib/constants";
 import { createAppAction, deleteAppAction } from "@/server/actions/resources-apps-events";
+import { CoverUploader } from "@/components/shared/cover-uploader";
 import { toast } from "sonner";
 
 export function AppComposer({ onSuccess }: { onSuccess?: () => void } = {}) {
@@ -33,6 +34,7 @@ export function AppComposer({ onSuccess }: { onSuccess?: () => void } = {}) {
     embed_url: "",
     file_url: "",
     icon_url: "",
+    cover_url: "",
   });
 
   function update<K extends keyof typeof form>(k: K, v: string) {
@@ -61,6 +63,7 @@ export function AppComposer({ onSuccess }: { onSuccess?: () => void } = {}) {
           embed_url: "",
           file_url: "",
           icon_url: "",
+          cover_url: "",
         });
         onSuccess?.();
       }
@@ -159,6 +162,7 @@ export function AppComposer({ onSuccess }: { onSuccess?: () => void } = {}) {
             <Input value={form.icon_url} onChange={(e) => update("icon_url", e.target.value)} />
           </div>
         </div>
+        <CoverUploader value={form.cover_url || null} onChange={(url) => update("cover_url", url ?? "")} />
         <div className="flex justify-end">
           <Button onClick={submit} disabled={pending}>
             {pending ? "Salvando…" : "Cadastrar app"}

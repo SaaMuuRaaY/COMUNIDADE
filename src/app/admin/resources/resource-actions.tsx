@@ -23,6 +23,7 @@ import {
   updateResourceAction,
   deleteResourceAction,
 } from "@/server/actions/resources-apps-events";
+import { CoverUploader } from "@/components/shared/cover-uploader";
 import { toast } from "sonner";
 
 type ResourceFormValues = {
@@ -31,6 +32,7 @@ type ResourceFormValues = {
   category: string;
   file_url: string;
   file_type: string;
+  cover_url: string;
 };
 
 const EMPTY: ResourceFormValues = {
@@ -39,6 +41,7 @@ const EMPTY: ResourceFormValues = {
   category: "apostilas",
   file_url: "",
   file_type: "",
+  cover_url: "",
 };
 
 function toFormData(values: ResourceFormValues): FormData {
@@ -117,6 +120,7 @@ function ResourceForm({
           onChange={(e) => update("description", e.target.value)}
         />
       </div>
+      <CoverUploader value={form.cover_url || null} onChange={(url) => update("cover_url", url ?? "")} />
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label>URL do arquivo</Label>
@@ -194,6 +198,7 @@ type ResourceRow = {
   category: string;
   file_url: string | null;
   file_type: string | null;
+  cover_url: string | null;
 };
 
 export function EditResourceDialog({ resource }: { resource: ResourceRow }) {
@@ -204,6 +209,7 @@ export function EditResourceDialog({ resource }: { resource: ResourceRow }) {
     category: resource.category,
     file_url: resource.file_url ?? "",
     file_type: resource.file_type ?? "",
+    cover_url: resource.cover_url ?? "",
   };
 
   return (

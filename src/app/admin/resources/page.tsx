@@ -44,6 +44,7 @@ export default async function AdminResourcesPage() {
                         category: r.category as string,
                         file_url: (r.file_url as string | null) ?? null,
                         file_type: (r.file_type as string | null) ?? null,
+                        cover_url: (r.cover_url as string | null) ?? null,
                       }}
                     />
                     <DeleteResourceInline id={r.id as string} />
