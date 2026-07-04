@@ -26,7 +26,7 @@ export async function followUser(userId: string): Promise<ActionResult> {
   const me = await requireProfile();
   if (me.is_banned) return { ok: false, error: "Usuário banido." };
   if (userId === me.id) return { ok: false, error: "Ação inválida." };
-  if (!rateLimit(`follow:${me.id}`, { limit: 60, windowMs: 60_000 }).ok) return { ok: false, error: RATE };
+  if (!(await rateLimit(`follow:${me.id}`, { limit: 60, windowMs: 60_000 })).ok) return { ok: false, error: RATE };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -58,7 +58,7 @@ export async function sendFriendRequest(userId: string): Promise<ActionResult> {
   const me = await requireProfile();
   if (me.is_banned) return { ok: false, error: "Usuário banido." };
   if (userId === me.id) return { ok: false, error: "Ação inválida." };
-  if (!rateLimit(`friend:${me.id}`, { limit: 30, windowMs: 60_000 }).ok) return { ok: false, error: RATE };
+  if (!(await rateLimit(`friend:${me.id}`, { limit: 30, windowMs: 60_000 })).ok) return { ok: false, error: RATE };
 
   const supabase = await createClient();
   const { data: existing } = await supabase

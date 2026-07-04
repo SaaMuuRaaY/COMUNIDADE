@@ -15,7 +15,7 @@ const callbackUrl = `${env.NEXT_PUBLIC_APP_URL}/auth/callback`;
 
 export async function loginAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const ip = await clientIp();
-  if (!rateLimit(`login:${ip}`, { limit: 10, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+  if (!(await rateLimit(`login:${ip}`, { limit: 10, windowMs: 60_000 })).ok) return { ok: false, error: TOO_MANY };
 
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
@@ -35,7 +35,7 @@ export async function loginAction(_prev: ActionState | null, formData: FormData)
 
 export async function registerAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const ip = await clientIp();
-  if (!rateLimit(`register:${ip}`, { limit: 5, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+  if (!(await rateLimit(`register:${ip}`, { limit: 5, windowMs: 60_000 })).ok) return { ok: false, error: TOO_MANY };
 
   const parsed = registerSchema.safeParse({
     full_name: formData.get("full_name"),
@@ -74,7 +74,7 @@ export async function resendConfirmationAction(
   if (!parsed.success) return { ok: false, error: "E-mail inválido" };
 
   const ip = await clientIp();
-  if (!rateLimit(`resend:${ip}`, { limit: 3, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+  if (!(await rateLimit(`resend:${ip}`, { limit: 3, windowMs: 60_000 })).ok) return { ok: false, error: TOO_MANY };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resend({
@@ -91,7 +91,7 @@ export async function forgotPasswordAction(
   formData: FormData,
 ): Promise<ActionState> {
   const ip = await clientIp();
-  if (!rateLimit(`forgot:${ip}`, { limit: 4, windowMs: 60_000 }).ok) return { ok: false, error: TOO_MANY };
+  if (!(await rateLimit(`forgot:${ip}`, { limit: 4, windowMs: 60_000 })).ok) return { ok: false, error: TOO_MANY };
 
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) {

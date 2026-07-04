@@ -148,7 +148,7 @@ export async function deleteEventAction(id: string): Promise<Result> {
 export async function rsvpEventAction(eventId: string, status: "going" | "maybe" | "declined" = "going"): Promise<Result> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`rsvp:${profile.id}`, { limit: 30, windowMs: 60_000 }).ok) {
+  if (!(await rateLimit(`rsvp:${profile.id}`, { limit: 30, windowMs: 60_000 })).ok) {
     return { ok: false, error: "Muitas ações em pouco tempo. Aguarde um momento." };
   }
   const supabase = await createClient();

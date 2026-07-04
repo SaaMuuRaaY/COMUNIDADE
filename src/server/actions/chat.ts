@@ -18,7 +18,7 @@ export type ActionResult = { ok: boolean; error?: string; id?: string };
 export async function sendMessageAction(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`chat:${profile.id}`, { limit: 30, windowMs: 60_000 }).ok) {
+  if (!(await rateLimit(`chat:${profile.id}`, { limit: 30, windowMs: 60_000 })).ok) {
     return { ok: false, error: RATE_MSG };
   }
 

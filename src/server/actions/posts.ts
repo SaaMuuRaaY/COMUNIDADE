@@ -17,7 +17,7 @@ export type ActionResult = { ok: boolean; error?: string; id?: string };
 export async function createPostAction(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`post:${profile.id}`, { limit: 12, windowMs: 60_000 }).ok) return { ok: false, error: RATE_MSG };
+  if (!(await rateLimit(`post:${profile.id}`, { limit: 12, windowMs: 60_000 })).ok) return { ok: false, error: RATE_MSG };
 
   const parsed = postSchema.safeParse({
     category: formData.get("category"),
@@ -146,7 +146,7 @@ export async function pinPostAction(postId: string, pinned: boolean): Promise<Ac
 export async function togglePostLikeAction(postId: string): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`like:${profile.id}`, { limit: 60, windowMs: 60_000 }).ok) return { ok: false, error: RATE_MSG };
+  if (!(await rateLimit(`like:${profile.id}`, { limit: 60, windowMs: 60_000 })).ok) return { ok: false, error: RATE_MSG };
 
   const supabase = await createClient();
   const { data: existing } = await supabase
@@ -183,7 +183,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
   if (!(REACTION_EMOJIS as readonly string[]).includes(emoji)) {
     return { ok: false, error: "Reação inválida." };
   }
-  if (!rateLimit(`react:${profile.id}`, { limit: 60, windowMs: 60_000 }).ok) {
+  if (!(await rateLimit(`react:${profile.id}`, { limit: 60, windowMs: 60_000 })).ok) {
     return { ok: false, error: RATE_MSG };
   }
 
@@ -221,7 +221,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
 export async function toggleSavePostAction(postId: string): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`save:${profile.id}`, { limit: 60, windowMs: 60_000 }).ok) return { ok: false, error: RATE_MSG };
+  if (!(await rateLimit(`save:${profile.id}`, { limit: 60, windowMs: 60_000 })).ok) return { ok: false, error: RATE_MSG };
 
   const supabase = await createClient();
   const { data: existing } = await supabase
@@ -258,7 +258,7 @@ export async function toggleSavePostAction(postId: string): Promise<ActionResult
 export async function createCommentAction(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
-  if (!rateLimit(`comment:${profile.id}`, { limit: 20, windowMs: 60_000 }).ok) return { ok: false, error: RATE_MSG };
+  if (!(await rateLimit(`comment:${profile.id}`, { limit: 20, windowMs: 60_000 })).ok) return { ok: false, error: RATE_MSG };
 
   const parsed = commentSchema.safeParse({
     post_id: formData.get("post_id"),

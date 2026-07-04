@@ -71,7 +71,7 @@ export async function startConversation(otherUserId: string): Promise<StartResul
 export async function sendDirectMessage(conversationId: string, body: string): Promise<DMResult> {
   if (!uuid(conversationId)) return { ok: false, error: "Conversa inválida." };
   const me = await requireActiveProfile();
-  if (!rateLimit(`dm:${me.id}`, { limit: 30, windowMs: 60_000 }).ok) {
+  if (!(await rateLimit(`dm:${me.id}`, { limit: 30, windowMs: 60_000 })).ok) {
     return { ok: false, error: RATE_MSG };
   }
 
