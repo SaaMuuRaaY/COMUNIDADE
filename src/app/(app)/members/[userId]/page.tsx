@@ -11,6 +11,8 @@ import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelative } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/community/structure";
+import { ConnectionButtons } from "@/components/connections/connection-buttons";
+import { getConnectionState, getConnectionCounts } from "@/server/queries/connections";
 import type { SocialLinks as SocialLinksMap } from "@/types/db";
 
 type Params = Promise<{ userId: string }>;
@@ -26,11 +28,17 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 export default async function MemberProfile({ params }: { params: Params }) {
   const { userId } = await params;
-  await requireProfile();
+  const me = await requireProfile();
+  const isSelf = me.id === userId;
   const supabase = await createClient();
 
   const { data: p } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
   if (!p) notFound();
+
+  const [connState, counts] = await Promise.all([
+    isSelf ? Promise.resolve(null) : getConnectionState(userId),
+    getConnectionCounts(userId),
+  ]);
 
   const [{ data: posts }, { count: postsCount }, { count: commentsCount }, { count: eventsCount }] =
     await Promise.all([
@@ -102,11 +110,15 @@ export default async function MemberProfile({ params }: { params: Params }) {
                 <p className="text-sm text-muted-foreground/70">Este membro ainda não escreveu uma bio.</p>
               )}
               <SocialLinks links={p.social_links as SocialLinksMap | undefined} className="pt-1" />
+              {!isSelf && connState ? <ConnectionButtons userId={userId} initial={connState} /> : null}
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat label="Seguidores" value={counts.followers} />
+            <Stat label="Seguindo" value={counts.following} />
+            <Stat label="Amigos" value={counts.friends} />
             <Stat label="Pontos" value={(p.points as number) ?? 0} />
             <Stat label="Nível" value={(p.level as number) ?? 1} />
             <Stat label="Publicações" value={postsCount ?? 0} />

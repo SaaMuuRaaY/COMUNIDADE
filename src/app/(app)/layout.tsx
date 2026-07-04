@@ -5,13 +5,15 @@ import { requireActiveProfile } from "@/lib/auth/current-user";
 import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { getUnreadDmCount } from "@/server/queries/direct-messages";
 import { getUnreadNotificationCount } from "@/server/queries/notifications";
+import { getPendingRequestCount } from "@/server/queries/connections";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireActiveProfile();
   const admin = isAdminCheck(profile);
-  const [unreadDm, unreadNotifications] = await Promise.all([
+  const [unreadDm, unreadNotifications, pendingRequests] = await Promise.all([
     getUnreadDmCount(),
     getUnreadNotificationCount(),
+    getPendingRequestCount(),
   ]);
 
   return (
@@ -23,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           isAdmin={admin}
           unreadDm={unreadDm}
           unreadNotifications={unreadNotifications}
+          pendingRequests={pendingRequests}
         />
         <main className="flex-1 pb-20 md:pb-6">{children}</main>
         <MobileNav />

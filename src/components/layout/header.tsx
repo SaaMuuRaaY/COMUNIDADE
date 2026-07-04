@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, Bookmark, LogOut, Menu, MessageCircle, Settings, User, Wrench } from "lucide-react";
+import { Bell, Bookmark, LogOut, Menu, MessageCircle, Settings, User, Users, Wrench } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import { NavTree } from "./nav-tree";
 import { HeaderPanel } from "./header-panel";
 import { ConversationsPanel } from "@/components/direct/conversations-panel";
 import { NotificationsPanel } from "@/components/notifications/notifications-panel";
+import { RequestsPanel } from "@/components/connections/requests-panel";
 import type { Profile } from "@/types/db";
 
 export function Header({
@@ -31,11 +32,13 @@ export function Header({
   isAdmin,
   unreadDm,
   unreadNotifications,
+  pendingRequests,
 }: {
   profile: Profile;
   isAdmin: boolean;
   unreadDm?: number;
   unreadNotifications?: number;
+  pendingRequests?: number;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -92,6 +95,16 @@ export function Header({
           footerLabel="Ver todas as notificações"
         >
           <NotificationsPanel />
+        </HeaderPanel>
+
+        <HeaderPanel
+          icon={Users}
+          label="Conexões"
+          count={pendingRequests}
+          href="/conexoes"
+          footerLabel="Ver conexões"
+        >
+          <RequestsPanel />
         </HeaderPanel>
 
         <Link href="/salvos" aria-label="Salvos">
