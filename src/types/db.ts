@@ -47,7 +47,8 @@ export type PointsAction =
   | "comment_created"
   | "like_received"
   | "lesson_completed"
-  | "event_attended";
+  | "event_attended"
+  | "admin_adjustment";
 export type SocialPlatform = "instagram" | "tiktok" | "linkedin" | "github" | "youtube";
 export type SocialLinks = Partial<Record<SocialPlatform, string>>;
 
