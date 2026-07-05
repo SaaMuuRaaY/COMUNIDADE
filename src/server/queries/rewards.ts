@@ -63,22 +63,22 @@ export type MonthlyRankRow = {
  * SECURITY DEFINER). Global (mesmo p/ todos), entao usa client service-role (sem
  * cookies) + unstable_cache 180s — mesmo padrao do trending.
  */
-const cachedMonthly = unstable_cache(
-  async (limit: number): Promise<MonthlyRankRow[]> => {
-    const supabase = createAdminClient();
-    const { data } = await supabase.rpc("get_monthly_ranking", { p_limit: limit });
-    return (data ?? []).map((r) => ({
-      user_id: r.user_id,
-      full_name: r.full_name,
-      avatar_url: r.avatar_url,
-      level: r.level ?? 1,
-      monthly_points: Number(r.monthly_points ?? 0),
-    }));
-  },
-  ["monthly-ranking"],
-  { revalidate: 180, tags: ["monthly-ranking"] },
-);
-
 export function getMonthlyRanking(limit = 50) {
-  return cachedMonthly(limit);
+  // keyParts inclui o limit para NAO colidir entre chamadas com limites
+  // diferentes (ex.: /admin/rewards com 20 e /leaderboard com 50).
+  return unstable_cache(
+    async (): Promise<MonthlyRankRow[]> => {
+      const supabase = createAdminClient();
+      const { data } = await supabase.rpc("get_monthly_ranking", { p_limit: limit });
+      return (data ?? []).map((r) => ({
+        user_id: r.user_id,
+        full_name: r.full_name,
+        avatar_url: r.avatar_url,
+        level: r.level ?? 1,
+        monthly_points: Number(r.monthly_points ?? 0),
+      }));
+    },
+    ["monthly-ranking", String(limit)],
+    { revalidate: 180, tags: ["monthly-ranking"] },
+  )();
 }

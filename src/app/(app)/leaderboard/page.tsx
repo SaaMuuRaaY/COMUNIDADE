@@ -43,6 +43,7 @@ export default async function LeaderboardPage({
     const { data } = await supabase
       .from("profiles")
       .select("id, full_name, avatar_url, points, level")
+      .eq("is_banned", false)
       .order("points", { ascending: false })
       .limit(50);
     rows = (data ?? []).map((p) => ({

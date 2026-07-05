@@ -34,6 +34,14 @@ export async function setMonthlyWinnersAction(
 
   const supabase = await createClient();
 
+  // Valida que todos os vencedores ainda existem ANTES de apagar os atuais —
+  // senao o DELETE apaga e o INSERT falha por FK, deixando o mes sem vencedores.
+  const userIds = winners.map((w) => w.userId);
+  const { data: found } = await supabase.from("profiles").select("id").in("id", userIds);
+  if (!found || found.length !== userIds.length) {
+    return { ok: false, error: "Um ou mais vencedores selecionados não existem mais." };
+  }
+
   const { error: delErr } = await supabase.from("rewards").delete().eq("month", monthISO);
   if (delErr) return { ok: false, error: delErr.message };
 
