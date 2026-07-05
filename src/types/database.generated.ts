@@ -1322,6 +1322,17 @@ export type Database = {
       channel_requires_mod: { Args: { slug: string }; Returns: boolean }
       current_role: { Args: never; Returns: string }
       dm_unread_count: { Args: never; Returns: number }
+      get_monthly_ranking: {
+        Args: { p_limit?: number; p_month?: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          level: number
+          monthly_points: number
+          user_id: string
+          username: string
+        }[]
+      }
       get_trending_posts: {
         Args: { p_days?: number; p_limit?: number }
         Returns: {
