@@ -1239,6 +1239,48 @@ export type Database = {
           },
         ]
       }
+      rewards: {
+        Row: {
+          created_at: string
+          emitted_by: string | null
+          id: string
+          month: string
+          rank: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emitted_by?: string | null
+          id?: string
+          month: string
+          rank: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emitted_by?: string | null
+          id?: string
+          month?: string
+          rank?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_emitted_by_fkey"
+            columns: ["emitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rewards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_posts: {
         Row: {
           created_at: string

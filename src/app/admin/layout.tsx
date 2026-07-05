@@ -12,6 +12,7 @@ const ADMIN_LINKS = [
   { href: "/admin/apps", label: "Apps" },
   { href: "/admin/events", label: "Eventos" },
   { href: "/admin/members", label: "Membros" },
+  { href: "/admin/rewards", label: "Recompensas" },
   { href: "/admin/reports", label: "Denúncias" },
   { href: "/admin/settings", label: "Configurações" },
 ];

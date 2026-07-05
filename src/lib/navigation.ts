@@ -73,6 +73,7 @@ export const NAV_TREE: NavGroup[] = [
       { type: "channel", label: "Marketing e Vendas", slug: "marketing-vendas", icon: "trending-up" },
       { type: "route", label: "Calendário de Eventos", href: "/calendar", icon: "calendar" },
       { type: "route", label: "Ranking", href: "/leaderboard", icon: "trophy" },
+      { type: "route", label: "Recompensas", href: "/rewards", icon: "gift" },
     ],
   },
   {
