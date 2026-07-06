@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,4 +57,69 @@ export async function getAppBySlug(param: string): Promise<AppDetail | null> {
     return (byId as AppDetail | null) ?? null;
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Preview PUBLICO (deslogado). Via service-role (a RLS e "to authenticated"),
+// expondo SO o teaser (capa/titulo/categoria/trecho + contador). NUNCA retorna
+// o payload (file_url/url/embed_url) — o conteudo completo fica pra quem loga.
+// ---------------------------------------------------------------------------
+export type LibraryPreview = {
+  kind: "resource" | "app";
+  slug: string | null;
+  title: string;
+  category: string;
+  cover_url: string | null;
+  teaser: string | null;
+  click_count: number;
+};
+
+function teaserOf(description: string | null): string | null {
+  if (!description) return null;
+  const plain = description
+    .replace(/[#*_`>[\]()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return plain.length > 220 ? `${plain.slice(0, 220).trimEnd()}…` : plain;
+}
+
+export async function getPublicPreview(
+  kind: "resource" | "app",
+  param: string,
+): Promise<LibraryPreview | null> {
+  const supabase = createAdminClient();
+
+  if (kind === "resource") {
+    const cols = "slug, title, category, cover_url, click_count, description";
+    let { data } = await supabase.from("resources").select(cols).eq("slug", param).maybeSingle();
+    if (!data && UUID.test(param)) {
+      ({ data } = await supabase.from("resources").select(cols).eq("id", param).maybeSingle());
+    }
+    if (!data) return null;
+    return {
+      kind,
+      slug: data.slug,
+      title: data.title,
+      category: data.category,
+      cover_url: data.cover_url,
+      click_count: data.click_count,
+      teaser: teaserOf(data.description),
+    };
+  }
+
+  const cols = "slug, name, category, cover_url, click_count, description";
+  let { data } = await supabase.from("apps").select(cols).eq("slug", param).maybeSingle();
+  if (!data && UUID.test(param)) {
+    ({ data } = await supabase.from("apps").select(cols).eq("id", param).maybeSingle());
+  }
+  if (!data) return null;
+  return {
+    kind,
+    slug: data.slug,
+    title: data.name,
+    category: data.category,
+    cover_url: data.cover_url,
+    click_count: data.click_count,
+    teaser: teaserOf(data.description),
+  };
 }
