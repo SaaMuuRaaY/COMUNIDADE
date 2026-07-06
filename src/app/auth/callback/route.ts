@@ -11,7 +11,24 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // Confirmacao de e-mail / OAuth: se o usuario ainda nao concluiu o onboarding,
+      // passa por ele ANTES do destino (robusto — nao depende de query aninhada
+      // sobreviver ao provedor). Ja-onboardado vai direto.
+      let dest = next;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user && !next.startsWith("/onboarding")) {
+        const { data: onb } = await supabase
+          .from("member_onboarding")
+          .select("completed_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!onb?.completed_at) {
+          dest = `/onboarding?next=${encodeURIComponent(next)}`;
+        }
+      }
+      return NextResponse.redirect(`${origin}${dest}`);
     }
   }
   return NextResponse.redirect(`${origin}/login?error=auth`);

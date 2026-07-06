@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/shared/logo";
@@ -53,6 +53,7 @@ export function Header({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0">
+          <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
           <div className="flex h-full flex-col p-4">
             <Link
               href="/dashboard"

@@ -54,8 +54,9 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
   }
 
   const next = readNext(formData);
-  // Cadastro NOVO passa pelo onboarding (nao-bloqueante) e so entao cai no conteudo
-  // (next). Cobre a sessao imediata E a confirmacao por e-mail (via callback).
+  // Sessao IMEDIATA (confirmacao desligada) -> vai pro onboarding e depois ao next.
+  // Confirmacao por E-MAIL -> o callback decide o onboarding (checa completed_at),
+  // entao aqui o emailRedirectTo carrega o next CRU (destino final).
   const afterAuth = `/onboarding?next=${encodeURIComponent(next)}`;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
@@ -63,7 +64,7 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.full_name },
-      emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(afterAuth)}`,
+      emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) return { ok: false, error: error.message };
