@@ -8,11 +8,12 @@ import { loginAction, type ActionState } from "@/server/actions/auth";
 
 const initial: ActionState = { ok: false };
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(loginAction, initial);
 
   return (
     <form action={action} className="space-y-4">
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <div className="space-y-2">
         <Label htmlFor="email">E-mail</Label>
         <Input id="email" name="email" type="email" required autoComplete="email" placeholder="voce@exemplo.com" />

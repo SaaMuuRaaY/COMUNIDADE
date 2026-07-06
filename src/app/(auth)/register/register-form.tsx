@@ -8,7 +8,7 @@ import { registerAction, type ActionState } from "@/server/actions/auth";
 
 const initial: ActionState = { ok: false };
 
-export function RegisterForm() {
+export function RegisterForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(registerAction, initial);
 
   if (state?.pending) {
@@ -25,6 +25,7 @@ export function RegisterForm() {
 
   return (
     <form action={action} className="space-y-4">
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <div className="space-y-2">
         <Label htmlFor="full_name">Seu nome</Label>
         <Input id="full_name" name="full_name" required placeholder="Como podemos te chamar?" />

@@ -5,8 +5,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema, forgotPasswordSchema } from "@/lib/validations/schemas";
+import { safeNextPath } from "@/lib/auth/safe-next-path";
 import { env } from "@/lib/env";
 import { rateLimit, clientIp } from "@/lib/security/rate-limit";
+
+/** Le e valida o destino de retorno (deep-link) do FormData. */
+function readNext(formData: FormData): string {
+  const raw = formData.get("next");
+  return safeNextPath(typeof raw === "string" ? raw : null);
+}
 
 export type ActionState = { ok: boolean; error?: string; pending?: boolean };
 
@@ -30,7 +37,7 @@ export async function loginAction(_prev: ActionState | null, formData: FormData)
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(readNext(formData));
 }
 
 export async function registerAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
@@ -46,13 +53,14 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   }
 
+  const next = readNext(formData);
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.full_name },
-      emailRedirectTo: callbackUrl,
+      emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) return { ok: false, error: error.message };
@@ -63,7 +71,7 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(next);
 }
 
 export async function resendConfirmationAction(
