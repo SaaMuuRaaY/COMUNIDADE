@@ -21,6 +21,16 @@ export function TrackedLink({
   className?: string;
   children: React.ReactNode;
 }) {
+  // Defesa em profundidade: nao renderiza o <a> se o protocolo for perigoso
+  // (javascript:/data:), mesmo que algum dado antigo tenha escapado do schema.
+  let safe = false;
+  try {
+    safe = ["http:", "https:"].includes(new URL(href).protocol);
+  } catch {
+    safe = false;
+  }
+  if (!safe) return <span className={className}>{children}</span>;
+
   return (
     <a
       href={href}

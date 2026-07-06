@@ -40,10 +40,10 @@ const APP_COLS =
 export async function getResourceBySlug(param: string): Promise<ResourceDetail | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("resources").select(RESOURCE_COLS).eq("slug", param).maybeSingle();
-  if (data) return data as ResourceDetail;
+  if (data) return data;
   if (UUID.test(param)) {
     const { data: byId } = await supabase.from("resources").select(RESOURCE_COLS).eq("id", param).maybeSingle();
-    return (byId as ResourceDetail | null) ?? null;
+    return byId ?? null;
   }
   return null;
 }
@@ -51,10 +51,10 @@ export async function getResourceBySlug(param: string): Promise<ResourceDetail |
 export async function getAppBySlug(param: string): Promise<AppDetail | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("apps").select(APP_COLS).eq("slug", param).maybeSingle();
-  if (data) return data as AppDetail;
+  if (data) return data;
   if (UUID.test(param)) {
     const { data: byId } = await supabase.from("apps").select(APP_COLS).eq("id", param).maybeSingle();
-    return (byId as AppDetail | null) ?? null;
+    return byId ?? null;
   }
   return null;
 }

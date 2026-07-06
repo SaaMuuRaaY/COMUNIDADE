@@ -26,6 +26,19 @@ function isSafePublicImageUrl(u: string): boolean {
   }
 }
 
+/**
+ * Aceita so http/https — bloqueia javascript:/data:/vbscript: etc. Usado nos
+ * campos de URL que viram <a href> ou src (evita XSS de href perigoso).
+ */
+function isSafeHttpUrl(u: string): boolean {
+  try {
+    const p = new URL(u).protocol;
+    return p === "http:" || p === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
   password: z.string().min(6, "Mínimo 6 caracteres"),
@@ -199,7 +212,7 @@ export const resourceSchema = z.object({
   title: z.string().min(2).max(160),
   description: z.string().max(1000).optional().nullable(),
   category: z.enum(["apostilas", "templates", "planilhas", "codigos", "checklists", "ferramentas"]),
-  file_url: z.string().url().optional().nullable(),
+  file_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
   file_storage_path: z.string().optional().nullable(),
   file_type: z.string().optional().nullable(),
   cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
@@ -220,10 +233,10 @@ export const appSchema = z.object({
   ]),
   type: z.enum(["link", "embed", "file", "internal"]),
   status: z.enum(["active", "coming-soon", "beta"]),
-  url: z.string().url().optional().nullable(),
-  embed_url: z.string().url().optional().nullable(),
-  file_url: z.string().url().optional().nullable(),
-  icon_url: z.string().url().optional().nullable(),
+  url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
+  embed_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
+  file_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
+  icon_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
   cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
 });
 export type AppInput = z.infer<typeof appSchema>;
