@@ -13,6 +13,7 @@
 -- (SEC) RLS na tabela de backup da migracao 0015 ------------------------------
 alter table public.community_migration_backup enable row level security;
 
+drop policy if exists "community_migration_backup_admin_read" on public.community_migration_backup;
 create policy "community_migration_backup_admin_read"
   on public.community_migration_backup for select to authenticated
   using (public.is_admin());
