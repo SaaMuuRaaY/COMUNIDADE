@@ -54,13 +54,16 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
   }
 
   const next = readNext(formData);
+  // Cadastro NOVO passa pelo onboarding (nao-bloqueante) e so entao cai no conteudo
+  // (next). Cobre a sessao imediata E a confirmacao por e-mail (via callback).
+  const afterAuth = `/onboarding?next=${encodeURIComponent(next)}`;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.full_name },
-      emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(afterAuth)}`,
     },
   });
   if (error) return { ok: false, error: error.message };
@@ -71,7 +74,7 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
   }
 
   revalidatePath("/", "layout");
-  redirect(next);
+  redirect(afterAuth);
 }
 
 export async function resendConfirmationAction(

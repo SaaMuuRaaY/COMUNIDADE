@@ -38,10 +38,12 @@ export function OnboardingForm({
   initial,
   alreadyCompleted,
   acceptedVersion,
+  next,
 }: {
   initial: FormState;
   alreadyCompleted: boolean;
   acceptedVersion: string | null;
+  next: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
@@ -77,7 +79,7 @@ export function OnboardingForm({
         return;
       }
       toast.success("Tudo pronto! Bem-vindo(a).");
-      router.push("/dashboard");
+      router.push(next);
     });
   }
 
@@ -195,7 +197,7 @@ export function OnboardingForm({
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Button variant="ghost" onClick={() => router.push("/dashboard")}>
+          <Button variant="ghost" onClick={() => router.push(next)}>
             Pular por enquanto
           </Button>
           <Button onClick={submit} disabled={pending}>

@@ -1,11 +1,17 @@
 import { requireActiveProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/auth/safe-next-path";
 import { OnboardingForm } from "./onboarding-form";
 
 export const metadata = { title: "Comece por aqui" };
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   const profile = await requireActiveProfile();
+  const next = safeNextPath((await searchParams).next ?? null);
   const supabase = await createClient();
   const { data } = await supabase
     .from("member_onboarding")
@@ -33,6 +39,7 @@ export default async function OnboardingPage() {
         }}
         alreadyCompleted={!!data?.completed_at}
         acceptedVersion={data?.agreements_version ?? null}
+        next={next}
       />
     </div>
   );
