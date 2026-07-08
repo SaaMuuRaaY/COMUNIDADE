@@ -1,3 +1,5 @@
+> ⚠️ **HISTÓRICO — não usar como estado atual.** Achados deste documento podem já ter sido corrigidos (ex.: award_points, cursos draft, estorno de pontos — resolvidos nas migrations 0010/0031/0032/0035). Estado vigente: docs/AUDIT_POST_RELEASE_*.md (2026-07-08).
+
 # NEW FEATURES — MASTER SUMMARY
 
 **Data:** 2026-07-04 · **Branch:** master · **HEAD:** caaa13e · **Gates baseline:** typecheck ✅ · lint ✅ · build ✅

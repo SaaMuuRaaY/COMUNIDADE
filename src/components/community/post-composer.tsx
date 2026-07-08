@@ -77,6 +77,7 @@ export function PostComposer({
         {guidance ? <p className="text-xs text-muted-foreground">{guidance}</p> : null}
         <Input
           placeholder="Título (opcional)"
+          aria-label="Título da publicação"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={160}
@@ -91,6 +92,7 @@ export function PostComposer({
             <Textarea
               rows={6}
               placeholder={placeholder ?? "Escreva em Markdown — **negrito**, _itálico_, listas, [links](#)…"}
+              aria-label="Conteúdo da publicação"
               value={body}
               onChange={(e) => setBody(e.target.value)}
             />

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth/current-user";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { reportActionError } from "@/lib/observability";
 import { getPendingRequests, type ConnectionProfile } from "@/server/queries/connections";
 
 export type ActionResult = { ok: boolean; error?: string };
@@ -72,7 +73,7 @@ export async function sendFriendRequest(userId: string): Promise<ActionResult> {
   if (error) {
     // 23505 = corrida (A->B e B->A simultaneos) barrada pelo indice unico canonico.
     if (error.code === "23505") return { ok: false, error: "Já existe uma relação com este membro." };
-    console.error("[connections] pedido de amizade:", error.message);
+    reportActionError("[connections] pedido de amizade", error);
     return { ok: false, error: "Não foi possível enviar a solicitação. Tente novamente." };
   }
   revalidateConn(userId);

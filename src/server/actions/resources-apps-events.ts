@@ -7,6 +7,7 @@ import { awardPoints } from "@/lib/points/award";
 import { resourceSchema, appSchema, eventSchema } from "@/lib/validations/schemas";
 import { POINTS } from "@/lib/constants";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { reportActionError } from "@/lib/observability";
 import { slugify } from "@/lib/utils";
 
 type Result = { ok: boolean; error?: string; id?: string };
@@ -234,7 +235,7 @@ export async function rsvpEventAction(eventId: string, status: "going" | "maybe"
       { onConflict: "event_id,user_id" },
     );
   if (error) {
-    console.error("[events] rsvp:", error.message);
+    reportActionError("[events] rsvp", error);
     return { ok: false, error: "Não foi possível confirmar a presença. Tente novamente." };
   }
 

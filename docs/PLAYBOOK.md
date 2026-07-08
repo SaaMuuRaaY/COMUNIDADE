@@ -2,13 +2,15 @@
 
 > Manual de "como operar a plataforma no dia-a-dia". Foco em **admin/moderador**. Cada aba explica o que fazer, onde clicar e como subir conteúdo.
 
+> ⚠️ **Atualizado em 2026-07-08 (auditoria pós-release).** Algumas seções ainda descrevem o MVP original; onde houver conflito, vale o app atual e os docs `AUDIT_POST_RELEASE_*.md`. Principais mudanças desde a primeira versão: canais substituíram categorias (0013–0016), upload nativo existe (avatar, capas, imagem de post), notificações são automáticas (0008/0022), chat realtime + DMs + salvos + conexões (F02–F04), Biblioteca 2.0 com URLs próprias, onboarding com acordos, ranking mensal + recompensas.
+
 ---
 
 ## Antes de começar
 
 ### Como logar como admin
 1. Acesse http://localhost:3004/login (ou seu domínio de produção)
-2. Email: `admin@codex.community` · Senha: `codex123!` (trocar antes de produção — ver [PROJETO.md §10.5](PROJETO.md))
+2. Use a conta admin/owner real da comunidade (o usuário demo `admin@codex.community` foi **removido** na migration 0025 por segurança).
 3. Você vai cair em `/dashboard`. No header aparece o badge 👑 Admin.
 
 ### Onde fica o painel admin
@@ -85,10 +87,10 @@ Feed estilo Skool/Reddit. Membros publicam dúvidas, apresentações, resultados
 - `/admin/posts` → lista os 100 mais recentes, incluindo excluídos
 - Você pode excluir qualquer um (soft-delete, não some do banco)
 
-### Categorias disponíveis
-Geral · Dúvidas · Apresentações · Resultados · Projetos · Avisos · Suporte
+### Canais disponíveis (substituíram as categorias antigas)
+A comunidade é organizada em **canais com URL própria na raiz** (ex.: `/comece-por-aqui`, `/apresente-se`, `/duvidas-gerais`, `/comunicados`, `/agentes`, `/rotinas`, `/suporte-tecnico`, `/marketing-e-vendas`, `/compartilhe-seu-projeto`, `/vagas-e-oportunidades`, `/parcerias-e-colaboracoes`, `/cupons-e-descontos`, `/lives-e-encontros`) + Feed Geral em `/community`.
 
-Para mudar categorias, editar `src/lib/constants.ts` + CHECK constraint na migration 0002. Categorias novas precisam de novo SQL no banco — ver [PROJETO.md §9.5](PROJETO.md).
+A fonte de verdade é `src/lib/community/structure.ts` (permissões de publicação/comentário por canal). Canal novo exige atualizar esse arquivo + CHECK no banco (migrations 0013–0017).
 
 ---
 
@@ -306,24 +308,22 @@ select key, value from settings;
 
 ---
 
-## 9. Aba **Notificações** (`/notifications`)
+## 9. Aba **Notificações** (`/notifications` + sino do header)
 
-### Estado atual (MVP)
-- Tela mostra notifications da tabela
-- **Nenhuma notification é criada automaticamente ainda**
-- Você pode criar manualmente via SQL pra testar:
+### Estado atual
+- Notificações são **criadas automaticamente por triggers** desde as migrations 0008 e 0022:
+  - curtida no seu post → notifica o autor
+  - comentário no seu post → notifica o autor
+  - nova mensagem direta → notifica o destinatário
+- O sino do header mostra badge de não lidas com painel popover; "marcar todas como lidas" disponível.
+- Notificação manual (avisos pontuais) ainda é via SQL:
 ```sql
 insert into notifications (user_id, title, body, type)
 values ('UUID_DO_MEMBRO', 'Bem-vindo!', 'Aproveite a comunidade.', 'system');
 ```
 
-### Para automatizar (roadmap)
-Adicionar triggers SQL:
-- Em INSERT post_likes → notification pro autor do post
-- Em INSERT post_comments → notification pro autor + parent
-- Em INSERT events → notification pra todos os membros ativos
-
-Ver [PROJETO.md §9.3 task 6](PROJETO.md).
+### Roadmap
+- Menções `@username` com notificação (Feature F-01 do roadmap pós-release).
 
 ---
 

@@ -80,6 +80,7 @@ export function CommentList({ postId, comments, currentUserId, canModerate, canC
             <Textarea
               rows={3}
               placeholder="Adicione um comentário…"
+              aria-label="Escrever comentário"
               value={body}
               onChange={(e) => setBody(e.target.value)}
             />

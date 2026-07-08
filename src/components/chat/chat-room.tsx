@@ -134,7 +134,7 @@ export function ChatRoom({
   }
 
   return (
-    <div className="flex h-[calc(100vh-11rem)] flex-col overflow-hidden rounded-xl border bg-card">
+    <div className="flex h-[calc(100dvh-11rem)] flex-col overflow-hidden rounded-xl border bg-card">
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">
@@ -196,7 +196,7 @@ export function ChatRoom({
                   )}
                 </div>
                 {!m.is_deleted && editingId !== m.id && (mine || canModerate) ? (
-                  <div className="mt-0.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="mt-0.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                     {mine ? (
                       <button
                         type="button"
@@ -234,6 +234,7 @@ export function ChatRoom({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Escreva uma mensagem…"
+          aria-label="Escrever mensagem no chat"
           maxLength={2000}
           className="flex-1"
         />

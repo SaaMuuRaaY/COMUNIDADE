@@ -312,6 +312,8 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
             onClick={onLike}
             disabled={pending}
             className="gap-2"
+            aria-pressed={liked}
+            aria-label={liked ? `Descurtir (${likesCount} curtidas)` : `Curtir (${likesCount} curtidas)`}
           >
             <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
             {likesCount}
@@ -390,16 +392,18 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
           </DialogHeader>
           <form onSubmit={onEditSubmit} className="space-y-3">
             <div className="space-y-1.5">
-              <Label>Título (opcional)</Label>
+              <Label htmlFor={`edit-title-${post.id}`}>Título (opcional)</Label>
               <Input
+                id={`edit-title-${post.id}`}
                 value={editForm.title}
                 onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
                 maxLength={160}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Conteúdo</Label>
+              <Label htmlFor={`edit-body-${post.id}`}>Conteúdo</Label>
               <Textarea
+                id={`edit-body-${post.id}`}
                 value={editForm.body}
                 onChange={(e) => setEditForm((f) => ({ ...f, body: e.target.value }))}
                 rows={5}
@@ -408,8 +412,9 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
             </div>
             {canModerate ? (
               <div className="space-y-1.5">
-                <Label>Canal</Label>
+                <Label htmlFor={`edit-channel-${post.id}`}>Canal</Label>
                 <select
+                  id={`edit-channel-${post.id}`}
                   value={moveTo}
                   onChange={(e) => setMoveTo(e.target.value)}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"

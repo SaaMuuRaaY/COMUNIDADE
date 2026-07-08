@@ -192,7 +192,7 @@ export function DMThread({
   }
 
   return (
-    <div className="flex h-[calc(100vh-11rem)] flex-col overflow-hidden rounded-xl border bg-card">
+    <div className="flex h-[calc(100dvh-11rem)] flex-col overflow-hidden rounded-xl border bg-card">
       <div className="flex items-center gap-3 border-b p-3">
         <Link
           href="/mensagens"
@@ -296,7 +296,7 @@ export function DMThread({
                     <span>{formatRelative(m.created_at)}</span>
                     {m.edited_at && !m.is_deleted ? <span>(editada)</span> : null}
                     {mine && !m.is_deleted && editingId !== m.id ? (
-                      <span className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <span className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                         <button
                           type="button"
                           onClick={() => {
@@ -347,6 +347,7 @@ export function DMThread({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Escreva uma mensagem…"
+            aria-label="Escrever mensagem direta"
             maxLength={2000}
             className="flex-1"
           />
@@ -365,6 +366,7 @@ export function DMThread({
             value={reportReason}
             onChange={(e) => setReportReason(e.target.value)}
             placeholder="Descreva o motivo (mín. 3 caracteres)…"
+            aria-label="Motivo da denúncia"
             maxLength={500}
             rows={4}
           />

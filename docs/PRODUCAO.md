@@ -3,9 +3,9 @@
 > Este doc lista **o que falta** para sair do "MVP rodando local" e ir pra "membros reais usando".
 > Organizado por prioridade: **BLOQUEADORES** (não vá ao ar sem) · **IMPORTANTES** (faça na primeira semana) · **NICE-TO-HAVE**.
 
----
+> ⚠️ **Atualização 2026-07-08 (auditoria pós-release):** vários itens abaixo já foram resolvidos — deploy em produção na Vercel (branch `master`), seed/usuários demo **removidos pela migration 0025** (B1 obsoleto), suíte E2E existente (`pnpm test:e2e`), Sentry configurado. Pendências operacionais vigentes: Auth URLs no Dashboard, `UPSTASH_REDIS_*` e DSN Sentry em produção, confirmação da migration 0035 na cloud — ver `AUDIT_POST_RELEASE_SECURITY.md §6`.
 
-## Status atual (em 2026-05-31)
+## Status em 2026-05-31 (histórico)
 
 | Item | Status |
 |---|---|
@@ -25,8 +25,8 @@
 
 ## BLOQUEADORES (faça antes de mandar o primeiro link pra alguém)
 
-### B1. Trocar senhas demo no banco
-**Por quê:** seed criou 5 usuários com senha pública `codex123!`. Qualquer um que ver este repo entra como admin.
+### B1. ~~Trocar senhas demo no banco~~ ✅ RESOLVIDO (migration 0025 removeu o seed demo)
+**Por quê (histórico):** seed criava 5 usuários com senha pública `codex123!`. Qualquer um que ver este repo entrava como admin.
 
 **Como:**
 ```sql

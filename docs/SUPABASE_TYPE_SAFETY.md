@@ -1,3 +1,5 @@
+> ⚠️ **HISTÓRICO — etapa concluída em 2026-07-01.** Referências a estado (12 migrations, db.ts stub) valem para aquela data; hoje são 35 migrations e os tipos vivem em `database.generated.ts` (regenerar com `pnpm db:types`).
+
 # Supabase Type Safety — Portal Nexus (módulo COMUNIDADE)
 
 > Guia da tipagem real do Supabase. **Data:** 2026-07-01 · **Branch:** `master` · **HEAD:** `1f5518d` · working tree limpo.

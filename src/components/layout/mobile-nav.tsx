@@ -21,7 +21,7 @@ export function MobileNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center gap-0.5 rounded-md px-2 py-1 text-[10px]",
+              "flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1.5 text-[10px]",
               active ? "text-[var(--accent)]" : "text-muted-foreground",
             )}
           >

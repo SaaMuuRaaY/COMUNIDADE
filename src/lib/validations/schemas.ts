@@ -247,6 +247,6 @@ export const eventSchema = z.object({
   event_type: z.enum(["live", "mentoria", "aula", "desafio", "reuniao"]),
   starts_at: z.string().datetime(),
   ends_at: z.string().datetime().optional().nullable(),
-  external_url: z.string().url().optional().nullable(),
+  external_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
 });
 export type EventInput = z.infer<typeof eventSchema>;

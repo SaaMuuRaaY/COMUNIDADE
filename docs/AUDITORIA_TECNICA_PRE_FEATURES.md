@@ -1,3 +1,5 @@
+> ⚠️ **HISTÓRICO — não usar como estado atual.** Achados deste documento podem já ter sido corrigidos (ex.: award_points, cursos draft, estorno de pontos — resolvidos nas migrations 0010/0031/0032/0035). Estado vigente: docs/AUDIT_POST_RELEASE_*.md (2026-07-08).
+
 # AUDITORIA TÉCNICA PRÉ-FEATURES — Portal Nexus (módulo COMUNIDADE)
 
 > **Tipo:** Auditoria técnica read-only — **nenhum arquivo de código, banco, migration, Supabase, commit, push ou deploy foi tocado**. Únicos arquivos criados: este documento e o resumo (`AUDITORIA_TECNICA_PRE_FEATURES_RESUMO.md`).

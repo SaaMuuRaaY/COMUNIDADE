@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { MEMBER_ROUTES } from "./fixtures";
+import { MEMBER_ROUTES, MEMBER_CHANNEL, MEMBER_CHANNEL_CTA } from "./fixtures";
 
 test.describe("Membro autenticado", () => {
   test("dashboard carrega após login", async ({ page }) => {
@@ -18,33 +18,35 @@ test.describe("Membro autenticado", () => {
     });
   }
 
-  test("criar publicação real no feed", async ({ page }) => {
+  test("criar publicação real em um canal", async ({ page }) => {
     const marker = `E2E post ${Date.now()} — validação de integridade`;
-    await page.goto("/community");
+    await page.goto(MEMBER_CHANNEL);
 
-    // Abre o composer (botão placeholder)
-    await page.getByRole("button", { name: /O que está acontecendo/i }).click();
-    const textarea = page.locator("textarea");
-    await expect(textarea).toBeVisible();
-    await textarea.fill(marker);
-    await page.getByRole("button", { name: "Publicar" }).click();
+    await page.getByRole("button", { name: MEMBER_CHANNEL_CTA }).click();
+    const body = page.getByLabel("Conteúdo da publicação");
+    await expect(body).toBeVisible();
+    await body.fill(marker);
+    await page.getByRole("button", { name: "Publicar", exact: true }).click();
 
-    // Confirma via toast e presença no feed
     await expect(page.getByText("Publicação criada.")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(marker)).toBeVisible({ timeout: 20_000 });
   });
 
-  test("curtir uma publicação não gera erro", async ({ page }) => {
+  test("curtir uma publicação alterna o estado sem erro", async ({ page }) => {
     await page.goto("/community");
-    const likeButton = page.locator("button:has(svg.lucide-heart)").first();
+    // aria-label/aria-pressed do botão de curtir tornam o estado observável.
+    const likeButton = page
+      .locator('button[aria-label^="Curtir"], button[aria-label^="Descurtir"]')
+      .first();
     await expect(likeButton).toBeVisible();
-    const before = (await likeButton.innerText()).trim();
+
+    const wasLiked = (await likeButton.getAttribute("aria-pressed")) === "true";
     await likeButton.click();
-    // O botão fica desabilitado durante a transição e reabilita; sem toast de erro.
-    await expect(page.getByText(/Erro ao curtir/i)).toHaveCount(0);
-    await expect(likeButton).toBeEnabled({ timeout: 15_000 });
-    const after = (await likeButton.innerText()).trim();
-    expect(after).not.toBe(`__${before}__nochange`); // sanity: clique processou
+
+    await expect(page.getByText(/Não foi possível atualizar a curtida/i)).toHaveCount(0);
+    await expect(likeButton).toHaveAttribute("aria-pressed", String(!wasLiked), {
+      timeout: 20_000,
+    });
   });
 
   test("membro NÃO acessa /admin (autorização)", async ({ page }) => {

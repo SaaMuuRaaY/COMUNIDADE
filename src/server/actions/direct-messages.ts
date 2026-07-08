@@ -6,6 +6,7 @@ import { requireActiveProfile } from "@/lib/auth/current-user";
 import { messageSchema, reportSchema } from "@/lib/validations/schemas";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { hasProfanity, PROFANITY_ERROR } from "@/lib/security/profanity";
+import { reportActionError } from "@/lib/observability";
 import {
   listMembersForDM,
   getConversations,
@@ -106,7 +107,12 @@ export async function sendDirectMessage(conversationId: string, body: string): P
     conv.user_a === me.id
       ? { last_message_at: ts, user_a_last_read_at: ts }
       : { last_message_at: ts, user_b_last_read_at: ts };
-  await supabase.from("dm_conversations").update(patch).eq("id", conversationId);
+  const { error: convError } = await supabase
+    .from("dm_conversations")
+    .update(patch)
+    .eq("id", conversationId);
+  // Mensagem já foi entregue; falha aqui só dessincroniza inbox/badge — reportar, não bloquear.
+  if (convError) reportActionError("[dm] atualizar metadados da conversa", convError);
 
   return { ok: true, id: msg.id };
 }

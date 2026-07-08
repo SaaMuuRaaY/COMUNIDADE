@@ -9,6 +9,7 @@ import { postSchema, commentSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
 import { canPostInChannel, canCommentInChannel } from "@/lib/community/structure";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { reportActionError } from "@/lib/observability";
 
 const RATE_MSG = "Muitas ações em pouco tempo. Aguarde um momento.";
 
@@ -159,13 +160,13 @@ export async function togglePostLikeAction(postId: string): Promise<ActionResult
   if (existing) {
     const { error } = await supabase.from("post_likes").delete().eq("id", existing.id);
     if (error) {
-      console.error("[posts] descurtir:", error.message);
+      reportActionError("[posts] descurtir", error);
       return { ok: false, error: "Não foi possível atualizar a curtida. Tente novamente." };
     }
   } else {
     const { error } = await supabase.from("post_likes").insert({ post_id: postId, user_id: profile.id });
     if (error) {
-      console.error("[posts] curtir:", error.message);
+      reportActionError("[posts] curtir", error);
       return { ok: false, error: "Não foi possível atualizar a curtida. Tente novamente." };
     }
     // pontos para o autor são lançados pelo trigger handle_like_award
@@ -199,7 +200,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
   if (existing) {
     const { error } = await supabase.from("post_reactions").delete().eq("id", existing.id);
     if (error) {
-      console.error("[posts] remover reação:", error.message);
+      reportActionError("[posts] remover reação", error);
       return { ok: false, error: "Não foi possível atualizar a reação. Tente novamente." };
     }
   } else {
@@ -207,7 +208,7 @@ export async function togglePostReactionAction(postId: string, emoji: string): P
       .from("post_reactions")
       .insert({ post_id: postId, user_id: profile.id, emoji });
     if (error) {
-      console.error("[posts] reagir:", error.message);
+      reportActionError("[posts] reagir", error);
       return { ok: false, error: "Não foi possível atualizar a reação. Tente novamente." };
     }
   }
@@ -238,13 +239,13 @@ export async function toggleSavePostAction(postId: string): Promise<ActionResult
       .eq("post_id", postId)
       .eq("user_id", profile.id);
     if (error) {
-      console.error("[posts] dessalvar:", error.message);
+      reportActionError("[posts] dessalvar", error);
       return { ok: false, error: "Não foi possível atualizar. Tente novamente." };
     }
   } else {
     const { error } = await supabase.from("saved_posts").insert({ post_id: postId, user_id: profile.id });
     if (error) {
-      console.error("[posts] salvar:", error.message);
+      reportActionError("[posts] salvar", error);
       return { ok: false, error: "Não foi possível atualizar. Tente novamente." };
     }
   }

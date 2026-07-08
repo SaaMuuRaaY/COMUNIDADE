@@ -19,6 +19,13 @@ export type E2EUsers = {
   createdIds: string[];
 };
 
+/**
+ * Canal onde o MEMBRO pode publicar (structure.ts: publish "member", comments true).
+ * O Feed Geral (/community) é VIEW-ONLY desde a FEATURE 02 — publicar acontece nos canais.
+ */
+export const MEMBER_CHANNEL = "/apresente-se";
+export const MEMBER_CHANNEL_CTA = "Criar apresentação";
+
 /** Rotas privadas do membro — usadas no smoke de integridade. */
 export const MEMBER_ROUTES = [
   "/dashboard",

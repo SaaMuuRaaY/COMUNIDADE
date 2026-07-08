@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { setMemberRoleAction, setMemberBannedAction } from "@/server/actions/admin";
 import { toast } from "sonner";
 
@@ -47,15 +48,13 @@ export function MemberRow({
     });
   }
 
-  function toggleBan() {
-    startTransition(async () => {
-      const res = await setMemberBannedAction(id, !banned);
-      if (!res.ok) toast.error(res.error ?? "Erro");
-      else {
-        setBanned(!banned);
-        toast.success(!banned ? "Membro banido." : "Banimento removido.");
-      }
-    });
+  async function doToggleBan() {
+    const res = await setMemberBannedAction(id, !banned);
+    if (!res.ok) toast.error(res.error ?? "Erro");
+    else {
+      setBanned(!banned);
+      toast.success(!banned ? "Membro banido." : "Banimento removido.");
+    }
   }
 
   return (
@@ -70,14 +69,29 @@ export function MemberRow({
           <SelectItem value="member">Membro</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        variant={banned ? "default" : "outline"}
-        size="sm"
-        disabled={pending}
-        onClick={toggleBan}
-      >
-        {banned ? "Desbanir" : "Banir"}
-      </Button>
+      {banned ? (
+        <Button
+          variant="default"
+          size="sm"
+          disabled={pending}
+          onClick={() => startTransition(doToggleBan)}
+        >
+          Desbanir
+        </Button>
+      ) : (
+        <ConfirmDialog
+          trigger={
+            <Button variant="outline" size="sm" disabled={pending}>
+              Banir
+            </Button>
+          }
+          title="Banir membro?"
+          description="O membro perde o acesso à comunidade até ser desbanido."
+          confirmLabel="Banir"
+          destructive
+          onConfirm={doToggleBan}
+        />
+      )}
     </div>
   );
 }
