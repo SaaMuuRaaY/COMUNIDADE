@@ -16,7 +16,7 @@ export default async function ResourcesPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("resources")
-    .select("id, slug, title, description, category, file_url, video_url, cover_url, click_count")
+    .select("id, slug, title, description, category, file_url, file_type, video_url, cover_url, click_count")
     .order("created_at", { ascending: false });
 
   const items: ResourceItem[] = (data ?? []).map((r) => ({
@@ -26,6 +26,7 @@ export default async function ResourcesPage() {
     description: (r.description as string | null) ?? null,
     category: r.category as string,
     file_url: (r.file_url as string | null) ?? null,
+    file_type: (r.file_type as string | null) ?? null,
     video_url: (r.video_url as string | null) ?? null,
     cover_url: (r.cover_url as string | null) ?? null,
     click_count: (r.click_count as number) ?? 0,
@@ -44,7 +45,7 @@ export default async function ResourcesPage() {
       {items.length === 0 ? (
         <EmptyState icon={Library} title="Sem recursos por enquanto" />
       ) : (
-        <ResourceBrowser resources={items} />
+        <ResourceBrowser resources={items} admin={admin} />
       )}
     </div>
   );

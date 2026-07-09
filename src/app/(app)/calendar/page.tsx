@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RsvpButton } from "@/components/calendar/rsvp-button";
-import { CreateEventButton } from "@/app/admin/events/event-actions";
+import { CreateEventButton, EditEventDialog, DeleteEventInline } from "@/app/admin/events/event-actions";
 import { requireProfile } from "@/lib/auth/current-user";
 import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { createClient } from "@/lib/supabase/server";
@@ -79,9 +79,26 @@ export default async function CalendarPage() {
                         })}
                       </p>
                     </div>
-                    {!ended ? (
-                      <RsvpButton eventId={e.id as string} initiallyGoing={goingSet.has(e.id as string)} />
-                    ) : null}
+                    <div className="flex items-center gap-1">
+                      {!ended ? (
+                        <RsvpButton eventId={e.id as string} initiallyGoing={goingSet.has(e.id as string)} />
+                      ) : null}
+                      {admin ? (
+                        <>
+                          <EditEventDialog
+                            event={{
+                              id: e.id as string,
+                              title: e.title as string,
+                              description: (e.description as string | null) ?? null,
+                              event_type: e.event_type as string,
+                              starts_at: e.starts_at as string,
+                              external_url: (e.external_url as string | null) ?? null,
+                            }}
+                          />
+                          <DeleteEventInline id={e.id as string} />
+                        </>
+                      ) : null}
+                    </div>
                   </div>
                   {e.description ? (
                     <p className="text-sm text-muted-foreground">{e.description as string}</p>

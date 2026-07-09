@@ -44,7 +44,12 @@ export default defineConfig({
     },
     {
       name: "admin",
-      testMatch: ["admin.spec.ts", "admin-content.spec.ts", "members-admin.spec.ts"],
+      testMatch: [
+        "admin.spec.ts",
+        "admin-content.spec.ts",
+        "members-admin.spec.ts",
+        "contextual-admin.spec.ts",
+      ],
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.runtime/admin.json" },
     },

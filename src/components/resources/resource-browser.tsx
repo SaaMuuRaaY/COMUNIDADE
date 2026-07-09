@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/resources/category-badge";
 import { TrackedLink } from "@/components/resources/tracked-link";
 import { EmptyState } from "@/components/shared/empty-state";
+import { EditResourceDialog, DeleteResourceInline } from "@/app/admin/resources/resource-actions";
 import { RESOURCE_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ export type ResourceItem = {
   description: string | null;
   category: string;
   file_url: string | null;
+  file_type: string | null;
   video_url: string | null;
   cover_url: string | null;
   click_count: number;
@@ -52,7 +54,13 @@ function FilterPill({
 const VIEW_BTN =
   "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent";
 
-export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
+export function ResourceBrowser({
+  resources,
+  admin = false,
+}: {
+  resources: ResourceItem[];
+  admin?: boolean;
+}) {
   const [active, setActive] = React.useState<string>("all");
 
   const present = RESOURCE_CATEGORIES.filter((c) => resources.some((r) => r.category === c.value));
@@ -93,6 +101,12 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
                       <Badge variant="secondary" className="gap-1">
                         <PlayCircle className="h-3 w-3" /> Vídeo
                       </Badge>
+                    ) : null}
+                    {admin ? (
+                      <div className="ml-auto flex items-center gap-0.5">
+                        <EditResourceDialog resource={r} />
+                        <DeleteResourceInline id={r.id} />
+                      </div>
                     ) : null}
                   </div>
                   <h3 className="font-semibold leading-tight">

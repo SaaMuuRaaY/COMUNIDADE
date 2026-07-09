@@ -197,6 +197,36 @@ export async function createEventAction(formData: FormData): Promise<Result> {
   return { ok: true, id: data.id };
 }
 
+export async function updateEventAction(id: string, formData: FormData): Promise<Result> {
+  await requireAdmin();
+  const parsed = eventSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description") || null,
+    event_type: formData.get("event_type"),
+    starts_at: formData.get("starts_at"),
+    ends_at: formData.get("ends_at") || null,
+    external_url: formData.get("external_url") || null,
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  // Só os campos que o formulário gerencia — não zera ends_at (fora do form).
+  const { error } = await supabase
+    .from("events")
+    .update({
+      title: parsed.data.title,
+      description: parsed.data.description,
+      event_type: parsed.data.event_type,
+      starts_at: parsed.data.starts_at,
+      external_url: parsed.data.external_url,
+    })
+    .eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/calendar");
+  revalidatePath("/admin/events");
+  return { ok: true, id };
+}
+
 export async function deleteEventAction(id: string): Promise<Result> {
   await requireAdmin();
   const supabase = await createClient();

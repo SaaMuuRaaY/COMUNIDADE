@@ -9,7 +9,7 @@ import { isAdmin as isAdminCheck } from "@/lib/permissions/policies";
 import { createClient } from "@/lib/supabase/server";
 import { APP_CATEGORIES } from "@/lib/constants";
 import { isSafeEmbedUrl } from "@/lib/storage/upload";
-import { CreateAppButton } from "@/app/admin/apps/app-actions";
+import { CreateAppButton, EditAppDialog, DeleteAppInline } from "@/app/admin/apps/app-actions";
 
 import { SectionBanner } from "@/components/shared/section-banner";
 import { SECTION_BANNERS } from "@/lib/section-banners";
@@ -69,6 +69,26 @@ export default async function AppsPage() {
                         {a.status === "active" ? "Ativo" : a.status === "beta" ? "Beta" : "Em breve"}
                       </Badge>
                     </div>
+                    {admin ? (
+                      <div className="flex items-center gap-0.5">
+                        <EditAppDialog
+                          app={{
+                            id: a.id as string,
+                            name: a.name as string,
+                            description: (a.description as string | null) ?? "",
+                            category: a.category as string,
+                            type: a.type as string,
+                            status: a.status as string,
+                            url: (a.url as string | null) ?? "",
+                            embed_url: (a.embed_url as string | null) ?? "",
+                            file_url: (a.file_url as string | null) ?? "",
+                            icon_url: (a.icon_url as string | null) ?? "",
+                            cover_url: (a.cover_url as string | null) ?? "",
+                          }}
+                        />
+                        <DeleteAppInline id={a.id as string} />
+                      </div>
+                    ) : null}
                   </div>
                   <h3 className="font-semibold leading-tight">
                     <Link
