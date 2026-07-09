@@ -10,6 +10,10 @@ export const SETTING_KEYS = [
   "community.description",
   "community.primary_color",
   "community.visibility",
+  "whatsapp_invite.enabled",
+  "whatsapp_invite.url",
+  "whatsapp_invite.title",
+  "whatsapp_invite.description",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];

@@ -61,6 +61,16 @@ export async function updateSettingAction(key: string, value: unknown): Promise<
     return { ok: false, error: "Configuração inválida." };
   }
 
+  // Chaves de URL (*.url) só aceitam https na FONTE — impede gravar javascript:/data:
+  // fora do form (o popup ainda faz window.open a partir daqui).
+  if (parsedKey.data.endsWith(".url") && typeof value === "string" && value.trim() !== "") {
+    try {
+      if (new URL(value).protocol !== "https:") return { ok: false, error: "URL deve ser https." };
+    } catch {
+      return { ok: false, error: "URL inválida." };
+    }
+  }
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("settings")

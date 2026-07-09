@@ -826,6 +826,12 @@ export type Database = {
           participation_goal: string | null
           updated_at: string
           user_id: string
+          whatsapp_invite_clicked_at: string | null
+          whatsapp_invite_dismissed_at: string | null
+          whatsapp_invite_first_shown_at: string | null
+          whatsapp_invite_last_shown_at: string | null
+          whatsapp_invite_show_count: number
+          whatsapp_joined_claimed_at: string | null
         }
         Insert: {
           agreements_accepted_at?: string | null
@@ -839,6 +845,12 @@ export type Database = {
           participation_goal?: string | null
           updated_at?: string
           user_id: string
+          whatsapp_invite_clicked_at?: string | null
+          whatsapp_invite_dismissed_at?: string | null
+          whatsapp_invite_first_shown_at?: string | null
+          whatsapp_invite_last_shown_at?: string | null
+          whatsapp_invite_show_count?: number
+          whatsapp_joined_claimed_at?: string | null
         }
         Update: {
           agreements_accepted_at?: string | null
@@ -852,6 +864,12 @@ export type Database = {
           participation_goal?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp_invite_clicked_at?: string | null
+          whatsapp_invite_dismissed_at?: string | null
+          whatsapp_invite_first_shown_at?: string | null
+          whatsapp_invite_last_shown_at?: string | null
+          whatsapp_invite_show_count?: number
+          whatsapp_joined_claimed_at?: string | null
         }
         Relationships: [
           {
@@ -1400,6 +1418,7 @@ export type Database = {
       is_not_banned: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       recalc_level: { Args: { p_points: number }; Returns: number }
+      record_whatsapp_invite_shown: { Args: never; Returns: undefined }
       slugify: { Args: { v: string }; Returns: string }
     }
     Enums: {

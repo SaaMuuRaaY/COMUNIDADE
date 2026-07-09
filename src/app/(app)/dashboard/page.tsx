@@ -19,6 +19,10 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { requireProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardData } from "@/server/queries/dashboard";
+import { getSettings } from "@/server/queries/settings";
+import { settingString, settingBoolean } from "@/lib/config/settings";
+import { shouldShowInvite } from "@/lib/whatsapp/invite";
+import { WhatsAppInvite } from "@/components/whatsapp/whatsapp-invite";
 import { OnboardingBanner } from "@/components/onboarding/onboarding-banner";
 import { nextLevelThreshold } from "@/lib/constants";
 import { getCategoryLabel, getChannel, channelHref } from "@/lib/community/structure";
@@ -52,11 +56,27 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: onboarding, error: onboardingError } = await supabase
     .from("member_onboarding")
-    .select("completed_at")
+    .select(
+      "completed_at, whatsapp_invite_first_shown_at, whatsapp_invite_show_count, whatsapp_joined_claimed_at, whatsapp_invite_dismissed_at",
+    )
     .eq("user_id", profile.id)
     .maybeSingle();
   // Na duvida (erro de query) NAO incomoda quem talvez ja tenha completado.
   const needsOnboarding = !onboardingError && !onboarding?.completed_at;
+
+  // Convite ao grupo do WhatsApp: só para quem concluiu o onboarding, respeitando
+  // o cooldown (0 / +7d / +21d). Config global no Admin (settings). O popup só
+  // aparece com o convite ativado e uma URL definida.
+  const settings = await getSettings();
+  const waUrl = settingString(settings, "whatsapp_invite.url");
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
+  const showWhatsapp =
+    settingBoolean(settings, "whatsapp_invite.enabled") &&
+    !!waUrl &&
+    !onboardingError &&
+    !!onboarding &&
+    shouldShowInvite(onboarding, nowMs);
 
   const nextThreshold = nextLevelThreshold(profile.points);
   const progressToNext = nextThreshold
@@ -66,6 +86,16 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       {needsOnboarding ? <OnboardingBanner /> : null}
+      {showWhatsapp && waUrl ? (
+        <WhatsAppInvite
+          url={waUrl}
+          title={settingString(settings, "whatsapp_invite.title") ?? "Convite exclusivo"}
+          description={
+            settingString(settings, "whatsapp_invite.description") ??
+            "Entre no grupo oficial da comunidade no WhatsApp para receber avisos, participar das conversas e acompanhar as principais novidades."
+          }
+        />
+      ) : null}
       <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <UserAvatar name={profile.full_name} src={profile.avatar_url} className="h-14 w-14" />

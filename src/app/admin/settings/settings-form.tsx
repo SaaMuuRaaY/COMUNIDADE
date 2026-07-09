@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateSettingAction } from "@/server/actions/admin";
@@ -15,7 +16,19 @@ type Initial = {
   description: string;
   primary_color: string;
   visibility: "public" | "private";
+  whatsapp_enabled: boolean;
+  whatsapp_url: string;
+  whatsapp_title: string;
+  whatsapp_description: string;
 };
+
+function isHttpsUrl(u: string): boolean {
+  try {
+    return new URL(u).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export function SettingsForm({ initial }: { initial: Initial }) {
   const [pending, startTransition] = React.useTransition();
@@ -25,13 +38,24 @@ export function SettingsForm({ initial }: { initial: Initial }) {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const whatsappUrl = form.whatsapp_url.trim();
+  const whatsappUrlValid = whatsappUrl === "" || isHttpsUrl(whatsappUrl);
+
   function save() {
+    if (!whatsappUrlValid) {
+      toast.error("A URL do grupo do WhatsApp precisa ser um link https válido.");
+      return;
+    }
     startTransition(async () => {
       const calls = await Promise.all([
         updateSettingAction("community.name", form.name),
         updateSettingAction("community.description", form.description),
         updateSettingAction("community.primary_color", form.primary_color),
         updateSettingAction("community.visibility", form.visibility),
+        updateSettingAction("whatsapp_invite.enabled", form.whatsapp_enabled),
+        updateSettingAction("whatsapp_invite.url", whatsappUrl),
+        updateSettingAction("whatsapp_invite.title", form.whatsapp_title),
+        updateSettingAction("whatsapp_invite.description", form.whatsapp_description),
       ]);
       const failed = calls.find((c) => !c.ok);
       if (failed) toast.error(failed.error ?? "Erro ao salvar.");
@@ -85,6 +109,63 @@ export function SettingsForm({ initial }: { initial: Initial }) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3 p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-medium">Convite para o grupo do WhatsApp</h2>
+              <p className="text-xs text-muted-foreground">
+                Popup para membros que concluíram o onboarding (na hora, +7 e +21 dias).
+              </p>
+            </div>
+            <Switch
+              id="whatsapp-enabled"
+              checked={form.whatsapp_enabled}
+              onCheckedChange={(v) => update("whatsapp_enabled", v)}
+              aria-label="Ativar convite do WhatsApp"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="whatsapp-url">URL do grupo</Label>
+            <Input
+              id="whatsapp-url"
+              value={form.whatsapp_url}
+              onChange={(e) => update("whatsapp_url", e.target.value)}
+              placeholder="https://chat.whatsapp.com/…"
+              aria-invalid={!whatsappUrlValid}
+              aria-describedby={!whatsappUrlValid ? "whatsapp-url-error" : undefined}
+            />
+            {!whatsappUrlValid ? (
+              <p id="whatsapp-url-error" className="text-xs text-destructive">
+                Use uma URL https válida (ex.: https://chat.whatsapp.com/…).
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="whatsapp-title">Título do popup</Label>
+            <Input
+              id="whatsapp-title"
+              value={form.whatsapp_title}
+              onChange={(e) => update("whatsapp_title", e.target.value)}
+              placeholder="Convite exclusivo"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="whatsapp-description">Descrição</Label>
+            <Textarea
+              id="whatsapp-description"
+              rows={3}
+              value={form.whatsapp_description}
+              onChange={(e) => update("whatsapp_description", e.target.value)}
+              placeholder="Entre no grupo oficial da comunidade no WhatsApp para receber avisos e novidades."
+            />
           </div>
         </CardContent>
       </Card>
