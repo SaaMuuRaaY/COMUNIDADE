@@ -27,6 +27,8 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { LevelBadge } from "@/components/shared/level-badge";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Markdown } from "@/components/shared/markdown";
+import { YouTubeVideoEmbed } from "@/components/shared/youtube-video-embed";
+import { isYouTubeUrl } from "@/lib/video/youtube";
 import { cn, formatRelative } from "@/lib/utils";
 import { REACTION_EMOJIS } from "@/lib/constants";
 import {
@@ -277,7 +279,12 @@ export function PostCard({ post, currentUserId, canModerate, role }: Props) {
         <Markdown>{post.body}</Markdown>
 
         {post.media_url ? (
-          post.media_type?.startsWith("video/") ? (
+          post.media_type === "youtube" || isYouTubeUrl(post.media_url) ? (
+            <YouTubeVideoEmbed
+              url={post.media_url}
+              title={post.title ?? "Vídeo da publicação"}
+            />
+          ) : post.media_type?.startsWith("video/") ? (
             <video
               src={post.media_url}
               controls

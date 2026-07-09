@@ -246,3 +246,14 @@ export function canPostInChannel(profile: ProfileLike, slug: string): boolean {
 export function canCommentInChannel(slug: string): boolean {
   return getChannel(slug)?.comments ?? true;
 }
+
+/**
+ * Canais em que o perfil pode PUBLICAR posts — para o seletor do feed geral.
+ * Exclui canais de chat (feed ≠ chat) e pendentes (canPostInChannel já barra).
+ * O servidor (createPostAction) revalida canPostInChannel; isto é só a lista da UI.
+ */
+export function postableChannels(profile: ProfileLike): { slug: string; label: string }[] {
+  return CHANNELS.filter(
+    (c) => !isChatChannel(c.slug) && canPostInChannel(profile, c.slug),
+  ).map((c) => ({ slug: c.slug, label: c.label }));
+}

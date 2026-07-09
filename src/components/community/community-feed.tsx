@@ -15,7 +15,7 @@ import { TrendingPanel } from "@/components/discovery/trending-panel";
 import { requireProfile } from "@/lib/auth/current-user";
 import { canModerate } from "@/lib/permissions/policies";
 import { getFeedPosts } from "@/server/queries/posts";
-import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS, getChannelComposer } from "@/lib/community/structure";
+import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS, getChannelComposer, postableChannels } from "@/lib/community/structure";
 
 /**
  * Componente COMPARTILHADO de feed da Comunidade (Fase 6.6).
@@ -31,6 +31,9 @@ import { getChannel, canPostInChannel, isChannelPending, CHANNEL_GROUPS, getChan
 // (realtime). Publicar posts acontece nos canais específicos (cada um tem "+ Criar").
 export async function CommunityGeneralFeed({ search }: { search: string }) {
   const profile = await requireProfile();
+  // Feed Geral é agregado (sem canal fixo): o composer recebe a lista de canais
+  // postáveis e o autor escolhe onde publicar. O servidor revalida a permissão.
+  const channels = postableChannels(profile);
 
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-6">
@@ -43,6 +46,10 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
             description="Acompanhe as publicações, novidades, projetos e conversas de todos os canais do Portal Nexus."
             variant="featured"
           />
+
+          {channels.length > 0 ? (
+            <PostComposer currentUserId={profile.id} channels={channels} />
+          ) : null}
 
           <FeedFilter />
 

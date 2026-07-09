@@ -7,20 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Markdown } from "@/components/shared/markdown";
 import { createPostAction } from "@/server/actions/posts";
 import { PostImageField } from "@/components/community/post-image-field";
+import { PostVideoField } from "@/components/community/post-video-field";
 import { toast } from "sonner";
 
 export function PostComposer({
   currentUserId,
   channelSlug,
+  channels,
   actionLabel,
   placeholder,
   guidance,
 }: {
   currentUserId: string;
-  channelSlug: string;
+  /** Canal fixo (uso por canal). Omitido no feed geral, onde `channels` decide. */
+  channelSlug?: string;
+  /** Lista de canais para escolher (uso no feed geral). O servidor revalida a permissão. */
+  channels?: { slug: string; label: string }[];
   actionLabel?: string;
   placeholder?: string;
   guidance?: string;
@@ -29,16 +36,24 @@ export function PostComposer({
   const [body, setBody] = React.useState("");
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [mediaType, setMediaType] = React.useState<string | null>(null);
+  const [selectedSlug, setSelectedSlug] = React.useState(channelSlug ?? channels?.[0]?.slug ?? "");
   const [open, setOpen] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
 
+  // Canal efetivo: fixo (por canal) ou o escolhido no seletor (feed geral).
+  const category = channelSlug ?? selectedSlug;
+
   function submit() {
+    if (!category) {
+      toast.error("Escolha um canal.");
+      return;
+    }
     if (body.trim().length < 2) {
       toast.error("Conteúdo muito curto.");
       return;
     }
     const fd = new FormData();
-    fd.append("category", channelSlug);
+    fd.append("category", category);
     fd.append("title", title);
     fd.append("body", body);
     if (mediaUrl) {
@@ -74,6 +89,23 @@ export function PostComposer({
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
+        {channels && !channelSlug ? (
+          <div className="space-y-1.5">
+            <Label htmlFor="composer-channel">Canal</Label>
+            <Select value={selectedSlug} onValueChange={setSelectedSlug}>
+              <SelectTrigger id="composer-channel">
+                <SelectValue placeholder="Escolha um canal" />
+              </SelectTrigger>
+              <SelectContent>
+                {channels.map((c) => (
+                  <SelectItem key={c.slug} value={c.slug}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
         {guidance ? <p className="text-xs text-muted-foreground">{guidance}</p> : null}
         <Input
           placeholder="Título (opcional)"
@@ -104,14 +136,26 @@ export function PostComposer({
           </TabsContent>
         </Tabs>
 
-        <PostImageField
-          userId={currentUserId}
-          value={mediaUrl}
-          onChange={(url, type) => {
-            setMediaUrl(url);
-            setMediaType(type);
-          }}
-        />
+        {/* Um slot de mídia por post: imagem OU vídeo do YouTube (mutuamente exclusivos). */}
+        {mediaType !== "youtube" ? (
+          <PostImageField
+            userId={currentUserId}
+            value={mediaUrl}
+            onChange={(url, type) => {
+              setMediaUrl(url);
+              setMediaType(type);
+            }}
+          />
+        ) : null}
+        {!(mediaUrl && mediaType !== "youtube") ? (
+          <PostVideoField
+            value={mediaType === "youtube" ? mediaUrl : null}
+            onChange={(url) => {
+              setMediaUrl(url);
+              setMediaType(url ? "youtube" : null);
+            }}
+          />
+        ) : null}
 
         <div className="flex items-center justify-end gap-2">
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={pending}>

@@ -37,6 +37,7 @@ export default defineConfig({
         "member-social.spec.ts",
         "rls.spec.ts",
         "video.spec.ts",
+        "post-media.spec.ts",
       ],
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.runtime/member.json" },

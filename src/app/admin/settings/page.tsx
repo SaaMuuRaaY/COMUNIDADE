@@ -1,5 +1,5 @@
 import { getSettings } from "@/server/queries/settings";
-import { settingBoolean, settingString } from "@/lib/config/settings";
+import { settingString } from "@/lib/config/settings";
 import { SettingsForm } from "./settings-form";
 
 export const metadata = { title: "Configurações · Admin" };
@@ -17,9 +17,6 @@ export default async function AdminSettingsPage() {
           primary_color: settingString(map, "community.primary_color") ?? "#0a0a0a",
           visibility:
             settingString(map, "community.visibility") === "public" ? "public" : "private",
-          welcome_video_enabled: settingBoolean(map, "welcome_video.enabled"),
-          welcome_video_url: settingString(map, "welcome_video.url") ?? "",
-          welcome_video_title: settingString(map, "welcome_video.title") ?? "",
         }}
       />
     </div>

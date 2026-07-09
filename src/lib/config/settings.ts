@@ -10,9 +10,6 @@ export const SETTING_KEYS = [
   "community.description",
   "community.primary_color",
   "community.visibility",
-  "welcome_video.enabled",
-  "welcome_video.url",
-  "welcome_video.title",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];

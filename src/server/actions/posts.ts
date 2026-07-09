@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth/current-user";
 import { isModerator } from "@/lib/permissions/policies";
 import { awardPoints } from "@/lib/points/award";
-import { postSchema, commentSchema } from "@/lib/validations/schemas";
+import { postSchema, createPostSchema, commentSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
 import { canPostInChannel, canCommentInChannel } from "@/lib/community/structure";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -20,7 +20,7 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
   if (profile.is_banned) return { ok: false, error: "Usuário banido." };
   if (!(await rateLimit(`post:${profile.id}`, { limit: 12, windowMs: 60_000 })).ok) return { ok: false, error: RATE_MSG };
 
-  const parsed = postSchema.safeParse({
+  const parsed = createPostSchema.safeParse({
     category: formData.get("category"),
     title: formData.get("title") || null,
     body: formData.get("body"),

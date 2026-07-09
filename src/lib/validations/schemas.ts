@@ -158,6 +158,22 @@ export const postSchema = z.object({
 });
 export type PostInput = z.infer<typeof postSchema>;
 
+/**
+ * Criação de post: além do postSchema, exige que um anexo de vídeo
+ * (media_type='youtube') traga uma URL válida do YouTube — o render monta o
+ * embed a partir dela, então lixo aqui viraria iframe quebrado. Mantido separado
+ * do postSchema porque updatePostAction depende de `.partial()` (só em ZodObject).
+ */
+export const createPostSchema = postSchema.superRefine((val, ctx) => {
+  if (val.media_type === "youtube" && (!val.media_url || !isYouTubeUrl(val.media_url))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["media_url"],
+      message: "URL de vídeo do YouTube inválida.",
+    });
+  }
+});
+
 export const commentSchema = z.object({
   post_id: z.string().uuid(),
   parent_id: z.string().uuid().optional().nullable(),
