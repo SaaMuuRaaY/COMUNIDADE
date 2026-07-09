@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Library, Eye, ExternalLink } from "lucide-react";
+import { Library, Eye, ExternalLink, PlayCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/resources/category-badge";
 import { TrackedLink } from "@/components/resources/tracked-link";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -17,6 +18,7 @@ export type ResourceItem = {
   description: string | null;
   category: string;
   file_url: string | null;
+  video_url: string | null;
   cover_url: string | null;
   click_count: number;
 };
@@ -84,9 +86,14 @@ export function ResourceBrowser({ resources }: { resources: ResourceItem[] }) {
                   <img src={r.cover_url} alt={r.title} className="aspect-video w-full object-cover" />
                 ) : null}
                 <CardContent className="flex flex-1 flex-col space-y-3 p-5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Library className="h-4 w-4 text-muted-foreground" />
                     <CategoryBadge category={r.category} />
+                    {r.video_url ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <PlayCircle className="h-3 w-3" /> Vídeo
+                      </Badge>
+                    ) : null}
                   </div>
                   <h3 className="font-semibold leading-tight">
                     <Link href={href} className="hover:text-[var(--accent)] hover:underline">

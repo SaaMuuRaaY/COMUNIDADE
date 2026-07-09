@@ -31,7 +31,13 @@ export default defineConfig({
     },
     {
       name: "member",
-      testMatch: ["member.spec.ts", "member-full.spec.ts", "member-social.spec.ts", "rls.spec.ts"],
+      testMatch: [
+        "member.spec.ts",
+        "member-full.spec.ts",
+        "member-social.spec.ts",
+        "rls.spec.ts",
+        "video.spec.ts",
+      ],
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.runtime/member.json" },
     },

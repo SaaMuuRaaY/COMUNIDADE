@@ -88,6 +88,7 @@ export const ALLOWED_DOC_EXTENSIONS = [
 
 export const SAFE_EMBED_HOSTS = [
   "youtube.com", "www.youtube.com", "youtu.be",
+  "youtube-nocookie.com",
   "vimeo.com", "player.vimeo.com",
   "loom.com", "www.loom.com",
   "docs.google.com",

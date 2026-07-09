@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { Clock, MessageSquareText, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -74,7 +74,16 @@ function PanelSkeleton() {
   );
 }
 
-export async function CommunityChannelFeed({ slug, search }: { slug: string; search: string }) {
+export async function CommunityChannelFeed({
+  slug,
+  search,
+  beforeFeed,
+}: {
+  slug: string;
+  search: string;
+  /** Conteudo opcional entre o banner e o feed (ex.: video de boas-vindas). */
+  beforeFeed?: ReactNode;
+}) {
   const channel = getChannel(slug);
   if (!channel) notFound();
 
@@ -93,6 +102,8 @@ export async function CommunityChannelFeed({ slug, search }: { slug: string; sea
         description={channel.description}
         variant="featured"
       />
+
+      {beforeFeed}
 
       <FeedFilter />
 

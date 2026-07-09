@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidPostCategory } from "@/lib/community/structure";
+import { isYouTubeUrl } from "@/lib/video/youtube";
 import {
   AI_LEVEL_VALUES,
   GOAL_VALUES,
@@ -215,6 +216,7 @@ export const resourceSchema = z.object({
   file_url: z.string().url().refine(isSafeHttpUrl, "Use uma URL http(s) válida").optional().nullable(),
   file_storage_path: z.string().optional().nullable(),
   file_type: z.string().optional().nullable(),
+  video_url: z.string().url().refine(isYouTubeUrl, "Cole um link do YouTube").optional().nullable(),
   cover_url: z.string().url().refine(isSafePublicImageUrl, "Use uma URL https pública de imagem").optional().nullable(),
 });
 export type ResourceInput = z.infer<typeof resourceSchema>;

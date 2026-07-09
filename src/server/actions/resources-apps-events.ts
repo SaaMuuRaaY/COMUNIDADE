@@ -38,6 +38,7 @@ export async function createResourceAction(formData: FormData): Promise<Result> 
     file_url: formData.get("file_url") || null,
     file_storage_path: formData.get("file_storage_path") || null,
     file_type: formData.get("file_type") || null,
+    video_url: formData.get("video_url") || null,
     cover_url: formData.get("cover_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -63,6 +64,7 @@ export async function updateResourceAction(id: string, formData: FormData): Prom
     file_url: formData.get("file_url") || null,
     file_storage_path: formData.get("file_storage_path") || null,
     file_type: formData.get("file_type") || null,
+    video_url: formData.get("video_url") || null,
     cover_url: formData.get("cover_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };

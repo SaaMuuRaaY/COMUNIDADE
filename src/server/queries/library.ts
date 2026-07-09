@@ -12,6 +12,7 @@ export type ResourceDetail = {
   category: string;
   file_url: string | null;
   file_type: string | null;
+  video_url: string | null;
   cover_url: string | null;
   click_count: number;
 };
@@ -32,7 +33,10 @@ export type AppDetail = {
   click_count: number;
 };
 
-const RESOURCE_COLS = "id, slug, title, description, category, file_url, file_type, cover_url, click_count";
+// video_url so entra no DETALHE. O preview publico (getPublicPreview) usa um
+// select proprio e NUNCA carrega payload — o video nao vaza para deslogado.
+const RESOURCE_COLS =
+  "id, slug, title, description, category, file_url, file_type, video_url, cover_url, click_count";
 const APP_COLS =
   "id, slug, name, description, category, type, status, url, embed_url, file_url, icon_url, cover_url, click_count";
 

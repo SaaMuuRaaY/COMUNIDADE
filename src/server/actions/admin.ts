@@ -1,19 +1,14 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/current-user";
+import { SETTING_KEYS } from "@/lib/config/settings";
 import type { Json } from "@/types/db";
 
 type Result = { ok: boolean; error?: string };
 
-const SETTING_KEYS = [
-  "community.name",
-  "community.description",
-  "community.primary_color",
-  "community.visibility",
-] as const;
 const settingKeySchema = z.enum(SETTING_KEYS);
 
 // Traduz a mensagem crua das exceções das RPCs (sem acento) para PT-BR amigável.
@@ -71,6 +66,8 @@ export async function updateSettingAction(key: string, value: unknown): Promise<
     .from("settings")
     .upsert({ key: parsedKey.data, value: value as Json, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) return { ok: false, error: error.message };
+  // updateTag (Next 16): read-your-own-writes — o admin ve o valor salvo na hora.
+  updateTag("settings");
   revalidatePath("/admin/settings");
   return { ok: true };
 }

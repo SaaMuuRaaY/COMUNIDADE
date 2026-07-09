@@ -1,4 +1,5 @@
 import { CommunityChannelFeed } from "@/components/community/community-feed";
+import { WelcomeVideo } from "@/components/onboarding/welcome-video";
 import { getChannel } from "@/lib/community/structure";
 
 const SLUG = "comece-por-aqui";
@@ -11,5 +12,7 @@ export function generateMetadata() {
 
 export default async function ChannelRootPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  return <CommunityChannelFeed slug={SLUG} search={sp.q?.trim() ?? ""} />;
+  return (
+    <CommunityChannelFeed slug={SLUG} search={sp.q?.trim() ?? ""} beforeFeed={<WelcomeVideo />} />
+  );
 }

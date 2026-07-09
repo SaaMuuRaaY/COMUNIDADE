@@ -17,6 +17,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ConfirmDeleteIconButton } from "@/components/shared/confirm-delete-icon-button";
+import { YouTubeVideoEmbed } from "@/components/shared/youtube-video-embed";
+import { isYouTubeUrl } from "@/lib/video/youtube";
 import { RESOURCE_CATEGORIES } from "@/lib/constants";
 import {
   createResourceAction,
@@ -32,6 +34,7 @@ type ResourceFormValues = {
   category: string;
   file_url: string;
   file_type: string;
+  video_url: string;
   cover_url: string;
 };
 
@@ -41,6 +44,7 @@ const EMPTY: ResourceFormValues = {
   category: "apostilas",
   file_url: "",
   file_type: "",
+  video_url: "",
   cover_url: "",
 };
 
@@ -72,9 +76,16 @@ function ResourceForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const videoUrl = form.video_url.trim();
+  const videoUrlValid = videoUrl === "" || isYouTubeUrl(videoUrl);
+
   function submit() {
     if (!form.title.trim()) {
       toast.error("Título obrigatório.");
+      return;
+    }
+    if (!videoUrlValid) {
+      toast.error("A URL do vídeo não é um link do YouTube.");
       return;
     }
     startTransition(async () => {
@@ -121,6 +132,25 @@ function ResourceForm({
         />
       </div>
       <CoverUploader value={form.cover_url || null} onChange={(url) => update("cover_url", url ?? "")} />
+      <div className="space-y-1">
+        <Label htmlFor="resource-video-url">Vídeo do YouTube (opcional)</Label>
+        <Input
+          id="resource-video-url"
+          value={form.video_url}
+          onChange={(e) => update("video_url", e.target.value)}
+          placeholder="https://youtu.be/… ou https://www.youtube.com/watch?v=…"
+          aria-invalid={!videoUrlValid}
+          aria-describedby={!videoUrlValid ? "resource-video-url-error" : undefined}
+        />
+        {!videoUrlValid ? (
+          <p id="resource-video-url-error" className="text-xs text-destructive">
+            Cole um link do YouTube (watch, youtu.be ou shorts).
+          </p>
+        ) : null}
+        {videoUrlValid && videoUrl ? (
+          <YouTubeVideoEmbed url={videoUrl} title={form.title || "Pré-visualização"} />
+        ) : null}
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label>URL do arquivo</Label>
@@ -198,6 +228,7 @@ type ResourceRow = {
   category: string;
   file_url: string | null;
   file_type: string | null;
+  video_url: string | null;
   cover_url: string | null;
 };
 
@@ -209,6 +240,7 @@ export function EditResourceDialog({ resource }: { resource: ResourceRow }) {
     category: resource.category,
     file_url: resource.file_url ?? "",
     file_type: resource.file_type ?? "",
+    video_url: resource.video_url ?? "",
     cover_url: resource.cover_url ?? "",
   };
 

@@ -15,6 +15,9 @@ const frameSrc = [
   "'self'",
   "https://www.youtube.com",
   "https://youtube.com",
+  // Modo de privacidade avancada: sem cookies de rastreamento antes do play.
+  "https://www.youtube-nocookie.com",
+  "https://youtube-nocookie.com",
   "https://player.vimeo.com",
   "https://vimeo.com",
   "https://www.loom.com",

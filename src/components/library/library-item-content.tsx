@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/resources/category-badge";
 import { Markdown } from "@/components/shared/markdown";
+import { YouTubeVideoEmbed } from "@/components/shared/youtube-video-embed";
 import { TrackedLink } from "@/components/resources/tracked-link";
 import { APP_STATUSES, APP_TYPES } from "@/lib/constants";
 import { isSafeEmbedUrl } from "@/lib/storage/upload";
@@ -48,6 +49,9 @@ function ResourceBody({ item }: { item: ResourceItemView }) {
         <div className="text-sm">
           <Markdown>{item.description}</Markdown>
         </div>
+      ) : null}
+      {item.video_url ? (
+        <YouTubeVideoEmbed url={item.video_url} title={item.title} showUnavailable />
       ) : null}
       {item.file_url ? (
         <TrackedLink kind="resource" id={item.id} href={item.file_url} className={BTN}>
