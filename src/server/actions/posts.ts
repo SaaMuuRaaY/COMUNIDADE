@@ -8,6 +8,7 @@ import { awardPoints } from "@/lib/points/award";
 import { postSchema, createPostSchema, commentSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
 import { canPostInChannel, canCommentInChannel } from "@/lib/community/structure";
+import { maybeCompleteJourney } from "@/lib/onboarding/complete";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { reportActionError } from "@/lib/observability";
 
@@ -29,11 +30,27 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
     attachment_url: formData.get("attachment_url") || null,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
-  if (!canPostInChannel(profile, parsed.data.category)) {
+  const category = parsed.data.category;
+  if (!canPostInChannel(profile, category)) {
     return { ok: false, error: "Sem permissão para publicar neste canal." };
   }
 
   const supabase = await createClient();
+
+  // Máquina de estados da jornada (espelha o RLS onboarding_allows_post da 0038).
+  const { data: mo } = await supabase
+    .from("member_onboarding")
+    .select("completed_at, grandfathered_at, introduction_completed_at")
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  const unlocked = !!(mo?.grandfathered_at || mo?.introduction_completed_at);
+  if (!unlocked) {
+    if (!mo?.completed_at) return { ok: false, error: "Conclua o onboarding para publicar." };
+    if (category !== "apresente-se") {
+      return { ok: false, error: "Faça sua apresentação em Apresente-se para publicar nos demais canais." };
+    }
+  }
+
   const { data, error } = await supabase
     .from("posts")
     .insert({
@@ -47,6 +64,22 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
   if (error) return { ok: false, error: error.message };
 
   await awardPoints(profile.id, "post_created", POINTS.POST_CREATED, "post", data.id);
+
+  // 1ª apresentação (regra crítica NO MESMO fluxo do insert — não depende de callback
+  // do cliente). Idempotente: `.is(introduction_completed_at, null)` + reward por userId.
+  const isFirstIntro =
+    category === "apresente-se" && !mo?.grandfathered_at && !mo?.introduction_completed_at;
+  if (isFirstIntro) {
+    await supabase
+      .from("member_onboarding")
+      .update({ introduction_post_id: data.id, introduction_completed_at: new Date().toISOString() })
+      .eq("user_id", profile.id)
+      .is("introduction_completed_at", null);
+    await awardPoints(profile.id, "first_introduction", POINTS.FIRST_INTRODUCTION, "introduction", profile.id);
+    await maybeCompleteJourney(profile.id);
+    revalidatePath("/comece-por-aqui");
+  }
+
   revalidatePath("/community", "layout");
   revalidatePath("/dashboard");
   return { ok: true, id: data.id };

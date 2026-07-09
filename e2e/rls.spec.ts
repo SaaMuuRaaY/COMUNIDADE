@@ -209,3 +209,87 @@ test.describe("RLS adversarial (API)", () => {
     await signOutLocal(client);
   });
 });
+
+// Gate de publicação da Jornada 2.0 (0038): máquina de 3 estados na RLS.
+test.describe("Gate de publicação da jornada (0038)", () => {
+  let users: E2EUsers;
+  let communityId: string;
+  let userId: string;
+  let client: SupabaseClient;
+
+  test.beforeAll(async () => {
+    users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) as E2EUsers;
+    const admin = getAdminClient();
+    const stamp = Date.now();
+
+    const { data: comm } = await admin.from("communities").select("id").limit(1).single();
+    if (!comm) throw new Error("E2E: comunidade não encontrada.");
+    communityId = comm.id;
+
+    const email = `e2e-journey-${stamp}@codex.community`;
+    const { data: created, error } = await admin.auth.admin.createUser({
+      email,
+      password: users.member.password,
+      email_confirm: true,
+      user_metadata: { full_name: "E2E Jornada" },
+    });
+    if (error || !created.user) throw new Error(`E2E: criação falhou: ${error?.message}`);
+    userId = created.user.id;
+
+    // completed_at (formulário) SEM intro e SEM grandfather → só pode publicar em
+    // /apresente-se. Retry pela linha em profiles (FK) do trigger assíncrono.
+    let set = false;
+    for (let i = 0; i < 10 && !set; i++) {
+      const { error: upErr } = await admin
+        .from("member_onboarding")
+        .upsert({ user_id: userId, completed_at: new Date().toISOString() }, { onConflict: "user_id" });
+      if (!upErr) set = true;
+      else await new Promise((r) => setTimeout(r, 500));
+    }
+    if (!set) throw new Error("E2E: não consegui setar completed_at.");
+
+    client = anonClient();
+    const { error: loginErr } = await client.auth.signInWithPassword({ email, password: users.member.password });
+    if (loginErr) throw new Error(`E2E: login falhou: ${loginErr.message}`);
+  });
+
+  test.afterAll(async () => {
+    if (client) await signOutLocal(client);
+    if (userId) await getAdminClient().auth.admin.deleteUser(userId);
+  });
+
+  test("só apresente-se antes da apresentação; demais canais liberam depois", async () => {
+    // 1. Formulário concluído, sem apresentação → bloqueado fora de apresente-se.
+    const before = await client.from("posts").insert({
+      community_id: communityId,
+      author_id: userId,
+      category: "compartilhe-seu-projeto",
+      body: "tentativa antes da apresentação",
+    });
+    expect(before.error, "RLS deve negar publicação fora de apresente-se sem intro").not.toBeNull();
+
+    // 2. /apresente-se é permitido (é a 1ª apresentação).
+    const intro = await client.from("posts").insert({
+      community_id: communityId,
+      author_id: userId,
+      category: "apresente-se",
+      body: "minha apresentação",
+    });
+    expect(intro.error, "apresente-se deve ser permitido").toBeNull();
+
+    // 3. Registra a apresentação (o que createPostAction faz no app).
+    await getAdminClient()
+      .from("member_onboarding")
+      .update({ introduction_completed_at: new Date().toISOString() })
+      .eq("user_id", userId);
+
+    // 4. Agora os demais canais liberam.
+    const other = await client.from("posts").insert({
+      community_id: communityId,
+      author_id: userId,
+      category: "compartilhe-seu-projeto",
+      body: "agora libera",
+    });
+    expect(other.error, "introduction_completed_at deve desbloquear os demais canais").toBeNull();
+  });
+});

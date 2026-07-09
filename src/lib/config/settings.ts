@@ -14,6 +14,9 @@ export const SETTING_KEYS = [
   "whatsapp_invite.url",
   "whatsapp_invite.title",
   "whatsapp_invite.description",
+  "welcome_video.enabled",
+  "welcome_video.url",
+  "welcome_video.title",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];

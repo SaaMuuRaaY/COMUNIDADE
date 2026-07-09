@@ -35,6 +35,18 @@ async function createUser(
     if (!promoted) throw new Error(`E2E: não consegui promover ${email} a admin (profile não encontrado).`);
   }
 
+  // Grandfather (0038): dispensa da nova jornada → publica normalmente, como um
+  // membro existente. Retry pois a linha em profiles (FK) vem do trigger async.
+  let gf = false;
+  for (let i = 0; i < 10 && !gf; i++) {
+    const { error: gErr } = await admin
+      .from("member_onboarding")
+      .upsert({ user_id: id, grandfathered_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (!gErr) gf = true;
+    else await new Promise((r) => setTimeout(r, 500));
+  }
+  if (!gf) throw new Error(`E2E: não consegui grandfatherar ${email}.`);
+
   return { email, password: PASSWORD, id, full_name, role };
 }
 

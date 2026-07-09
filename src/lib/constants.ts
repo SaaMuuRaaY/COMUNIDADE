@@ -71,6 +71,9 @@ export const POINTS = {
   LIKE_RECEIVED: 2,
   LESSON_COMPLETED: 15,
   EVENT_ATTENDED: 20,
+  SIGNUP: 10,
+  ONBOARDING_COMPLETED: 20,
+  FIRST_INTRODUCTION: 10,
 } as const;
 
 export const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "😮"] as const;

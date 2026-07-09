@@ -22,6 +22,8 @@ export function PostComposer({
   actionLabel,
   placeholder,
   guidance,
+  initialBody,
+  initialOpen,
 }: {
   currentUserId: string;
   /** Canal fixo (uso por canal). Omitido no feed geral, onde `channels` decide. */
@@ -31,13 +33,17 @@ export function PostComposer({
   actionLabel?: string;
   placeholder?: string;
   guidance?: string;
+  /** Rascunho inicial do corpo (ex.: apresentação pré-preenchida a partir do onboarding). */
+  initialBody?: string;
+  /** Abre o composer já expandido (ex.: passo de apresentação da jornada). */
+  initialOpen?: boolean;
 }) {
   const [title, setTitle] = React.useState("");
-  const [body, setBody] = React.useState("");
+  const [body, setBody] = React.useState(initialBody ?? "");
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [mediaType, setMediaType] = React.useState<string | null>(null);
   const [selectedSlug, setSelectedSlug] = React.useState(channelSlug ?? channels?.[0]?.slug ?? "");
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(initialOpen ?? false);
   const [pending, startTransition] = React.useTransition();
 
   // Canal efetivo: fixo (por canal) ou o escolhido no seletor (feed geral).

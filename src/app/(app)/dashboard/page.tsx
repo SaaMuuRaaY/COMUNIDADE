@@ -23,6 +23,8 @@ import { getSettings } from "@/server/queries/settings";
 import { settingString, settingBoolean } from "@/lib/config/settings";
 import { shouldShowInvite } from "@/lib/whatsapp/invite";
 import { WhatsAppInvite } from "@/components/whatsapp/whatsapp-invite";
+import { needsOnboarding as journeyNeedsOnboarding } from "@/lib/onboarding/journey";
+import { WelcomeTour } from "@/components/onboarding/welcome-tour";
 import { OnboardingBanner } from "@/components/onboarding/onboarding-banner";
 import { nextLevelThreshold } from "@/lib/constants";
 import { getCategoryLabel, getChannel, channelHref } from "@/lib/community/structure";
@@ -57,12 +59,15 @@ export default async function DashboardPage() {
   const { data: onboarding, error: onboardingError } = await supabase
     .from("member_onboarding")
     .select(
-      "completed_at, whatsapp_invite_first_shown_at, whatsapp_invite_show_count, whatsapp_joined_claimed_at, whatsapp_invite_dismissed_at",
+      "completed_at, grandfathered_at, welcome_tour_completed_at, whatsapp_invite_first_shown_at, whatsapp_invite_show_count, whatsapp_joined_claimed_at, whatsapp_invite_dismissed_at",
     )
     .eq("user_id", profile.id)
     .maybeSingle();
-  // Na duvida (erro de query) NAO incomoda quem talvez ja tenha completado.
-  const needsOnboarding = !onboardingError && !onboarding?.completed_at;
+  // needsOnboarding respeita grandfathered_at (usuário antigo não é incomodado).
+  // Na dúvida (erro de query) não incomoda quem talvez já tenha completado.
+  const onNeedsOnboarding = !onboardingError && journeyNeedsOnboarding(onboarding ?? null);
+  // Pop-up de boas-vindas: 1º acesso de quem está na jornada e ainda não viu o tour.
+  const showWelcomeTour = onNeedsOnboarding && !onboarding?.welcome_tour_completed_at;
 
   // Convite ao grupo do WhatsApp: só para quem concluiu o onboarding, respeitando
   // o cooldown (0 / +7d / +21d). Config global no Admin (settings). O popup só
@@ -85,7 +90,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-      {needsOnboarding ? <OnboardingBanner /> : null}
+      <WelcomeTour show={showWelcomeTour} />
+      {onNeedsOnboarding ? <OnboardingBanner /> : null}
       {showWhatsapp && waUrl ? (
         <WhatsAppInvite
           url={waUrl}

@@ -21,6 +21,9 @@ export default async function AdminSettingsPage() {
           whatsapp_url: settingString(map, "whatsapp_invite.url") ?? "",
           whatsapp_title: settingString(map, "whatsapp_invite.title") ?? "",
           whatsapp_description: settingString(map, "whatsapp_invite.description") ?? "",
+          welcome_video_enabled: settingBoolean(map, "welcome_video.enabled"),
+          welcome_video_url: settingString(map, "welcome_video.url") ?? "",
+          welcome_video_title: settingString(map, "welcome_video.title") ?? "",
         }}
       />
     </div>

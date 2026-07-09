@@ -85,11 +85,14 @@ export async function CommunityChannelFeed({
   slug,
   search,
   beforeFeed,
+  composerInitialBody,
 }: {
   slug: string;
   search: string;
   /** Conteudo opcional entre o banner e o feed (ex.: video de boas-vindas). */
   beforeFeed?: ReactNode;
+  /** Rascunho inicial do composer (ex.: apresentação pré-preenchida). Abre expandido. */
+  composerInitialBody?: string;
 }) {
   const channel = getChannel(slug);
   if (!channel) notFound();
@@ -125,6 +128,8 @@ export async function CommunityChannelFeed({
           actionLabel={composer.actionLabel}
           placeholder={composer.placeholder}
           guidance={composer.guidance}
+          initialBody={composerInitialBody}
+          initialOpen={!!composerInitialBody}
         />
       ) : (
         <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">

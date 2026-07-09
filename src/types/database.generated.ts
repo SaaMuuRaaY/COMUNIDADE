@@ -822,10 +822,17 @@ export type Database = {
           created_at: string
           current_project: string | null
           goals: string[]
+          grandfathered_at: string | null
           interests: string[]
+          introduction_completed_at: string | null
+          introduction_post_id: string | null
+          journey_completed_at: string | null
           participation_goal: string | null
+          tour_version: string | null
           updated_at: string
           user_id: string
+          welcome_tour_completed_at: string | null
+          welcome_video_completed_at: string | null
           whatsapp_invite_clicked_at: string | null
           whatsapp_invite_dismissed_at: string | null
           whatsapp_invite_first_shown_at: string | null
@@ -841,10 +848,17 @@ export type Database = {
           created_at?: string
           current_project?: string | null
           goals?: string[]
+          grandfathered_at?: string | null
           interests?: string[]
+          introduction_completed_at?: string | null
+          introduction_post_id?: string | null
+          journey_completed_at?: string | null
           participation_goal?: string | null
+          tour_version?: string | null
           updated_at?: string
           user_id: string
+          welcome_tour_completed_at?: string | null
+          welcome_video_completed_at?: string | null
           whatsapp_invite_clicked_at?: string | null
           whatsapp_invite_dismissed_at?: string | null
           whatsapp_invite_first_shown_at?: string | null
@@ -860,10 +874,17 @@ export type Database = {
           created_at?: string
           current_project?: string | null
           goals?: string[]
+          grandfathered_at?: string | null
           interests?: string[]
+          introduction_completed_at?: string | null
+          introduction_post_id?: string | null
+          journey_completed_at?: string | null
           participation_goal?: string | null
+          tour_version?: string | null
           updated_at?: string
           user_id?: string
+          welcome_tour_completed_at?: string | null
+          welcome_video_completed_at?: string | null
           whatsapp_invite_clicked_at?: string | null
           whatsapp_invite_dismissed_at?: string | null
           whatsapp_invite_first_shown_at?: string | null
@@ -872,6 +893,13 @@ export type Database = {
           whatsapp_joined_claimed_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "member_onboarding_introduction_post_id_fkey"
+            columns: ["introduction_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "member_onboarding_user_id_fkey"
             columns: ["user_id"]
@@ -1417,6 +1445,7 @@ export type Database = {
       is_moderator: { Args: never; Returns: boolean }
       is_not_banned: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
+      onboarding_allows_post: { Args: { p_category: string }; Returns: boolean }
       recalc_level: { Args: { p_points: number }; Returns: number }
       record_whatsapp_invite_shown: { Args: never; Returns: undefined }
       slugify: { Args: { v: string }; Returns: string }

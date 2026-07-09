@@ -67,13 +67,18 @@ test.describe("Membro — social", () => {
     await expect(page.getByText(body)).toBeVisible({ timeout: 20_000 });
   });
 
-  test("completar onboarding com aceite dos acordos", async ({ page }) => {
+  test("completar onboarding em etapas com aceite dos acordos", async ({ page }) => {
     await page.goto("/onboarding");
+    // Etapa 1 — Sobre você: nível (combobox) + ao menos 1 objetivo (checkbox).
     await page.getByRole("combobox").first().click();
     await page.getByRole("option").first().click();
     await page.getByRole("checkbox").first().click();
-    await page.getByRole("combobox").nth(1).click();
+    await page.getByRole("button", { name: "Avançar" }).click();
+    // Etapa 2 — Momento atual: como quer participar (único combobox da etapa).
+    await page.getByRole("combobox").first().click();
     await page.getByRole("option").first().click();
+    await page.getByRole("button", { name: "Avançar" }).click();
+    // Etapa 3 — Acordos: aceite (único checkbox da etapa) + Concluir.
     await page.getByRole("checkbox").last().click();
     await page.getByRole("button", { name: /^(Concluir|Salvar)$/ }).click();
     await expect(page.getByText("Tudo pronto! Bem-vindo(a).")).toBeVisible({ timeout: 20_000 });

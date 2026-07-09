@@ -21,10 +21,11 @@ export async function GET(request: NextRequest) {
       if (user && !next.startsWith("/onboarding")) {
         const { data: onb } = await supabase
           .from("member_onboarding")
-          .select("completed_at")
+          .select("completed_at, grandfathered_at")
           .eq("user_id", user.id)
           .maybeSingle();
-        if (!onb?.completed_at) {
+        // Grandfathered (usuário antigo) não é mandado para a jornada.
+        if (!onb?.completed_at && !onb?.grandfathered_at) {
           dest = `/onboarding?next=${encodeURIComponent(next)}`;
         }
       }
