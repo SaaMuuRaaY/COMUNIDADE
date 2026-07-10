@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { reportActionError } from "@/lib/observability";
 
 export type TrendingPost = {
   id: string;
@@ -19,7 +20,11 @@ export type TrendingPost = {
 const cachedTrending = unstable_cache(
   async (limit: number): Promise<TrendingPost[]> => {
     const supabase = createAdminClient();
-    const { data } = await supabase.rpc("get_trending_posts", { p_days: 7, p_limit: limit });
+    // Os throws ficam DENTRO da fn cacheada: unstable_cache só memoriza resoluções,
+    // então uma falha nunca é servida como lista vazia pelos 120s seguintes. Quem
+    // chama captura e degrada para [] — a página não cai.
+    const { data, error } = await supabase.rpc("get_trending_posts", { p_days: 7, p_limit: limit });
+    if (error) throw error;
 
     let base = (data ?? []).map((r) => ({
       id: r.id,
@@ -31,12 +36,13 @@ const cachedTrending = unstable_cache(
     }));
 
     if (base.length === 0) {
-      const { data: recent } = await supabase
+      const { data: recent, error: recentError } = await supabase
         .from("posts")
         .select("id, title, category, author_id")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false })
         .limit(limit);
+      if (recentError) throw recentError;
       base = (recent ?? []).map((r) => ({
         id: r.id,
         title: r.title ?? "(sem título)",
@@ -49,10 +55,11 @@ const cachedTrending = unstable_cache(
     if (base.length === 0) return [];
 
     const authorIds = [...new Set(base.map((b) => b.author_id))];
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("id, full_name")
       .in("id", authorIds);
+    if (profilesError) throw profilesError;
     const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
 
     return base.map((b) => ({
@@ -67,6 +74,11 @@ const cachedTrending = unstable_cache(
   { revalidate: 120, tags: ["trending"] },
 );
 
-export function getTrendingPosts(limit = 5) {
-  return cachedTrending(limit);
+export async function getTrendingPosts(limit = 5): Promise<TrendingPost[]> {
+  try {
+    return await cachedTrending(limit);
+  } catch (error) {
+    reportActionError("trending.getTrendingPosts", error);
+    return [];
+  }
 }

@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { reportActionError } from "@/lib/observability";
 
 /** Primeiro dia do mes corrente (UTC), formato YYYY-MM-DD — chave da tabela rewards. */
 export function currentMonthStart(): string {
@@ -22,21 +23,30 @@ export async function getRewardWinners(monthISO?: string): Promise<RewardWinner[
 
   let month = monthISO;
   if (!month) {
-    const { data: latest } = await supabase
+    const { data: latest, error: latestError } = await supabase
       .from("rewards")
       .select("month")
       .order("month", { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (latestError) {
+      reportActionError("rewards.getRewardWinners.latest", latestError);
+      return [];
+    }
     if (!latest) return [];
     month = latest.month as string;
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("rewards")
     .select("user_id, rank, month, profiles(full_name, avatar_url)")
     .eq("month", month)
     .order("rank", { ascending: true });
+
+  if (error) {
+    reportActionError("rewards.getRewardWinners", error);
+    return [];
+  }
 
   return (data ?? []).map((r) => {
     const prof = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
@@ -63,13 +73,17 @@ export type MonthlyRankRow = {
  * SECURITY DEFINER). Global (mesmo p/ todos), entao usa client service-role (sem
  * cookies) + unstable_cache 180s — mesmo padrao do trending.
  */
-export function getMonthlyRanking(limit = 50) {
+export async function getMonthlyRanking(limit = 50): Promise<MonthlyRankRow[]> {
   // keyParts inclui o limit para NAO colidir entre chamadas com limites
   // diferentes (ex.: /admin/rewards com 20 e /leaderboard com 50).
-  return unstable_cache(
+  const cached = unstable_cache(
     async (): Promise<MonthlyRankRow[]> => {
       const supabase = createAdminClient();
-      const { data } = await supabase.rpc("get_monthly_ranking", { p_limit: limit });
+      // O throw fica DENTRO da fn cacheada: unstable_cache só memoriza resoluções,
+      // então uma falha nunca vira "Ninguém pontuou neste mês ainda" pelos 180s
+      // seguintes. Quem chama captura e degrada para [] — a página não cai.
+      const { data, error } = await supabase.rpc("get_monthly_ranking", { p_limit: limit });
+      if (error) throw error;
       return (data ?? []).map((r) => ({
         user_id: r.user_id,
         full_name: r.full_name,
@@ -80,5 +94,12 @@ export function getMonthlyRanking(limit = 50) {
     },
     ["monthly-ranking", String(limit)],
     { revalidate: 180, tags: ["monthly-ranking"] },
-  )();
+  );
+
+  try {
+    return await cached();
+  } catch (error) {
+    reportActionError("rewards.getMonthlyRanking", error);
+    return [];
+  }
 }

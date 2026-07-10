@@ -72,11 +72,14 @@ export async function updateResourceAction(id: string, formData: FormData): Prom
   const { error } = await supabase
     .from("resources")
     .update({
+      // file_storage_path fica de fora: nenhum formulário o envia, logo incluí-lo aqui
+      // gravaria null por cima do valor existente.
       title: parsed.data.title,
       description: parsed.data.description,
       category: parsed.data.category,
       file_url: parsed.data.file_url,
       file_type: parsed.data.file_type,
+      video_url: parsed.data.video_url,
       cover_url: parsed.data.cover_url,
     })
     .eq("id", id);
