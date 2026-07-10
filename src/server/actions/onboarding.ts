@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { onboardingSchema } from "@/lib/validations/schemas";
 import { AGREEMENTS_VERSION } from "@/lib/config/agreements";
 import { WELCOME_TOUR_VERSION } from "@/lib/onboarding/journey";
-import { maybeCompleteJourney } from "@/lib/onboarding/complete";
+import { getSettings } from "@/server/queries/settings";
+import { settingBoolean, settingString } from "@/lib/config/settings";
 import { awardPoints } from "@/lib/points/award";
 import { POINTS } from "@/lib/constants";
 import { reportActionError } from "@/lib/observability";
@@ -88,7 +89,52 @@ export async function markWelcomeVideoWatchedAction(): Promise<Result> {
     reportActionError("onboarding:welcome-video", error);
     return { ok: false, error: error.message };
   }
-  await maybeCompleteJourney(profile.id);
+  // NÃO conclui a jornada aqui: o tour vem depois. Ver completeJourneyAction.
   revalidatePath("/comece-por-aqui");
+  return { ok: true };
+}
+
+/**
+ * ÚNICA autoridade de conclusão da jornada (fim do tour ou "Pular e concluir").
+ * Valida tudo no servidor — não confia em nenhuma flag do client. Idempotente via
+ * `.is(journey_completed_at, null)`: quem já concluiu NÃO é reaberto/recarimbado.
+ */
+export async function completeJourneyAction(): Promise<Result> {
+  const profile = await requireActiveProfile();
+  const supabase = await createClient();
+
+  const { data, error: readErr } = await supabase
+    .from("member_onboarding")
+    .select("completed_at, welcome_video_completed_at, introduction_completed_at, journey_completed_at, grandfathered_at")
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  if (readErr) {
+    reportActionError("onboarding:complete-journey:read", readErr);
+    return { ok: false, error: readErr.message };
+  }
+  if (!data) return { ok: false, error: "Onboarding não encontrado." };
+  if (data.journey_completed_at || data.grandfathered_at) return { ok: true }; // já resolvido
+
+  const settings = await getSettings();
+  const videoRequired =
+    settingBoolean(settings, "welcome_video.enabled") && !!settingString(settings, "welcome_video.url");
+
+  const essentialsDone =
+    !!data.completed_at &&
+    !!data.introduction_completed_at &&
+    (videoRequired ? !!data.welcome_video_completed_at : true);
+  if (!essentialsDone) return { ok: false, error: "Conclua os passos anteriores da jornada." };
+
+  const { error } = await supabase
+    .from("member_onboarding")
+    .update({ journey_completed_at: new Date().toISOString() })
+    .eq("user_id", profile.id)
+    .is("journey_completed_at", null);
+  if (error) {
+    reportActionError("onboarding:complete-journey", error);
+    return { ok: false, error: error.message };
+  }
+  revalidatePath("/comece-por-aqui");
+  revalidatePath("/dashboard");
   return { ok: true };
 }

@@ -4,6 +4,7 @@ export const RUNTIME_DIR = path.join(__dirname, ".runtime");
 export const USERS_FILE = path.join(RUNTIME_DIR, "users.json");
 export const MEMBER_STATE = path.join(RUNTIME_DIR, "member.json");
 export const ADMIN_STATE = path.join(RUNTIME_DIR, "admin.json");
+export const JOURNEY_STATE = path.join(RUNTIME_DIR, "journey.json");
 
 export type E2EUser = {
   email: string;
@@ -16,6 +17,11 @@ export type E2EUser = {
 export type E2EUsers = {
   member: E2EUser;
   admin: E2EUser;
+  /**
+   * Usuário NÃO grandfathered: é o único que passa pela Onboarding Journey.
+   * `member`/`admin` são grandfatherados no global-setup (publicam normalmente).
+   */
+  journey: E2EUser;
   createdIds: string[];
 };
 

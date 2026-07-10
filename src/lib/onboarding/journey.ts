@@ -53,8 +53,16 @@ export function whatsappResolved(row: JourneyRow): boolean {
 
 /**
  * Deriva os passos da jornada (checklist) a partir do estado persistido.
- * `videoRequired` = há um vídeo de boas-vindas configurado no Admin. Se não houver,
- * o passo do vídeo é omitido e não bloqueia a conclusão (evita passo vazio/deadlock).
+ *
+ * ORDEM OFICIAL: signup → form → whatsapp → introduction → video → tour → completed.
+ * O WhatsApp participa da experiência mas NÃO é bloqueante ("Agora não" e "Não
+ * mostrar novamente" permitem seguir) → `essential: false`.
+ *
+ * `videoRequired` = há vídeo de boas-vindas configurado no Admin. Sem ele o passo
+ * é omitido e não bloqueia a conclusão (evita passo vazio/deadlock).
+ *
+ * `essentialsDone` habilita o TOUR — quem carimba `journey_completed_at` é o fim
+ * do tour (completeJourneyAction), nunca esta função nem as actions de passo.
  */
 export function deriveJourney(
   row: JourneyRow,
@@ -64,6 +72,7 @@ export function deriveJourney(
   essentialsDone: boolean;
   journeyDone: boolean;
   introDone: boolean;
+  videoDone: boolean;
 } {
   const videoRequired = opts?.videoRequired ?? true;
   const formDone = !!row.completed_at;
@@ -73,20 +82,19 @@ export function deriveJourney(
   const steps: JourneyStep[] = [
     { key: "signup", label: "Cadastro realizado", done: true, essential: false, href: "/dashboard", cta: "Ver início" },
     { key: "form", label: "Perfil e interesses preenchidos", done: formDone, essential: true, href: "/onboarding", cta: "Preencher" },
+    { key: "whatsapp", label: "Entrar no grupo do WhatsApp", done: whatsappResolved(row), essential: false, href: "/comece-por-aqui", cta: "Conhecer o grupo" },
+    { key: "introduction", label: "Fazer sua apresentação", done: introDone, essential: true, href: "/apresente-se", cta: "Fazer minha apresentação" },
   ];
   if (videoRequired) {
     steps.push({ key: "video", label: "Assistir ao vídeo de boas-vindas", done: videoDone, essential: true, href: "/comece-por-aqui", cta: "Assistir ao vídeo" });
   }
-  steps.push(
-    { key: "introduction", label: "Fazer sua apresentação", done: introDone, essential: true, href: "/apresente-se", cta: "Fazer minha apresentação" },
-    { key: "whatsapp", label: "Entrar no grupo do WhatsApp", done: whatsappResolved(row), essential: false, href: "/comece-por-aqui", cta: "Conhecer o grupo" },
-  );
 
-  const essentialsDone = formDone && (videoRequired ? videoDone : true) && introDone;
+  const essentialsDone = formDone && introDone && (videoRequired ? videoDone : true);
   return {
     steps,
     essentialsDone,
     journeyDone: !!row.journey_completed_at,
     introDone,
+    videoDone,
   };
 }

@@ -8,7 +8,7 @@ import { deriveJourney } from "@/lib/onboarding/journey";
 import { getRecommendations } from "@/lib/onboarding/recommendations";
 import { shouldShowInvite } from "@/lib/whatsapp/invite";
 import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
-import { WelcomeVideoStep } from "@/components/onboarding/welcome-video-step";
+import { JourneyExperience } from "@/components/onboarding/journey-experience";
 import { JourneyComplete } from "@/components/onboarding/journey-complete";
 import { WhatsAppInvite } from "@/components/whatsapp/whatsapp-invite";
 
@@ -45,7 +45,7 @@ export default async function ChannelRootPage({ searchParams }: { searchParams: 
     const settings = await getSettings();
     const videoUrl = settingString(settings, "welcome_video.url");
     const videoRequired = settingBoolean(settings, "welcome_video.enabled") && !!videoUrl;
-    const { steps } = deriveJourney(mo, { videoRequired });
+    const { steps, introDone, videoDone, essentialsDone } = deriveJourney(mo, { videoRequired });
     const waUrl = settingString(settings, "whatsapp_invite.url");
     // eslint-disable-next-line react-hooks/purity
     const nowMs = Date.now();
@@ -55,13 +55,14 @@ export default async function ChannelRootPage({ searchParams }: { searchParams: 
     beforeFeed = (
       <div className="space-y-4">
         <OnboardingChecklist steps={steps} />
-        {videoRequired ? (
-          <WelcomeVideoStep
-            url={videoUrl ?? ""}
-            title={settingString(settings, "welcome_video.title") ?? "Vídeo de boas-vindas"}
-            watched={!!mo.welcome_video_completed_at}
-          />
-        ) : null}
+        <JourneyExperience
+          videoUrl={videoUrl ?? ""}
+          videoTitle={settingString(settings, "welcome_video.title") ?? "Vídeo de boas-vindas"}
+          videoRequired={videoRequired}
+          videoDone={videoDone}
+          introDone={introDone}
+          essentialsDone={essentialsDone}
+        />
         {showWa && waUrl ? (
           <WhatsAppInvite
             url={waUrl}

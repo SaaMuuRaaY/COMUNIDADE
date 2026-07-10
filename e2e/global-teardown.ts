@@ -1,8 +1,12 @@
 import fs from "node:fs";
 import { getAdminClient } from "./admin-client";
 import { USERS_FILE, type E2EUsers } from "./fixtures";
+import { restoreWelcomeVideoSettings } from "./settings-backup";
 
 export default async function globalTeardown() {
+  // Devolve as chaves de welcome_video ao valor original da comunidade.
+  await restoreWelcomeVideoSettings();
+
   if (!fs.existsSync(USERS_FILE)) return;
   const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) as E2EUsers;
   const admin = getAdminClient();

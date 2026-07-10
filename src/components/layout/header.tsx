@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useNavDrawer } from "@/components/layout/nav-drawer-context";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/shared/logo";
@@ -40,7 +41,8 @@ export function Header({
   unreadNotifications?: number;
   pendingRequests?: number;
 }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Estado elevado (nav-drawer-context) para o tour guiado poder abrir o menu no mobile.
+  const { open: drawerOpen, setOpen: setDrawerOpen } = useNavDrawer();
   const [themeOpen, setThemeOpen] = useState(false);
 
   return (

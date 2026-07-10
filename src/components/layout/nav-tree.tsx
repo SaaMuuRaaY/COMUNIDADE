@@ -61,6 +61,9 @@ export function NavTree({
                 href={href}
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
+                // Alvo estável do tour guiado. Presente na sidebar E no drawer:
+                // o tour escolhe o elemento VISÍVEL, nunca o primeiro do DOM.
+                data-tour={item.tour}
                 className={linkClass(active, variant)}
               >
                 <NavIcon id={item.icon} className="h-4 w-4 shrink-0" />

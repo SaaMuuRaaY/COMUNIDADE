@@ -8,13 +8,18 @@ import { awardPoints } from "@/lib/points/award";
 import { postSchema, createPostSchema, commentSchema } from "@/lib/validations/schemas";
 import { COMMUNITY_ID, POINTS, REACTION_EMOJIS } from "@/lib/constants";
 import { canPostInChannel, canCommentInChannel } from "@/lib/community/structure";
-import { maybeCompleteJourney } from "@/lib/onboarding/complete";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { reportActionError } from "@/lib/observability";
 
 const RATE_MSG = "Muitas ações em pouco tempo. Aguarde um momento.";
 
-export type ActionResult = { ok: boolean; error?: string; id?: string };
+export type ActionResult = {
+  ok: boolean;
+  error?: string;
+  id?: string;
+  /** true SÓ na transição real pendente→concluída da 1ª apresentação (dispara os confetes). */
+  isFirstIntro?: boolean;
+};
 
 export async function createPostAction(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
@@ -76,13 +81,14 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
       .eq("user_id", profile.id)
       .is("introduction_completed_at", null);
     await awardPoints(profile.id, "first_introduction", POINTS.FIRST_INTRODUCTION, "introduction", profile.id);
-    await maybeCompleteJourney(profile.id);
+    // A jornada NÃO se auto-conclui aqui: quem carimba journey_completed_at é o
+    // fim do tour (completeJourneyAction). Ver F9.4.
     revalidatePath("/comece-por-aqui");
   }
 
   revalidatePath("/community", "layout");
   revalidatePath("/dashboard");
-  return { ok: true, id: data.id };
+  return { ok: true, id: data.id, isFirstIntro };
 }
 
 export async function updatePostAction(postId: string, formData: FormData): Promise<ActionResult> {

@@ -35,7 +35,9 @@ const contentSecurityPolicy = [
   "frame-ancestors 'self'",
   "form-action 'self'",
   // Next injeta scripts/estilos inline; sem nonce mantemos 'unsafe-inline'.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  // https://www.youtube.com: SCRIPT da IFrame Player API (detecta o fim do video de
+  // boas-vindas). Host especifico, sem wildcard. O PLAYER segue em nocookie.
+  `script-src 'self' 'unsafe-inline' https://www.youtube.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",

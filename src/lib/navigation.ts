@@ -21,10 +21,14 @@
 
 import { channelHref } from "@/lib/community/structure";
 
+/**
+ * `tour` = identificador ESTÁVEL para o tour guiado (`data-tour`). Nunca usar texto
+ * visível ou classe CSS como seletor — eles mudam com facilidade.
+ */
 export type NavItem =
-  | { type: "route"; label: string; href: string; icon: string }
-  | { type: "channel"; label: string; slug: string; icon: string }
-  | { type: "page"; label: string; href: string; icon: string };
+  | { type: "route"; label: string; href: string; icon: string; tour?: string }
+  | { type: "channel"; label: string; slug: string; icon: string; tour?: string }
+  | { type: "page"; label: string; href: string; icon: string; tour?: string };
 
 export type NavGroup = { label: string; items: NavItem[] };
 
@@ -44,7 +48,7 @@ export const NAV_TREE: NavGroup[] = [
     label: "Geral",
     items: [
       { type: "route", label: "Início", href: "/dashboard", icon: "home" },
-      { type: "route", label: "Comunidade", href: "/community", icon: "message-square-text" },
+      { type: "route", label: "Comunidade", href: "/community", icon: "message-square-text", tour: "community" },
       { type: "route", label: "Mensagens", href: "/mensagens", icon: "mail" },
     ],
   },
@@ -60,10 +64,10 @@ export const NAV_TREE: NavGroup[] = [
   {
     label: "Aprender e Construir",
     items: [
-      { type: "route", label: "Cursos e Materiais", href: "/courses", icon: "graduation-cap" },
-      { type: "route", label: "Biblioteca", href: "/resources", icon: "library" },
-      { type: "route", label: "Aplicativos", href: "/apps", icon: "layout-grid" },
-      { type: "route", label: "Agentes Especialistas", href: "/agentes", icon: "bot" },
+      { type: "route", label: "Cursos e Materiais", href: "/courses", icon: "graduation-cap", tour: "courses" },
+      { type: "route", label: "Biblioteca", href: "/resources", icon: "library", tour: "resources" },
+      { type: "route", label: "Aplicativos", href: "/apps", icon: "layout-grid", tour: "apps" },
+      { type: "route", label: "Agentes Especialistas", href: "/agentes", icon: "bot", tour: "agentes" },
     ],
   },
   {
@@ -71,15 +75,15 @@ export const NAV_TREE: NavGroup[] = [
     items: [
       { type: "channel", label: "Lives e Encontros", slug: "lives-encontros", icon: "radio" },
       { type: "channel", label: "Marketing e Vendas", slug: "marketing-vendas", icon: "trending-up" },
-      { type: "route", label: "Calendário de Eventos", href: "/calendar", icon: "calendar" },
-      { type: "route", label: "Ranking", href: "/leaderboard", icon: "trophy" },
+      { type: "route", label: "Calendário de Eventos", href: "/calendar", icon: "calendar", tour: "calendar" },
+      { type: "route", label: "Ranking", href: "/leaderboard", icon: "trophy", tour: "leaderboard" },
       { type: "route", label: "Recompensas", href: "/rewards", icon: "gift" },
     ],
   },
   {
     label: "Networking",
     items: [
-      { type: "channel", label: "Chat Network", slug: "chat-networking", icon: "messages-square" },
+      { type: "channel", label: "Chat Network", slug: "chat-networking", icon: "messages-square", tour: "chat-network" },
       { type: "channel", label: "Vagas e Oportunidades", slug: "vagas-oportunidades", icon: "briefcase" },
       { type: "channel", label: "Parcerias e Colaborações", slug: "parcerias-colaboracoes", icon: "handshake" },
       { type: "channel", label: "Compartilhe seu Projeto", slug: "compartilhe-seu-projeto", icon: "rocket" },

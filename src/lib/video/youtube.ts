@@ -39,7 +39,21 @@ export function isYouTubeUrl(url: string): boolean {
   return parseYouTubeId(url) !== null;
 }
 
-/** Dominio nocookie: o YouTube so grava cookies de rastreamento apos o play. */
-export function youTubeEmbedUrl(id: string): string {
-  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
+/**
+ * Dominio nocookie: o YouTube so grava cookies de rastreamento apos o play.
+ * `jsApi` habilita o controle pela IFrame Player API (enablejsapi + origin) — usado
+ * pelo modal da jornada para detectar o fim do video. NUNCA liga autoplay.
+ */
+export function youTubeEmbedUrl(id: string, opts?: { jsApi?: boolean; origin?: string }): string {
+  const params = new URLSearchParams({
+    rel: "0",
+    playsinline: "1",
+    modestbranding: "1",
+  });
+  if (opts?.jsApi) {
+    params.set("enablejsapi", "1");
+    // Recomendado pela doc: protege contra JS de terceiros no player.
+    if (opts.origin) params.set("origin", opts.origin);
+  }
+  return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
 }

@@ -13,6 +13,7 @@ import { Markdown } from "@/components/shared/markdown";
 import { createPostAction } from "@/server/actions/posts";
 import { PostImageField } from "@/components/community/post-image-field";
 import { PostVideoField } from "@/components/community/post-video-field";
+import { IntroductionCelebration } from "@/components/onboarding/introduction-celebration";
 import { toast } from "sonner";
 
 export function PostComposer({
@@ -44,6 +45,7 @@ export function PostComposer({
   const [mediaType, setMediaType] = React.useState<string | null>(null);
   const [selectedSlug, setSelectedSlug] = React.useState(channelSlug ?? channels?.[0]?.slug ?? "");
   const [open, setOpen] = React.useState(initialOpen ?? false);
+  const [celebrate, setCelebrate] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
 
   // Canal efetivo: fixo (por canal) ou o escolhido no seletor (feed geral).
@@ -78,8 +80,12 @@ export function PostComposer({
       setMediaUrl(null);
       setMediaType(null);
       setOpen(false);
+      // Só na transição real pendente→concluída da 1ª apresentação (servidor decide).
+      if (res.isFirstIntro) setCelebrate(true);
     });
   }
+
+  if (celebrate) return <IntroductionCelebration />;
 
   if (!open) {
     return (

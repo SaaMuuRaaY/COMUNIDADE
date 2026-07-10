@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PartyPopper, ArrowRight, Trophy, MessagesSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TourReplayButton } from "@/components/onboarding/tour-replay-button";
 import type { Recommendation } from "@/lib/onboarding/recommendations";
 
 /**
@@ -46,11 +47,14 @@ export function JourneyComplete({
           </div>
         </div>
 
-        <Button asChild size="sm" className="gap-2">
-          <Link href="/chat-e-networking">
-            <MessagesSquare className="h-4 w-4" /> Entrar no Chat Network
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" className="gap-2">
+            <Link href="/chat-e-networking">
+              <MessagesSquare className="h-4 w-4" /> Entrar no Chat Network
+            </Link>
+          </Button>
+          <TourReplayButton />
+        </div>
       </CardContent>
     </Card>
   );

@@ -43,6 +43,13 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.runtime/member.json" },
     },
     {
+      // Usuário NÃO grandfathered: único que exercita a Onboarding Journey.
+      name: "journey",
+      testMatch: ["journey.spec.ts"],
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"], storageState: "e2e/.runtime/journey.json" },
+    },
+    {
       name: "admin",
       testMatch: [
         "admin.spec.ts",
