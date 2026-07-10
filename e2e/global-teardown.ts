@@ -14,8 +14,15 @@ import { restoreWelcomeVideoSettings } from "./settings-backup";
  * suíte. Um teardown que falha e passa é pior que nenhum teardown.
  */
 
-/** Tabelas com FK `on delete set null` — precisam ser apagadas ANTES do usuário. */
-const SET_NULL_TABLES = ["courses", "apps", "resources", "events"] as const;
+/** Tabelas com FK `on delete set null` — precisam ser apagadas ANTES do usuário
+ *  (senão o conteúdo sobrevive com a coluna nula). */
+const SET_NULL_TABLES = [
+  { table: "courses", column: "created_by" },
+  { table: "apps", column: "created_by" },
+  { table: "resources", column: "created_by" },
+  { table: "events", column: "created_by" },
+  { table: "rewards", column: "emitted_by" },
+] as const;
 /** Tabelas com FK `on delete cascade` — apagadas por garantia, a cascata cobre o resto. */
 const CASCADE_TABLES = [
   { table: "post_comments", column: "author_id" },
@@ -48,8 +55,8 @@ export default async function globalTeardown() {
       const { error } = await admin.from(table).delete().eq(column, id);
       if (error) failures.push(`${table} de ${id}: ${error.message}`);
     }
-    for (const table of SET_NULL_TABLES) {
-      const { error } = await admin.from(table).delete().eq("created_by", id);
+    for (const { table, column } of SET_NULL_TABLES) {
+      const { error } = await admin.from(table).delete().eq(column, id);
       if (error) failures.push(`${table} de ${id}: ${error.message}`);
     }
 
@@ -59,10 +66,17 @@ export default async function globalTeardown() {
       continue;
     }
 
-    // `deleteUser` pode devolver sucesso e não remover. Confirmamos.
-    const { data: still } = await admin.auth.admin.getUserById(id);
+    // `deleteUser` pode devolver sucesso e não remover. Confirmamos consultando de novo.
+    const { data: still, error: checkErr } = await admin.auth.admin.getUserById(id);
     if (still?.user) {
       failures.push(`usuário ${id} ainda existe após deleteUser`);
+      continue;
+    }
+    // Sem user retornado: "User not found" (404) É a confirmação esperada da remoção.
+    // Só um erro DIFERENTE disso (rede etc.) conta como não-verificado.
+    const gone = !checkErr || checkErr.status === 404 || /not.?found/i.test(checkErr.message);
+    if (!gone) {
+      failures.push(`não deu para confirmar a remoção de ${id}: ${checkErr.message}`);
       continue;
     }
     removed++;

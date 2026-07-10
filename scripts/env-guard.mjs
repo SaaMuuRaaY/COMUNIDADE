@@ -25,7 +25,9 @@ export function projectRefOf(url) {
   if (!host.endsWith(".supabase.co")) {
     throw new Error(`[env-isolation] não foi possível derivar o project ref de "${host}"`);
   }
-  return host.slice(0, -".supabase.co".length);
+  const ref = host.slice(0, -".supabase.co".length);
+  if (!ref) throw new Error(`[env-isolation] project ref vazio em "${host}"`);
+  return ref;
 }
 
 export function assertEnvIsolation() {
