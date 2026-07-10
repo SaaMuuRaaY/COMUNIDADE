@@ -94,7 +94,10 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
 export async function updatePostAction(postId: string, formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
   const parsed = postSchema.partial().safeParse({
-    category: formData.get("category"),
+    // Membro comum edita sem mexer no canal: a chave não vem no FormData e
+    // `formData.get` devolve null, que o schema (category optional, não nullable)
+    // rejeitaria. `?? undefined` = "não alterar a categoria".
+    category: formData.get("category") ?? undefined,
     title: formData.get("title"),
     body: formData.get("body"),
   });
