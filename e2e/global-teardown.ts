@@ -3,35 +3,77 @@ import { getAdminClient } from "./admin-client";
 import { USERS_FILE, type E2EUsers } from "./fixtures";
 import { restoreWelcomeVideoSettings } from "./settings-backup";
 
-export default async function globalTeardown() {
-  // Devolve as chaves de welcome_video ao valor original da comunidade.
-  await restoreWelcomeVideoSettings();
+/**
+ * Limpeza verificada.
+ *
+ * No incidente de 2026-07-10 este arquivo imprimia "3 usuários removidos" enquanto
+ * deixava os três em produção: `deleteUser` devolve `{ error }` e NÃO lança, o
+ * `try/catch` nunca lia o erro, e o log era só `createdIds.length`.
+ *
+ * Agora: todo erro é lido, a exclusão é CONFIRMADA e qualquer resíduo QUEBRA a
+ * suíte. Um teardown que falha e passa é pior que nenhum teardown.
+ */
 
-  if (!fs.existsSync(USERS_FILE)) return;
+/** Tabelas com FK `on delete set null` — precisam ser apagadas ANTES do usuário. */
+const SET_NULL_TABLES = ["courses", "apps", "resources", "events"] as const;
+/** Tabelas com FK `on delete cascade` — apagadas por garantia, a cascata cobre o resto. */
+const CASCADE_TABLES = [
+  { table: "post_comments", column: "author_id" },
+  { table: "post_likes", column: "user_id" },
+  { table: "posts", column: "author_id" },
+  { table: "lesson_progress", column: "user_id" },
+  { table: "event_attendees", column: "user_id" },
+] as const;
+
+export default async function globalTeardown() {
+  const failures: string[] = [];
+
+  try {
+    await restoreWelcomeVideoSettings();
+  } catch (e) {
+    failures.push(`restauração de settings: ${(e as Error).message}`);
+  }
+
+  if (!fs.existsSync(USERS_FILE)) {
+    if (failures.length) throw new Error(`[e2e] teardown falhou:\n  - ${failures.join("\n  - ")}`);
+    return;
+  }
+
   const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) as E2EUsers;
   const admin = getAdminClient();
+  let removed = 0;
 
   for (const id of users.createdIds) {
-    // Limpa conteúdo gerado pelos testes antes de remover o usuário.
-    try {
-      await admin.from("post_comments").delete().eq("author_id", id);
-      await admin.from("post_likes").delete().eq("user_id", id);
-      await admin.from("posts").delete().eq("author_id", id);
-      await admin.from("lesson_progress").delete().eq("user_id", id);
-      await admin.from("event_attendees").delete().eq("user_id", id);
-      // Cursos/apps/recursos/eventos criados pelo admin de teste (cascade cobre módulos/aulas).
-      await admin.from("courses").delete().eq("created_by", id);
-      await admin.from("apps").delete().eq("created_by", id);
-      await admin.from("resources").delete().eq("created_by", id);
-      await admin.from("events").delete().eq("created_by", id);
-    } catch (e) {
-      console.warn(`[e2e] limpeza de conteúdo falhou para ${id}:`, (e as Error).message);
+    for (const { table, column } of CASCADE_TABLES) {
+      const { error } = await admin.from(table).delete().eq(column, id);
+      if (error) failures.push(`${table} de ${id}: ${error.message}`);
     }
-    try {
-      await admin.auth.admin.deleteUser(id);
-    } catch (e) {
-      console.warn(`[e2e] remoção do usuário ${id} falhou:`, (e as Error).message);
+    for (const table of SET_NULL_TABLES) {
+      const { error } = await admin.from(table).delete().eq("created_by", id);
+      if (error) failures.push(`${table} de ${id}: ${error.message}`);
     }
+
+    const { error: delErr } = await admin.auth.admin.deleteUser(id);
+    if (delErr) {
+      failures.push(`deleteUser(${id}): ${delErr.message}`);
+      continue;
+    }
+
+    // `deleteUser` pode devolver sucesso e não remover. Confirmamos.
+    const { data: still } = await admin.auth.admin.getUserById(id);
+    if (still?.user) {
+      failures.push(`usuário ${id} ainda existe após deleteUser`);
+      continue;
+    }
+    removed++;
   }
-  console.log(`[e2e] teardown concluído: ${users.createdIds.length} usuários removidos.`);
+
+  fs.rmSync(USERS_FILE, { force: true });
+
+  if (failures.length) {
+    throw new Error(
+      `[e2e] teardown NÃO limpou tudo (${removed}/${users.createdIds.length} usuários removidos):\n  - ${failures.join("\n  - ")}`,
+    );
+  }
+  console.log(`[e2e] teardown verificado: ${removed}/${users.createdIds.length} usuários removidos.`);
 }

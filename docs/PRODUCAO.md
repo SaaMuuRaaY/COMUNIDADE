@@ -73,11 +73,21 @@ delete from auth.users
 2. Acesse https://vercel.com → New Project → Import repo
 3. **Root Directory**: `COMUNIDADE` (se subir o NEXUS inteiro) ou `/` (se subir só esta pasta)
 4. Framework Preset: Next.js (auto-detect)
-5. **Environment Variables**: adicione as 4 do `.env.local`:
+5. **Environment Variables**: pegue as credenciais **no Dashboard do Supabase de produção**.
+   **NÃO copie do `.env.local`** — foi essa instrução que causou o incidente de 2026-07-10
+   (ver `INCIDENT_PRODUCTION_TEST_CONTAMINATION.md`). O `.env.local` aponta para o Supabase
+   **local**; produção existe só na Vercel.
+
+   Configure valores **distintos** para Production, Preview e Development. Nunca reaproveite
+   os de Production nos outros dois.
+   - `APP_ENV` = `production` (Production) · `preview` (Preview) · `local` (Development)
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `NEXT_PUBLIC_APP_URL` (vai virar `https://codex-community.vercel.app` por enquanto)
+
+   A guarda em `src/lib/env-isolation.ts` recusa o boot se `APP_ENV` e o projeto Supabase
+   não combinarem — em qualquer direção.
 6. Deploy
 7. Pega a URL final (`xxx.vercel.app`) e atualiza `NEXT_PUBLIC_APP_URL` + redeploy
 

@@ -18,6 +18,24 @@
 -- Garante extensões
 create extension if not exists "pgcrypto";
 
+-- -----------------------------------------------------------------------------
+-- Grants de API que a plataforma Supabase aplica AUTOMATICAMENTE na cloud, mas que
+-- NUNCA estiveram nas migrations. Sem eles, anon/authenticated/service_role não
+-- têm DML e o app local não funciona (foi por isso que o local nunca foi usado e
+-- todos caíam em produção — raiz do incidente de 2026-07-10).
+--
+-- Escopo: TABELAS e SEQUÊNCIAS apenas. NUNCA funções — um `grant on functions`
+-- reverteria o lockdown de award_points (0031). A RLS (habilitada em todas as
+-- tabelas) continua gateando cada linha; isto só concede o direito de tentar.
+--
+-- LOCAL-ONLY: este seed nunca roda na cloud.
+-- -----------------------------------------------------------------------------
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on all tables in schema public to anon, authenticated, service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant select, insert, update, delete on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant usage, select on sequences to anon, authenticated, service_role;
+
 do $$
 declare
   v_admin_id    uuid := '11111111-1111-1111-1111-111111111111';

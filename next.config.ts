@@ -26,6 +26,8 @@ const frameSrc = [
   "https://codepen.io",
   "https://codesandbox.io",
   "https://github.com",
+  // Widget do Cloudflare Turnstile (CAPTCHA do signup). Host específico.
+  "https://challenges.cloudflare.com",
 ].join(" ");
 
 const contentSecurityPolicy = [
@@ -36,8 +38,9 @@ const contentSecurityPolicy = [
   "form-action 'self'",
   // Next injeta scripts/estilos inline; sem nonce mantemos 'unsafe-inline'.
   // https://www.youtube.com: SCRIPT da IFrame Player API (detecta o fim do video de
-  // boas-vindas). Host especifico, sem wildcard. O PLAYER segue em nocookie.
-  `script-src 'self' 'unsafe-inline' https://www.youtube.com${isDev ? " 'unsafe-eval'" : ""}`,
+  // boas-vindas). https://challenges.cloudflare.com: SCRIPT do Turnstile (CAPTCHA do
+  // signup). Hosts especificos, sem wildcard. O PLAYER de video segue em nocookie.
+  `script-src 'self' 'unsafe-inline' https://www.youtube.com https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",

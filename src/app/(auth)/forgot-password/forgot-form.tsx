@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgotPasswordAction, type ActionState } from "@/server/actions/auth";
+import { Turnstile } from "@/components/auth/turnstile";
 
 const initial: ActionState = { ok: false };
 
@@ -25,6 +26,7 @@ export function ForgotForm() {
         <Label htmlFor="email">E-mail</Label>
         <Input id="email" name="email" type="email" required autoComplete="email" />
       </div>
+      <Turnstile />
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Enviando…" : "Enviar link de recuperação"}

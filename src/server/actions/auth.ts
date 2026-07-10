@@ -15,6 +15,16 @@ function readNext(formData: FormData): string {
   return safeNextPath(typeof raw === "string" ? raw : null);
 }
 
+/**
+ * Token do Turnstile injetado pelo widget no form (campo `cf-turnstile-response`).
+ * Passado ao Supabase Auth como captchaToken. Se o CAPTCHA estiver desligado no
+ * Dashboard, o token ausente é ignorado; se ligado, o Supabase exige um válido.
+ */
+function readCaptcha(formData: FormData): string | undefined {
+  const t = formData.get("cf-turnstile-response");
+  return typeof t === "string" && t ? t : undefined;
+}
+
 export type ActionState = { ok: boolean; error?: string; pending?: boolean };
 
 const TOO_MANY = "Muitas tentativas. Aguarde um minuto e tente novamente.";
@@ -33,7 +43,10 @@ export async function loginAction(_prev: ActionState | null, formData: FormData)
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { error } = await supabase.auth.signInWithPassword({
+    ...parsed.data,
+    options: { captchaToken: readCaptcha(formData) },
+  });
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/", "layout");
@@ -65,6 +78,7 @@ export async function registerAction(_prev: ActionState | null, formData: FormDa
     options: {
       data: { full_name: parsed.data.full_name },
       emailRedirectTo: `${callbackUrl}?next=${encodeURIComponent(next)}`,
+      captchaToken: readCaptcha(formData),
     },
   });
   if (error) return { ok: false, error: error.message };
@@ -92,7 +106,7 @@ export async function resendConfirmationAction(
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: parsed.data,
-    options: { emailRedirectTo: callbackUrl },
+    options: { emailRedirectTo: callbackUrl, captchaToken: readCaptcha(formData) },
   });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
@@ -113,6 +127,7 @@ export async function forgotPasswordAction(
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: callbackUrl,
+    captchaToken: readCaptcha(formData),
   });
   if (error) return { ok: false, error: error.message };
 

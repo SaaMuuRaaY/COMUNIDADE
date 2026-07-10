@@ -1,9 +1,27 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
+import path from "node:path";
+import type { FullConfig } from "@playwright/test";
+import { assertEnvIsolation } from "../src/lib/env-isolation";
+import { loadTestEnv } from "./load-test-env";
 import { getAdminClient } from "./admin-client";
 import { RUNTIME_DIR, USERS_FILE, type E2EUser, type E2EUsers } from "./fixtures";
 import { seedWelcomeVideoSettings } from "./settings-backup";
 
-const PASSWORD = "E2ePlaywright!2026";
+/** Senha nova a cada execução: nada de credencial constante no git. Nunca é impressa. */
+const PASSWORD = `E2e!${crypto.randomBytes(24).toString("base64url")}`;
+
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
+
+/** A suíte só roda contra o app local. Um baseURL remoto é recusado antes de tudo. */
+function assertLocalBaseURL(config: FullConfig): void {
+  const baseURL = config.projects[0]?.use?.baseURL;
+  if (!baseURL) throw new Error("E2E: baseURL não configurado.");
+  const host = new URL(baseURL).hostname;
+  if (!LOCAL_HOSTS.has(host)) {
+    throw new Error(`SECURITY: E2E recusa baseURL não-local ("${host}").`);
+  }
+}
 
 async function createUser(
   email: string,
@@ -64,20 +82,18 @@ async function createUser(
   return { email, password: PASSWORD, id, full_name, role };
 }
 
-export default async function globalSetup() {
+export default async function globalSetup(config: FullConfig) {
+  // Ordem deliberada: as duas guardas rodam ANTES de qualquer chamada de rede.
+  loadTestEnv(path.join(__dirname, ".."));
+  const { appEnv, ref } = assertEnvIsolation();
+  assertLocalBaseURL(config);
+  console.log(`[e2e] ambiente verificado — APP_ENV=${appEnv} projeto=${ref}`);
+
   fs.mkdirSync(RUNTIME_DIR, { recursive: true });
   const stamp = Date.now();
 
-  const member = await createUser(
-    `e2e-member-${stamp}@codex.community`,
-    "E2E Membro",
-    "member",
-  );
-  const admin = await createUser(
-    `e2e-admin-${stamp}@codex.community`,
-    "E2E Admin",
-    "admin",
-  );
+  const member = await createUser(`e2e-member-${stamp}@codex.community`, "E2E Membro", "member");
+  const admin = await createUser(`e2e-admin-${stamp}@codex.community`, "E2E Admin", "admin");
   // NÃO grandfathered: único que passa pela Onboarding Journey.
   const journey = await createUser(
     `e2e-journey-${stamp}@codex.community`,
@@ -97,7 +113,5 @@ export default async function globalSetup() {
   // Semeia o vídeo ANTES de qualquer request popular o cache de getSettings().
   await seedWelcomeVideoSettings();
 
-  console.log(
-    `[e2e] usuários criados: membro=${member.email} admin=${admin.email} jornada=${journey.email}`,
-  );
+  console.log(`[e2e] usuários criados: ${users.createdIds.length}`);
 }

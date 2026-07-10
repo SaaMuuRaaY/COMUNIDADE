@@ -142,6 +142,28 @@ export function DMThread({
       if (!res.ok) {
         toast.error(res.error ?? "Erro ao enviar.");
         setBody(text);
+        return;
+      }
+      // Render otimista da própria mensagem: não depende do realtime ecoar (a policy
+      // de SELECT do DM é uma subquery que o postgres_changes avalia de forma menos
+      // confiável que a do chat). O handler de INSERT deduplica por id — sem duplicar.
+      if (res.id) {
+        const id = res.id;
+        setMessages((prev) =>
+          prev.some((x) => x.id === id)
+            ? prev
+            : [
+                ...prev,
+                {
+                  id,
+                  sender_id: currentUserId,
+                  body: text,
+                  is_deleted: false,
+                  edited_at: null,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+        );
       }
     });
   }

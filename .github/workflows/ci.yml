@@ -9,6 +9,9 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     env:
+      # A guarda (src/lib/env-isolation.ts) exige APP_ENV. Com APP_ENV=test, apontar
+      # o secret abaixo para o projeto de produção faz o build FALHAR — de propósito.
+      APP_ENV: test
       # Valores dummy permitem o build sem expor segredos; sobrescreva com secrets se quiser build real.
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy-anon-key' }}

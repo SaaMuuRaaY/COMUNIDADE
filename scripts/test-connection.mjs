@@ -1,15 +1,22 @@
 /**
- * Smoke-test de conexão com Supabase usando as variáveis do .env.local.
- * Rode com:  node --env-file=.env.local scripts/test-connection.mjs
+ * Smoke-test de conexão com Supabase.
+ *
+ * Rode com:  APP_ENV=local node --env-file=.env.local scripts/test-connection.mjs
+ *
+ * Nunca contém credenciais: o login real foi removido no incidente de 2026-07-10
+ * (havia um e-mail e uma senha em texto plano neste arquivo, rastreado no git).
  */
-import { createClient } from "@supabase/supabase-js";
+import { assertEnvIsolation } from "./env-guard.mjs";
+
+const { appEnv, ref } = assertEnvIsolation();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 console.log("\n=== ENV ===");
-console.log("URL:           ", url ?? "❌ AUSENTE");
+console.log("APP_ENV:       ", appEnv);
+console.log("projeto:       ", ref);
 console.log("ANON length:   ", anon?.length ?? "❌ AUSENTE");
 console.log("SERVICE length:", service?.length ?? "❌ AUSENTE");
 
@@ -27,29 +34,12 @@ try {
   console.error("❌ fetch falhou:", e.message);
 }
 
-console.log("\n=== 2. Login real (admin@codex.community / codex123!) ===");
-const supa = createClient(url, anon);
+console.log("\n=== 2. REST (anon → /rest/v1/profiles) ===");
 try {
-  const { data, error } = await supa.auth.signInWithPassword({
-    email: "admin@codex.community",
-    password: "codex123!",
-  });
-  if (error) {
-    console.error("❌ login falhou:", error.message, error.status ?? "");
-  } else {
-    console.log("✓ login OK | user:", data.user?.email, "| id:", data.user?.id);
-  }
-} catch (e) {
-  console.error("❌ exception:", e.message);
-}
-
-console.log("\n=== 3. Query (rest /rest/v1/profiles) ===");
-try {
-  const r = await fetch(`${url}/rest/v1/profiles?select=id,full_name,role&limit=5`, {
+  const r = await fetch(`${url}/rest/v1/profiles?select=id&limit=1`, {
     headers: { apikey: anon, Authorization: `Bearer ${anon}` },
   });
-  console.log("HTTP", r.status);
-  console.log(await r.text());
+  console.log("HTTP", r.status, r.ok ? "✓" : "✗");
 } catch (e) {
   console.error("❌", e.message);
 }

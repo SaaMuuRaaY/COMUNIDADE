@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginAction, type ActionState } from "@/server/actions/auth";
+import { Turnstile } from "@/components/auth/turnstile";
 
 const initial: ActionState = { ok: false };
 
@@ -22,6 +23,7 @@ export function LoginForm({ next }: { next?: string }) {
         <Label htmlFor="password">Senha</Label>
         <Input id="password" name="password" type="password" required autoComplete="current-password" />
       </div>
+      <Turnstile />
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Entrando…" : "Entrar"}

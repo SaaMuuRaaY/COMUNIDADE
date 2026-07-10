@@ -9,6 +9,7 @@
  */
 import fs from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { assertEnvIsolation } from "./env-guard.mjs";
 
 // Parse mínimo de .env.local (sem dependência; nenhum valor é impresso).
 for (const file of [".env.local", ".env"]) {
@@ -18,6 +19,11 @@ for (const file of [".env.local", ".env"]) {
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
   }
 }
+
+// Ler produção é legítimo aqui, mas exige declarar APP_ENV=production. A guarda
+// impede o caso silencioso: APP_ENV=local batendo no banco de produção.
+const { appEnv, ref } = assertEnvIsolation();
+console.log(`APP_ENV=${appEnv} projeto=${ref}`);
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
