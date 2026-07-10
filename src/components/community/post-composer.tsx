@@ -25,6 +25,7 @@ export function PostComposer({
   guidance,
   initialBody,
   initialOpen,
+  canPostMedia = false,
 }: {
   currentUserId: string;
   /** Canal fixo (uso por canal). Omitido no feed geral, onde `channels` decide. */
@@ -38,6 +39,8 @@ export function PostComposer({
   initialBody?: string;
   /** Abre o composer já expandido (ex.: passo de apresentação da jornada). */
   initialOpen?: boolean;
+  /** Só moderador/admin anexa imagem ou vídeo. O servidor e a RLS do storage revalidam. */
+  canPostMedia?: boolean;
 }) {
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState(initialBody ?? "");
@@ -148,8 +151,8 @@ export function PostComposer({
           </TabsContent>
         </Tabs>
 
-        {/* Um slot de mídia por post: imagem OU vídeo do YouTube (mutuamente exclusivos). */}
-        {mediaType !== "youtube" ? (
+        {/* Mídia é só de moderador/admin. Um slot por post: imagem OU vídeo do YouTube. */}
+        {canPostMedia && mediaType !== "youtube" ? (
           <PostImageField
             userId={currentUserId}
             value={mediaUrl}
@@ -159,7 +162,7 @@ export function PostComposer({
             }}
           />
         ) : null}
-        {!(mediaUrl && mediaType !== "youtube") ? (
+        {canPostMedia && !(mediaUrl && mediaType !== "youtube") ? (
           <PostVideoField
             value={mediaType === "youtube" ? mediaUrl : null}
             onChange={(url) => {

@@ -48,7 +48,7 @@ export async function CommunityGeneralFeed({ search }: { search: string }) {
           />
 
           {channels.length > 0 ? (
-            <PostComposer currentUserId={profile.id} channels={channels} />
+            <PostComposer currentUserId={profile.id} channels={channels} canPostMedia={canModerate(profile)} />
           ) : null}
 
           <FeedFilter />
@@ -130,6 +130,7 @@ export async function CommunityChannelFeed({
           guidance={composer.guidance}
           initialBody={composerInitialBody}
           initialOpen={!!composerInitialBody}
+          canPostMedia={canModerate(profile)}
         />
       ) : (
         <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">

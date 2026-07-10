@@ -39,6 +39,11 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
   if (!canPostInChannel(profile, category)) {
     return { ok: false, error: "Sem permissão para publicar neste canal." };
   }
+  // Mídia (imagem/vídeo/link) é só de moderador/admin — o composer esconde para
+  // membro; aqui barramos requisição forjada, e a RLS do bucket post-media revalida.
+  if (!isModerator(profile) && (parsed.data.media_url || parsed.data.attachment_url)) {
+    return { ok: false, error: "Apenas moderadores podem anexar mídia." };
+  }
 
   const supabase = await createClient();
 
